@@ -172,7 +172,7 @@ Submitting `main` to Apple App Review takes two CLI commands plus some App Store
 ### Prereqs
 
 - **Expo account in the `mirlo-app` org.** Project ID `a2ccd2d1-…` (in [app.json](app.json)) lives under the `mirlo-app` organization. Get invited at https://expo.dev/accounts/mirlo-app/settings/members, then `eas login` with your own creds. Verify: `eas project:info` should print the project (not 403).
-- **Apple Developer Program enrollment** ($99/yr) in your own name. The bundle ID `space.mirlo.mobile` (in [app.json](app.json)) is registered under whichever team currently ships the app — confirm at https://developer.apple.com/account/resources/identifiers/list that the team-switcher shows the team this bundle ID belongs to. Apple Developer Program membership is *separate* from App Store Connect access; you need the Developer Program one for `eas build` to sign.
+- **Apple Developer Program enrollment** ($99/yr) in your own name. The bundle ID `space.mirlo.mobile` (in [app.json](app.json)) must be registered under your Developer Program team at https://developer.apple.com/account/resources/identifiers/list — when registering a fresh one, no Capabilities checkboxes are needed (audio background playback is handled by Expo via Info.plist at build time, not at App ID level). Apple Developer Program membership is *separate* from App Store Connect access; you need the Developer Program one for `eas build` to sign.
 - **`eas-cli` ≥ 18.x.** `npm install -g eas-cli`.
 
 ### Releasing a version (recurring)
