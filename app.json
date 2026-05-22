@@ -10,7 +10,7 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.drod17.mirlo-mobile",
+      "bundleIdentifier": "space.mirlo.mobile",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
@@ -73,7 +73,7 @@
         "projectId": "a2ccd2d1-a537-4697-9df3-43228ba534ef"
       }
     },
-    "owner": "drod17",
+    "owner": "mirlo-app",
     "runtimeVersion": "1.0.1",
     "updates": {
       "url": "https://u.expo.dev/a2ccd2d1-a537-4697-9df3-43228ba534ef",
