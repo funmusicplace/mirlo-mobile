@@ -165,6 +165,72 @@ grep "foojay-resolver-convention" \
 - Patches apply automatically on `npm install` via the `postinstall` script. If a patch fails to apply (because the underlying package version changed), `patch-package` prints a clear error pointing at the offending hunk.
 - After bumping either of the two patched packages, re-run `npx expo run:android` cold to confirm. If everything still works, regenerate or delete the corresponding patch.
 
+## Releasing to the App Store (iOS)
+
+Submitting `main` to Apple App Review takes two CLI commands plus some App Store Connect work in the browser. The full flow:
+
+### Prereqs
+
+- **Expo account in the `mirlo-app` org.** Project ID `a2ccd2d1-…` (in [app.json](app.json)) lives under the `mirlo-app` organization. Get invited at https://expo.dev/accounts/mirlo-app/settings/members, then `eas login` with your own creds. Verify: `eas project:info` should print the project (not 403).
+- **Apple Developer Program enrollment** ($99/yr) in your own name. The bundle ID `space.mirlo.mobile` (in [app.json](app.json)) is registered under whichever team currently ships the app — confirm at https://developer.apple.com/account/resources/identifiers/list that the team-switcher shows the team this bundle ID belongs to. Apple Developer Program membership is *separate* from App Store Connect access; you need the Developer Program one for `eas build` to sign.
+- **`eas-cli` ≥ 18.x.** `npm install -g eas-cli`.
+
+### Releasing a version (recurring)
+
+The recurring flow once everything's set up is two commands plus filling out the App Store Connect web UI.
+
+1. **Bump the version** in [app.json](app.json) — `expo.version` and both `runtimeVersion` fields (`expo.runtimeVersion` + `expo.ios.runtimeVersion`) — and the matching `version` in [package.json](package.json). All four should stay in sync. Bump them together so OTA updates don't accidentally target binaries with different native code.
+
+2. **Build:**
+   ```bash
+   eas build --platform ios --profile production
+   ```
+   - `appVersionSource: "remote"` + `autoIncrement: true` in [eas.json](eas.json) means EAS owns `buildNumber` server-side. You don't edit it in [app.json](app.json).
+   - First time only: EAS prompts for your Apple ID + 2FA, then asks "Select a Provider" — pick the team that owns the bundle ID (not your personal "Individual" team). To skip the prompt on future builds, set `expo.ios.appleTeamId` in [app.json](app.json) to your 10-char team ID.
+   - Build runs on EAS (~15–30 min). Watch progress at the URL eas prints, or via `eas build:list`.
+
+3. **Submit to App Store Connect:**
+   ```bash
+   eas submit --platform ios --profile production --latest
+   ```
+   - First time only: prompts for App Store Connect credentials. Generate an [App Store Connect API key](https://appstoreconnect.apple.com/access/integrations/api) (Issuer ID + Key ID + `.p8`) and feed those — EAS caches them for future submissions.
+   - Apple processes the build (~15–60 min). It becomes available in App Store Connect → TestFlight/App Store after.
+
+4. **Submit for review** (App Store Connect web UI). Once Apple finishes processing:
+   - **My Apps → Mirlo → App Store** → new/in-progress version matching `expo.version`.
+   - Fill: **What's New**, **Description**, **Keywords**, **Support URL** (https://mirlo.space), screenshots (at minimum 6.7" iPhone; capture from Xcode simulator).
+   - **Build** section → pick the build you just submitted.
+   - **App Privacy** wizard (new apps only): contact info + identifiers + usage data; linked to user; **not** used for tracking.
+   - **App Review Information** → provide a real demo account on `api.mirlo.space` (Apple reviews against production, not the local Docker stack) and a one-line note like "Music streaming app. Delete Account is in the hamburger menu after logging in."
+   - **Version Release**: pick **Manually release** so you control go-live.
+   - **Add for Review** → **Submit to App Review**. Apple SLA: typically 24–48h, sometimes a week.
+
+5. **After approval:** App Store Connect → version page → **Release This Version**. Global roll-out within ~1h.
+
+### When you can skip the build (JS-only changes) — EAS Update
+
+If the diff touches only JavaScript / assets, push an OTA update instead:
+
+```bash
+eas update --branch production --message "<short description>"
+```
+
+Existing installs phone home to `expo.updates.url` and pick up the new bundle on next launch. The [preview workflow](.github/workflows/preview.yml) handles the `preview` channel automatically on PR merge; production publishes are manual.
+
+**Full rebuild + resubmit *is* required when any of these change:**
+
+- Adding/removing native dependencies (anything with native iOS code).
+- `expo` plugins in [app.json](app.json), or `expo.ios.bundleIdentifier`, entitlements, `Info.plist` keys.
+- Expo SDK or React Native version.
+- `expo.runtimeVersion` — must bump it whenever native code changes so OTA updates don't target stale binaries.
+
+### Common snags
+
+- **`Entity not authorized`** from `eas`: you're logged in as the wrong Expo user, or you haven't been added to the project's owning org. `eas whoami` to check, then `eas login`, then verify via `eas project:info`.
+- **"Bundle identifier is not available to team X"** at the EAS build step: the bundle ID belongs to a different Apple Developer Program team than the one your Apple ID is on. Either be added to the right team (developer.apple.com → People → Invite — note: this is separate from App Store Connect's user list) OR register the bundle ID under your team and update `expo.ios.bundleIdentifier`.
+- **Apple processing takes forever**: 15–60 min is normal. If a build's been "Processing" >2h, retry the submit.
+- **Build number conflict on submit**: with `appVersionSource: "remote"`, EAS prevents this. If it happens anyway, you manually set a `buildNumber` somewhere — remove it.
+
 ## Contributing
 
 _Branch Structure:_
