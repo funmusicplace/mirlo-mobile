@@ -2,7 +2,7 @@
   "expo": {
     "name": "Mirlo",
     "slug": "mirlo-mobile",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -21,7 +21,7 @@
         "dark": "./assets/images/mirlo-logo-logoOnly-dark.png",
         "light": "./assets/images/mirlo-app-icon-light.png"
       },
-      "runtimeVersion": "1.0.1"
+      "runtimeVersion": "1.0.2"
     },
     "android": {
       "adaptiveIcon": {
@@ -74,7 +74,7 @@
       }
     },
     "owner": "mirlo-app",
-    "runtimeVersion": "1.0.1",
+    "runtimeVersion": "1.0.2",
     "updates": {
       "url": "https://u.expo.dev/a2ccd2d1-a537-4697-9df3-43228ba534ef",
       "checkAutomatically": "ON_LOAD",
