@@ -24,8 +24,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          # eas-cli 18.x requires Node >= 20.
-          node-version: 20.x
+          # eas-cli 23.x requires Node >= 22.
+          node-version: 22.x
           cache: npm
 
       - name: Setup EAS
