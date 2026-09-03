@@ -1,6 +1,6 @@
 {
   "name": "mirlo-mobile",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "1.0.2",
   "scripts": {
     "start": "expo start",
@@ -62,7 +62,7 @@
     "expo-status-bar": "~55.0.4",
     "expo-symbols": "~55.0.4",
     "expo-system-ui": "~55.0.9",
-    "expo-updates": "~55.0.12",
+    "expo-updates": "^55.0.26",
     "expo-web-browser": "~55.0.9",
     "i18next": "^25.3.0",
     "jest-expo": "~55.0.9",

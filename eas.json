@@ -27,9 +27,12 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production",
-      "env": {
-        "ENTRY_FILE": "node_modules/expo-router/entry.js"
+      "channel": "production"
+    },
+    "production-simulator": {
+      "extends": "production",
+      "ios": {
+        "simulator": true
       }
     }
   },
