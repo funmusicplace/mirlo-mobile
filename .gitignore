@@ -42,3 +42,11 @@ app-example
 
 # Claude Code per-user state
 .claude/
+
+# Store submission artifacts and console-automation output, kept locally (see handoff.md)
+/.playwright-mcp/
+/screenshots/
+/*.png
+/*.pdf
+/*.zip
+/handoff.md
