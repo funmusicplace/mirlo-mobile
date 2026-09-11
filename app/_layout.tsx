@@ -16,6 +16,10 @@ import { checkForUpdates } from "../scripts/appVersionCheck";
 
 SplashScreen.preventAutoHideAsync();
 
+// Keep the home screen under deep-linked routes: it is what hides the splash
+// once data loads, and Back then returns home instead of leaving the app
+export const unstable_settings = { anchor: "index" };
+
 SplashScreen.setOptions({
   duration: 500,
   fade: true,

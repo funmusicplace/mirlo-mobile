@@ -5,7 +5,7 @@
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "mirlo",
     "userInterfaceStyle": "automatic",
     "jsEngine": "hermes",
     "ios": {
@@ -21,7 +21,11 @@
         "dark": "./assets/images/mirlo-logo-logoOnly-dark.png",
         "light": "./assets/images/mirlo-app-icon-light.png"
       },
-      "runtimeVersion": "1.0.2"
+      "runtimeVersion": "1.0.2",
+      "associatedDomains": [
+        "applinks:mirlo.space"
+      ],
+      "appleTeamId": "VZCHHV7VNW"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +35,39 @@
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "space.mirlo.mobile"
+      "package": "space.mirlo.mobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "mirlo.space",
+              "path": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "mirlo.space",
+              "pathAdvancedPattern": "/[^/]+"
+            },
+            {
+              "scheme": "https",
+              "host": "mirlo.space",
+              "pathAdvancedPattern": "/[^/]+/release/[^/]+"
+            },
+            {
+              "scheme": "https",
+              "host": "mirlo.space",
+              "pathAdvancedPattern": "/[^/]+/release/[^/]+/tracks/[0-9]+"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
