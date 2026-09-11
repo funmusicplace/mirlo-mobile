@@ -213,7 +213,7 @@ const itemWidth = (width - 100) / 2;
 
 const styles = StyleSheet.create({
   avatar: {
-    borderRadius: "50%",
+    borderRadius: 25,
     width: 50,
     height: 50,
   },
