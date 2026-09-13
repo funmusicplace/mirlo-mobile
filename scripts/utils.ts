@@ -1,4 +1,4 @@
-import * as Linking from "expo-linking";
+import { openInBrowser } from "@/scripts/openInBrowser";
 
 export function audioTrackType(url: string): "default" | "hls" | "dash" {
   if (url.endsWith(".m3u8")) return "hls";
@@ -69,5 +69,5 @@ export const linkifyUrls = (text: string) => {
 
 export const handleExternalPurchase = (trackGroup: AlbumProps) => {
   const purchaseUrl = `https://mirlo.space/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`;
-  Linking.openURL(purchaseUrl);
+  openInBrowser(purchaseUrl);
 };
