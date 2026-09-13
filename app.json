@@ -54,6 +54,11 @@
             {
               "scheme": "https",
               "host": "mirlo.space",
+              "pathAdvancedPattern": "/[^/]+/releases"
+            },
+            {
+              "scheme": "https",
+              "host": "mirlo.space",
               "pathAdvancedPattern": "/[^/]+/release/[^/]+"
             },
             {
