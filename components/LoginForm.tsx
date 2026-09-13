@@ -11,7 +11,7 @@ import { useLoginMutation } from "@/queries/authQueries";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as WebBrowser from "expo-web-browser";
+import { openInBrowser } from "@/scripts/openInBrowser";
 import ErrorNotification from "./ErrorNotification";
 
 type LoginInputs = {
@@ -38,7 +38,7 @@ export default function LoginForm() {
   const { mutate: login } = useLoginMutation();
 
   const handleBrowserOpen = async () => {
-    await WebBrowser.openBrowserAsync("https://mirlo.space/signup");
+    await openInBrowser("https://mirlo.space/signup");
   };
 
   const onSubmit = async (data: LoginInputs) => {
