@@ -6,7 +6,7 @@ import {
 import { MirloFetchError } from "./fetch/MirloFetchError";
 import { authRefresh } from "./authQueries";
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000, //30 seconds
