@@ -35,44 +35,7 @@
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "space.mirlo.mobile",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "mirlo.space",
-              "path": "/"
-            },
-            {
-              "scheme": "https",
-              "host": "mirlo.space",
-              "pathAdvancedPattern": "/[^/]+"
-            },
-            {
-              "scheme": "https",
-              "host": "mirlo.space",
-              "pathAdvancedPattern": "/[^/]+/releases"
-            },
-            {
-              "scheme": "https",
-              "host": "mirlo.space",
-              "pathAdvancedPattern": "/[^/]+/release/[^/]+"
-            },
-            {
-              "scheme": "https",
-              "host": "mirlo.space",
-              "pathAdvancedPattern": "/[^/]+/release/[^/]+/tracks/[0-9]+"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
+      "package": "space.mirlo.mobile"
     },
     "web": {
       "bundler": "metro",
@@ -98,7 +61,8 @@
         }
       ],
       "expo-localization",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withMirloAppLinks"
     ],
     "experiments": {
       "typedRoutes": true
