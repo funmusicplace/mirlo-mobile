@@ -17,6 +17,7 @@ import TagPill from "@/components/TagPill";
 import { optionDisplay } from "@/components/SearchOptionRenderer";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function SearchPage() {
   const {
@@ -35,6 +36,7 @@ export default function SearchPage() {
   );
   const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation("translation");
 
   const tagPills = useMemo(() => {
     const group = tags?.results.map((tag, index) => {
@@ -99,7 +101,7 @@ export default function SearchPage() {
         !searchValue &&
         !searchResults.length && (
           <ScrollView style={{ marginTop: 20, marginHorizontal: 10, gap: 20 }}>
-            <Text>Or Search By Popular Tags:</Text>
+            <Text>{t("mobileApp.searchScreen.searchByPopular")}</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 3 }}>
               {tagPills}
             </View>
@@ -153,6 +155,7 @@ export default function SearchPage() {
 
 function TypeLinks() {
   const router = useRouter();
+  const { t } = useTranslation("translation");
   return (
     <View
       style={{
@@ -164,7 +167,8 @@ function TypeLinks() {
         Popular{" >"}
       </Link>
       <Link href={{ pathname: "/mostPlayed" }} onPress={() => router.back()}>
-        Most Listened To{" >"}
+        {t("mobileApp.searchScreen.topListened")}
+        {" >"}
       </Link>
     </View>
   );
