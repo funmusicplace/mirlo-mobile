@@ -16,6 +16,7 @@ import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import DismissModalBar from "@/components/DismissModalBar";
+import MarqueeText from "@/components/MarqueeText";
 
 export default function NowPlaying() {
   const { activeTrack, shuffled } = usePlayer() as {
@@ -76,7 +77,9 @@ export default function NowPlaying() {
             maxWidth: width * 0.9,
           }}
         >
-          <Text style={{ fontWeight: "bold" }}>{activeTrack?.title}</Text>
+          <MarqueeText style={{ fontWeight: "bold" }}>
+            {activeTrack?.title}
+          </MarqueeText>
           <View
             style={{
               display: "flex",
@@ -104,13 +107,9 @@ export default function NowPlaying() {
                     router.dismiss(1);
                   }}
                 >
-                  <Text
-                    style={[styles.link, { maxWidth: "100%" }]}
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
-                  >
+                  <MarqueeText style={[styles.link, { maxWidth: "100%" }]}>
                     {activeTrack?.trackGroup.title}
-                  </Text>
+                  </MarqueeText>
                 </Pressable>
               </Link>
             </View>
@@ -133,13 +132,9 @@ export default function NowPlaying() {
                     router.dismiss(1);
                   }}
                 >
-                  <Text
-                    style={styles.link}
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
-                  >
+                  <MarqueeText style={styles.link}>
                     {activeTrack?.artist}
-                  </Text>
+                  </MarqueeText>
                 </Pressable>
               </Link>
             </View>
