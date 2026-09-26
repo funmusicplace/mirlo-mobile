@@ -25,6 +25,7 @@ import { useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import FavoriteTrackButton from "@/components/FavoriteTrackButton";
 import ErrorNotification from "@/components/ErrorNotification";
+import MarqueeText from "@/components/MarqueeText";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -173,15 +174,19 @@ export default function TrackView() {
                         slug: data.result?.urlSlug,
                       },
                     }}
-                    style={{
-                      color: "#BE3455",
-                      marginBottom: 5,
-                      fontWeight: "bold",
-                    }}
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
+                    asChild
                   >
-                    {data.result?.title}
+                    <Pressable style={{ flexShrink: 1 }}>
+                      <MarqueeText
+                        style={{
+                          color: "#BE3455",
+                          marginBottom: 5,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {data.result?.title}
+                      </MarqueeText>
+                    </Pressable>
                   </Link>
                   <Text>
                     {t("profile.albumLink")
