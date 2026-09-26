@@ -1,5 +1,4 @@
 import {
-  Text,
   View,
   Image,
   StyleSheet,
@@ -16,6 +15,8 @@ import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import DismissModalBar from "@/components/DismissModalBar";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function NowPlaying() {
   const { activeTrack, shuffled } = usePlayer() as {
@@ -26,9 +27,12 @@ export default function NowPlaying() {
   const router = useRouter();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const colors = useColors();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <DismissModalBar />
       <ScrollView style={{ width: width }}>
         <Image
@@ -36,6 +40,7 @@ export default function NowPlaying() {
           style={[
             styles.image,
             { width: width, height: width < 380 ? width * 0.9 : width },
+            { backgroundColor: colors.muted },
           ]}
           resizeMode={width < 380 ? "stretch" : "cover"}
         />
@@ -52,8 +57,8 @@ export default function NowPlaying() {
             minimumValue={0}
             maximumValue={progress.duration}
             thumbTintColor="transparent"
-            minimumTrackTintColor="#BE3455"
-            maximumTrackTintColor="#d6d6d6"
+            minimumTrackTintColor={colors.accent}
+            maximumTrackTintColor={colors.border}
             onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
           />
           <View
@@ -105,7 +110,10 @@ export default function NowPlaying() {
                   }}
                 >
                   <Text
-                    style={[styles.link, { maxWidth: "100%" }]}
+                    style={[
+                      styles.link,
+                      { maxWidth: "100%", color: colors.accent },
+                    ]}
                     ellipsizeMode="tail"
                     numberOfLines={1}
                   >
@@ -134,7 +142,7 @@ export default function NowPlaying() {
                   }}
                 >
                   <Text
-                    style={styles.link}
+                    style={[styles.link, { color: colors.accent }]}
                     ellipsizeMode="tail"
                     numberOfLines={1}
                   >
@@ -171,19 +179,16 @@ function formatTime(seconds: number) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start",
   },
   image: {
-    backgroundColor: "#f0f0f0", // placeholder color while loading
     alignSelf: "center",
   },
   loadSpinner: {
     flex: 1,
   },
   link: {
-    color: "#BE3455",
     fontWeight: "bold",
   },
   progressBar: {

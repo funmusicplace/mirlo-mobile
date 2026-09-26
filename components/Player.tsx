@@ -21,6 +21,7 @@ import TrackPlayer, {
   useProgress,
 } from "react-native-track-player";
 import Slider from "@react-native-community/slider";
+import { useColors } from "@/constants/colors";
 
 type PlayerStyleProps = {
   bottomDistance: number;
@@ -46,6 +47,7 @@ export default function Player({ style }: ViewProps) {
 
 function PlayerPlayButton({ buttonColor }: PlayButtonProps) {
   const { playbackState, isPlaying } = usePlayer();
+  const colors = useColors();
   const playIcon = <Ionicons name="play" size={40} />;
   const pauseIcon = <Ionicons name="pause" size={40} />;
 
@@ -81,6 +83,7 @@ function PlayerPlayButton({ buttonColor }: PlayButtonProps) {
             : "play-circle-outline"
         }
         size={75}
+        color={colors.text}
       />
     </TouchableOpacity>
   );

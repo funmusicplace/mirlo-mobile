@@ -1,4 +1,10 @@
 import { Stack, usePathname } from "expo-router";
+import { useColorScheme } from "react-native";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
 import { SearchContextProvider } from "@/state/SearchContext";
 import { PlayerContextProvider } from "@/state/PlayerContext";
 import { AuthContextProvider } from "@/state/AuthContext";
@@ -11,6 +17,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { AppReadyContextProvider } from "@/state/AppReadyContext";
 import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
+import { useColors } from "@/constants/colors";
 import "../i18n";
 import { checkForUpdates } from "../scripts/appVersionCheck";
 
@@ -29,6 +36,8 @@ TrackPlayer.registerPlaybackService(() => require("../scripts/service"));
 
 export default function RootLayout() {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const scheme = useColorScheme();
+  const colors = useColors();
   // Needed for TanStack Query Devtools
   const onCopy = async (text: string) => {
     try {
@@ -57,125 +66,129 @@ export default function RootLayout() {
         <AuthContextProvider>
           <PlayerContextProvider>
             <SearchContextProvider>
-              <Stack screenOptions={{ animation: "none" }}>
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="collections"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="artist/[id]"
-                  options={{
-                    headerShown: false,
-                    animation: "none",
-                  }}
-                />
-                <Stack.Screen
-                  name="now-playing"
-                  options={{
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 100,
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="search"
-                  options={{
-                    headerShown: false,
-                    animation: "fade",
-                    animationDuration: 300,
-                    presentation: "transparentModal",
-                  }}
-                />
-                <Stack.Screen
-                  name="menu"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                  }}
-                />
-                <Stack.Screen
-                  name="deleteAccount"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 200,
-                  }}
-                />
-                <Stack.Screen
-                  name="tags/[tag]"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="mostPlayed"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="topSold"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="wishlist"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="maxPlaysReached"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 200,
-                  }}
-                />
-                <Stack.Screen
-                  name="emailPurchaseInfoModal"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 200,
-                  }}
-                />
-                <Stack.Screen
-                  name="addFreeAlbumModal"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 200,
-                  }}
-                />
-                <Stack.Screen
-                  name="emailVerificationModal"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    animation: "slide_from_bottom",
-                    animationDuration: 200,
-                  }}
-                />
-              </Stack>
-              <Footer />
-              <StatusBar style="dark" backgroundColor="white" />
+              <ThemeProvider
+                value={scheme === "dark" ? DarkTheme : DefaultTheme}
+              >
+                <Stack screenOptions={{ animation: "none" }}>
+                  <Stack.Screen name="login" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="collections"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="artist/[id]"
+                    options={{
+                      headerShown: false,
+                      animation: "none",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="now-playing"
+                    options={{
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 100,
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="search"
+                    options={{
+                      headerShown: false,
+                      animation: "fade",
+                      animationDuration: 300,
+                      presentation: "transparentModal",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="menu"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="deleteAccount"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 200,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="tags/[tag]"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="mostPlayed"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="topSold"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="wishlist"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="maxPlaysReached"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 200,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="emailPurchaseInfoModal"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 200,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="addFreeAlbumModal"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 200,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="emailVerificationModal"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      animation: "slide_from_bottom",
+                      animationDuration: 200,
+                    }}
+                  />
+                </Stack>
+                <Footer />
+                <StatusBar style="auto" backgroundColor={colors.background} />
+              </ThemeProvider>
             </SearchContextProvider>
           </PlayerContextProvider>
         </AuthContextProvider>

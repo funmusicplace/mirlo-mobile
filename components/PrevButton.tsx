@@ -1,11 +1,16 @@
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { usePlayer } from "@/state/PlayerContext";
 import TrackPlayer from "react-native-track-player";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function PrevButton() {
   const { setActiveTrack } = usePlayer();
-  const prevIcon = <Ionicons name="play-skip-back" size={40} />;
+  const colors = useColors();
+  const prevIcon = (
+    <Ionicons name="play-skip-back" size={40} color={colors.text} />
+  );
 
   const prevSong = async () => {
     try {

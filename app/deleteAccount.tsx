@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,19 +12,21 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import DismissModalBar from "@/components/DismissModalBar";
-import { mirloRed } from "@/constants/mirlo-red";
 import {
   AUTH_PROFILE_QUERY_KEY,
   clearLocalAuthSession,
 } from "@/queries/authQueries";
 import * as api from "@/queries/fetch/fetchWrapper";
 import { useAuthContext } from "@/state/AuthContext";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function DeleteAccountScreen() {
   const router = useRouter();
   const { user, refreshLoggedInUser } = useAuthContext();
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
+  const colors = useColors();
 
   const artistCount = user?.artists?.length ?? 0;
   const albumPurchaseCount = user?.userTrackGroupPurchases?.length ?? 0;
@@ -117,25 +118,34 @@ export default function DeleteAccountScreen() {
   }, [deleteAccount, isDeleting, user?.id]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <DismissModalBar />
       <ScrollView
         contentContainerStyle={styles.contentContainer}
-        style={styles.content}
+        style={[styles.content, { backgroundColor: colors.background }]}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Delete account</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            Delete account
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.secondaryText }]}>
             Review the impact below. You'll get a confirmation popup before the
             account is permanently deleted.
           </Text>
         </View>
 
-        <View style={styles.card}>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: colors.alert, borderColor: colors.alertBorder },
+          ]}
+        >
           <Text style={styles.cardTitle}>What happens next</Text>
           {warningItems.map((item) => (
             <View key={item} style={styles.warningRow}>
-              <Text style={styles.bullet}>•</Text>
+              <Text style={[styles.bullet, { color: colors.accent }]}>•</Text>
               <Text style={styles.warningText}>{item}</Text>
             </View>
           ))}
@@ -154,10 +164,20 @@ export default function DeleteAccountScreen() {
           if (summaryRows.length === 0) return null;
 
           return (
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryTitle}>Account summary</Text>
+            <View
+              style={[
+                styles.summaryCard,
+                { backgroundColor: colors.muted, borderColor: colors.border },
+              ]}
+            >
+              <Text style={[styles.summaryTitle, { color: colors.text }]}>
+                Account summary
+              </Text>
               {summaryRows.map((row) => (
-                <Text key={row} style={styles.summaryText}>
+                <Text
+                  key={row}
+                  style={[styles.summaryText, { color: colors.secondaryText }]}
+                >
                   {row}
                 </Text>
               ))}
@@ -179,10 +199,15 @@ export default function DeleteAccountScreen() {
 
         <Pressable
           onPress={() => router.dismiss()}
-          style={styles.cancelButton}
+          style={[
+            styles.cancelButton,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
           disabled={isDeleting}
         >
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+          <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+            Cancel
+          </Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
@@ -192,11 +217,9 @@ export default function DeleteAccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
   },
   content: {
     flex: 1,
-    backgroundColor: "white",
   },
   contentContainer: {
     paddingHorizontal: 20,
@@ -210,25 +233,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#111",
   },
   subtitle: {
     fontSize: 16,
     lineHeight: 22,
-    color: "#555",
   },
   card: {
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f0d3d9",
-    backgroundColor: "#fff7f8",
     padding: 18,
     gap: 12,
   },
   cardTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111",
   },
   warningRow: {
     flexDirection: "row",
@@ -238,30 +256,24 @@ const styles = StyleSheet.create({
   bullet: {
     fontSize: 18,
     lineHeight: 24,
-    color: mirloRed,
   },
   warningText: {
     flex: 1,
     fontSize: 16,
     lineHeight: 24,
-    color: "#333",
   },
   summaryCard: {
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    backgroundColor: "#fafafa",
     padding: 18,
     gap: 8,
   },
   summaryTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111",
   },
   summaryText: {
     fontSize: 16,
-    color: "#444",
   },
   deleteButton: {
     backgroundColor: "#a21d1d",
@@ -282,11 +294,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#d8d8d8",
-    backgroundColor: "white",
   },
   cancelButtonText: {
-    color: "#222",
     fontSize: 17,
     fontWeight: "600",
   },

@@ -3,19 +3,21 @@ import { queryArtist } from "@/queries/queries";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import {
   View,
-  Text,
   ActivityIndicator,
   StyleSheet,
   Pressable,
   Image,
   Dimensions,
-  FlatList} from "react-native";
+  FlatList,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Markdown from "react-native-markdown-display";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function ArtistPage() {
   const { id } = useLocalSearchParams();
@@ -23,13 +25,14 @@ export default function ArtistPage() {
     queryArtist({ artistSlug: String(id) ?? "" })
   );
   const { t } = useTranslation("translation");
+  const colors = useColors();
 
   if (isPending) {
     return (
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -85,20 +88,23 @@ export default function ArtistPage() {
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.header,
         }}
       >
         <Pressable onPress={() => router.dismiss()}>
           <Ionicons
             name="chevron-back-outline"
             size={40}
-            style={{ color: "#696969" }}
+            style={{ color: colors.secondaryText }}
           ></Ionicons>
         </Pressable>
       </View>
       <FlatList
         style={{ flex: 1 }}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[
+          styles.listContainer,
+          { backgroundColor: colors.background },
+        ]}
         horizontal={false}
         columnWrapperStyle={{
           justifyContent: "space-evenly",
@@ -153,7 +159,7 @@ export default function ArtistPage() {
                 />
               )}
               <View style={{ marginHorizontal: 20, gap: 5 }}>
-                <Text style={{ color: "black", fontWeight: "bold" }}>
+                <Text style={{ color: colors.text, fontWeight: "bold" }}>
                   {artistInfo.name}
                 </Text>
                 {artistInfo.location && (
@@ -168,9 +174,9 @@ export default function ArtistPage() {
                     <Ionicons
                       name="location-outline"
                       size={20}
-                      color={"#b5b5b5"}
+                      color={colors.inactive}
                     ></Ionicons>
-                    <Text style={{ color: "#b5b5b5" }}>
+                    <Text style={{ color: colors.inactive }}>
                       {artistInfo.location}
                     </Text>
                   </View>
@@ -193,7 +199,12 @@ export default function ArtistPage() {
             </Text>
 
             {artistInfo.bio ? (
-              <Markdown>
+              <Markdown
+                style={{
+                  body: { color: colors.text },
+                  link: { color: colors.accent },
+                }}
+              >
                 {linkifyUrls(
                   artistInfo.bio.replace(/([^\n])\n([^\n])/g, "$1 $2")
                 )}
@@ -226,7 +237,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    backgroundColor: "white",
     alignItems: "stretch",
     justifyContent: "flex-start",
     minHeight: "100%",

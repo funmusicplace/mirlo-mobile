@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import * as api from "../queries/fetch/fetchWrapper";
 import { ViewProps } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useColors } from "@/constants/colors";
 
 type FavoriteTrackButton = {
   track: {
@@ -21,6 +22,7 @@ export default function FavoriteTrackButton({
   size,
 }: FavoriteTrackButton) {
   const { user, refreshLoggedInUser } = useAuthContext();
+  const colors = useColors();
   const [isInFavorites, setIsInFavorites] = useState(
     !!user?.trackFavorites?.find((w) => w.trackId === track.id),
   );
@@ -43,7 +45,7 @@ export default function FavoriteTrackButton({
     <Pressable onPress={onPress} style={style}>
       <Ionicons
         name={isInFavorites ? "star" : "star-outline"}
-        color={isInFavorites ? "#BE3455" : "#ababab"}
+        color={isInFavorites ? colors.accent : colors.inactive}
         size={size}
       />
     </Pressable>

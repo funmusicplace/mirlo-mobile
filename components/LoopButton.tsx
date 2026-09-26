@@ -1,18 +1,23 @@
-import { Image, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image, View, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { usePlayer } from "@/state/PlayerContext";
 import { API_ROOT } from "@/constants/api-root";
 import TrackPlayer, { RepeatMode } from "react-native-track-player";
 import { useState } from "react";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function LoopButton() {
   // const [looping, setLooping] = useState<"none" | "track" | "queue">("none");
   const { looping, setLooping } = usePlayer();
+  const colors = useColors();
   const loopIcon = (
     <Ionicons
       name="repeat"
       size={30}
-      color={looping === "queue" || looping === "track" ? "#BE3455" : "black"}
+      color={
+        looping === "queue" || looping === "track" ? colors.accent : colors.text
+      }
     />
   );
 
@@ -44,9 +49,10 @@ export default function LoopButton() {
 }
 
 const LoopIndicator = () => {
+  const colors = useColors();
   return (
     <View style={{ position: "absolute", right: 10, top: 5 }}>
-      <Text style={styles.loopIndicator}>1</Text>
+      <Text style={[styles.loopIndicator, { color: colors.accent }]}>1</Text>
     </View>
   );
 };
@@ -65,6 +71,5 @@ const styles = StyleSheet.create({
   },
   loopIndicator: {
     fontSize: 12,
-    color: "#BE3455",
   },
 });

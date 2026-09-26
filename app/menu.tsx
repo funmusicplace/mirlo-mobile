@@ -1,15 +1,18 @@
-import { View, Pressable, Text, StyleSheet } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useAuthContext } from "@/state/AuthContext";
 import { useLogoutMutation } from "@/queries/authQueries";
 import { useTranslation } from "react-i18next";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function Menu() {
   const router = useRouter();
   const { user } = useAuthContext();
   const { t } = useTranslation("translation");
+  const colors = useColors();
 
   const { mutate: logout } = useLogoutMutation();
   const onLogOut = () => {
@@ -28,7 +31,7 @@ export default function Menu() {
         justifyContent: "flex-start",
         alignItems: "center",
         width: "100%",
-        backgroundColor: "white",
+        backgroundColor: colors.background,
       }}
     >
       <View
@@ -39,14 +42,14 @@ export default function Menu() {
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.header,
         }}
       >
         <Pressable onPress={() => router.dismiss()}>
           <Ionicons
             name="chevron-down-outline"
             size={40}
-            style={{ color: "#696969" }}
+            style={{ color: colors.secondaryText }}
           ></Ionicons>
         </Pressable>
       </View>
@@ -56,7 +59,9 @@ export default function Menu() {
             <Text style={{ marginTop: 20, fontSize: 25, fontWeight: "bold" }}>
               {user.name}
             </Text>
-            <View style={styles.separator} />
+            <View
+              style={[styles.separator, { borderBottomColor: colors.border }]}
+            />
           </View>
         )}
         <View
@@ -73,9 +78,9 @@ export default function Menu() {
                 router.back();
                 router.navigate("/");
               }}
-              style={styles.link}
+              style={[styles.link, { backgroundColor: colors.muted }]}
             >
-              <Ionicons name="home-outline" size={25} />
+              <Ionicons name="home-outline" size={25} color={colors.text} />
               <Text style={{ fontSize: 20 }}>
                 {t("releases.recentReleases")}
               </Text>
@@ -85,9 +90,9 @@ export default function Menu() {
                 router.back();
                 router.navigate("/collections");
               }}
-              style={styles.link}
+              style={[styles.link, { backgroundColor: colors.muted }]}
             >
-              <Ionicons name="library-outline" size={25} />
+              <Ionicons name="library-outline" size={25} color={colors.text} />
               <Text style={{ fontSize: 20 }}>
                 {t("profile.yourCollection")}
               </Text>
@@ -97,18 +102,18 @@ export default function Menu() {
                 router.back();
                 router.navigate("/wishlist");
               }}
-              style={styles.link}
+              style={[styles.link, { backgroundColor: colors.muted }]}
             >
-              <Ionicons name="heart-outline" size={25} />
+              <Ionicons name="heart-outline" size={25} color={colors.text} />
               <Text style={{ fontSize: 20 }}>{t("profile.yourWishlist")}</Text>
             </Pressable>
             <Pressable
               style={[
                 styles.link,
                 {
-                  borderColor: "#e0e0e0",
+                  borderColor: colors.border,
                   borderWidth: StyleSheet.hairlineWidth,
-                  backgroundColor: "white",
+                  backgroundColor: colors.background,
                   marginTop: 20,
                 },
               ]}
@@ -124,6 +129,7 @@ export default function Menu() {
               <Ionicons
                 name={user ? "log-in-outline" : "log-out-outline"}
                 size={25}
+                color={colors.text}
               />
               <Text style={{ fontSize: 20 }}>
                 {user ? t("headerMenu.logOut") : t("headerMenu.logIn")}
@@ -136,9 +142,9 @@ export default function Menu() {
               style={[
                 styles.link,
                 {
-                  borderColor: "#e0e0e0",
+                  borderColor: colors.border,
                   borderWidth: StyleSheet.hairlineWidth,
-                  backgroundColor: "white",
+                  backgroundColor: colors.background,
                   marginBottom: 30,
                 },
               ]}
@@ -146,10 +152,10 @@ export default function Menu() {
                 router.push("/deleteAccount");
               }}
             >
-              <Text style={{ fontSize: 20, color: "red" }}>
+              <Text style={{ fontSize: 20, color: colors.danger }}>
                 {t("profile.deleteAccount")}
               </Text>
-              <Ionicons name="open-outline" size={25} color="red" />
+              <Ionicons name="open-outline" size={25} color={colors.danger} />
             </Pressable>
           )}
         </View>
@@ -160,12 +166,10 @@ export default function Menu() {
 
 const styles = StyleSheet.create({
   separator: {
-    borderBottomColor: "grey",
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 20,
   },
   link: {
-    backgroundColor: "#edebeb",
     flexDirection: "row",
     width: "100%",
     padding: 10,

@@ -1,10 +1,15 @@
-import { Image, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image, View, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { usePlayer } from "@/state/PlayerContext";
 import TrackPlayer, { PlaybackState, State } from "react-native-track-player";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 export default function NextButton() {
   const { setActiveTrack, playbackState, activeTrack } = usePlayer();
-  const nextIcon = <Ionicons name="play-skip-forward" size={40} />;
+  const colors = useColors();
+  const nextIcon = (
+    <Ionicons name="play-skip-forward" size={40} color={colors.text} />
+  );
 
   const nextSong = async () => {
     try {

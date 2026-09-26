@@ -1,10 +1,12 @@
 import { View, Pressable, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useColors } from "@/constants/colors";
 
 export default function DismissModalBar() {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
+  const colors = useColors();
 
   return (
     <View
@@ -14,7 +16,7 @@ export default function DismissModalBar() {
         justifyContent: "space-between",
         width: "100%",
         height: height * 0.08,
-        backgroundColor: "#fafafa",
+        backgroundColor: colors.header,
       }}
     >
       <Pressable
@@ -30,7 +32,7 @@ export default function DismissModalBar() {
         <Ionicons
           name="chevron-down-outline"
           size={40}
-          style={{ color: "#696969" }}
+          style={{ color: colors.secondaryText }}
         ></Ionicons>
       </Pressable>
     </View>
