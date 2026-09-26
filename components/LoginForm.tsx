@@ -137,7 +137,7 @@ export default function LoginForm() {
             marginTop: 30,
           }}
         >
-          <Pressable onPress={handleBrowserOpen}>
+          <Pressable onPress={handleBrowserOpen} hitSlop={12}>
             <Text style={{ color: "white", textDecorationLine: "underline" }}>
               {t("signUp")}
             </Text>
