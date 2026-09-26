@@ -918,5 +918,11 @@
     "faqDescription": "Some frequently asked questions about Mirlo",
     "whatWeBuilding": "What we're building",
     "people": "The people doing it "
+  },
+  "mobileApp": {
+    "searchScreen": {
+      "searchByPopular": "Search By Popular Tags",
+      "topListened": "Most Listened To"
+    }
   }
 }
