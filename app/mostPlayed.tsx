@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  Text,
-  View,
-  FlatList,
-  Pressable,
-} from "react-native";
+import { ActivityIndicator, View, FlatList, Pressable } from "react-native";
 import MenuButton from "@/components/MenuButton";
 import { StyleSheet } from "react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +10,8 @@ import { queryMostPlayed } from "@/queries/queries";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useState } from "react";
+import { useColors } from "@/constants/colors";
+import Text from "@/components/ThemedText";
 
 export default function Index() {
   const { isPending, isError, data, error } = useQuery(queryMostPlayed({}));
@@ -23,13 +19,14 @@ export default function Index() {
   const trackGroups = data?.results;
   const router = useRouter();
   const [showError, setShowError] = useState<boolean>(true);
+  const colors = useColors();
 
   if (isPending) {
     return (
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -50,8 +47,10 @@ export default function Index() {
   }
 
   return (
-    <View style={{ flex: 1, paddingTop: top, backgroundColor: "white" }}>
-      <View style={styles.container}>
+    <View
+      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
+    >
+      <View style={[styles.container, { backgroundColor: colors.muted }]}>
         <View
           style={{
             flexDirection: "row",
@@ -61,15 +60,15 @@ export default function Index() {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           }}
         >
           <Pressable onPress={() => router.dismiss()}>
             <Ionicons
               name="chevron-back-outline"
               size={40}
-              style={{ color: "#696969" }}
+              style={{ color: colors.secondaryText }}
             ></Ionicons>
           </Pressable>
           <Text style={{ fontSize: 20, flex: 1, textAlign: "center" }}>
@@ -80,7 +79,10 @@ export default function Index() {
 
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={trackGroups}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={({ item }) => (
@@ -113,12 +115,10 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "#FFF",
     zIndex: 10,
   },
   text: {

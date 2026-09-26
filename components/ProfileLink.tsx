@@ -1,15 +1,18 @@
 import Feather from "@expo/vector-icons/Feather";
 import { Link } from "expo-router";
-import { Text, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useAuthContext } from "@/state/AuthContext";
 import { useLogoutMutation } from "@/queries/authQueries";
 import { useCallback } from "react";
 import { useRouter } from "expo-router";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function ProfileLink() {
   const { user } = useAuthContext();
   const { mutate: logout } = useLogoutMutation();
   const router = useRouter();
+  const colors = useColors();
   const onLogOut = () => {
     logout(undefined, {
       onSuccess() {
@@ -19,8 +22,8 @@ export default function ProfileLink() {
     });
   };
 
-  const logInIcon = <Feather name="log-in" size={20} color="black" />;
-  const logOutIcon = <Feather name="log-out" size={20} color="black" />;
+  const logInIcon = <Feather name="log-in" size={20} color={colors.text} />;
+  const logOutIcon = <Feather name="log-out" size={20} color={colors.text} />;
 
   if (!user) {
     return (

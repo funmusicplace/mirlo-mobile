@@ -1,13 +1,16 @@
-import { Image, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image, View, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { usePlayer } from "@/state/PlayerContext";
 import { API_ROOT } from "@/constants/api-root";
 import { shuffle, pullAt } from "lodash";
 import TrackPlayer, { State } from "react-native-track-player";
 import { useEffect, useState } from "react";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 export default function ShuffleButton() {
   const { shuffled, setShuffled } = usePlayer();
+  const colors = useColors();
 
   const onPress = async () => {
     if (!shuffled) {
@@ -106,7 +109,7 @@ export default function ShuffleButton() {
           <Ionicons
             name="shuffle"
             size={30}
-            color={shuffled ? "#BE3455" : "black"}
+            color={shuffled ? colors.accent : colors.text}
           />
         </Text>
       </TouchableOpacity>
