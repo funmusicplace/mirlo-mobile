@@ -2,9 +2,11 @@ import {
   audioTrackType,
   isTrackOwned,
   isTrackOwnedOrPreview,
+  pickFeaturedTrack,
 } from "@/scripts/utils";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
+import { createMockAlbum } from "@/__mocks__/mockAlbum";
 
 describe("audioTrackType", () => {
   test("returns 'hls' for .m3u8 URLs", () => {
@@ -120,5 +122,38 @@ describe("isTrackOwnedOrPreview", () => {
       releaseDate: past,
     };
     expect(isTrackOwnedOrPreview(track, null, trackGroup)).toBe(false);
+  });
+});
+
+describe("pickFeaturedTrack", () => {
+  test("prefers a playable featured track", () => {
+    const album = createMockAlbum();
+    const first = createMockRNTrack({ order: 0, isPreview: true });
+    const featured = createMockRNTrack({
+      order: 1,
+      isPreview: true,
+      isFeatured: true,
+    });
+    expect(pickFeaturedTrack([first, featured], undefined, album)).toBe(
+      featured,
+    );
+  });
+
+  test("falls back to the first playable track by order", () => {
+    const album = createMockAlbum();
+    const first = createMockRNTrack({ order: 0, isPreview: true });
+    const second = createMockRNTrack({ order: 1, isPreview: true });
+    expect(pickFeaturedTrack([second, first], undefined, album)).toBe(first);
+  });
+
+  test("skips a featured track the listener can't play", () => {
+    const album = createMockAlbum();
+    const locked = createMockRNTrack({
+      order: 0,
+      isPreview: false,
+      isFeatured: true,
+    });
+    const open = createMockRNTrack({ order: 1, isPreview: true });
+    expect(pickFeaturedTrack([locked, open], undefined, album)).toBe(open);
   });
 });

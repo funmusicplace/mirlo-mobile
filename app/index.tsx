@@ -1,9 +1,10 @@
-import { ActivityIndicator, View, FlatList } from "react-native";
+import { ActivityIndicator, View, FlatList, Text } from "react-native";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
 import { StyleSheet } from "react-native";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import TrackGroupItem from "@/components/TrackGroupItem";
+import PlayFeaturedButton from "@/components/PlayFeaturedButton";
 import { useEffect, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,8 +12,12 @@ import * as api from "../queries/fetch/fetchWrapper";
 import { Link } from "expo-router";
 import { API_ROOT } from "@/constants/api-root";
 import ErrorNotification from "@/components/ErrorNotification";
+import { useTranslation } from "react-i18next";
+
+const PAGE_SIZE = 20;
 
 export default function Index() {
+  const { t } = useTranslation("translation");
   const { setIsDataLoaded } = useAppIsReadyContext();
   const {
     isPending,
@@ -28,7 +33,7 @@ export default function Index() {
     queryFn: ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
       params.append("skip", String(pageParam));
-      params.append("take", String(20));
+      params.append("take", String(PAGE_SIZE));
       params.append("distinctArtists", "true");
       params.append("isReleased", "released");
 
@@ -36,7 +41,9 @@ export default function Index() {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.results.length === 20 ? allPages.length * 20 : null;
+      return lastPage.results.length === PAGE_SIZE
+        ? allPages.length * PAGE_SIZE
+        : null;
     },
   });
   const { top } = useSafeAreaInsets();
@@ -142,6 +149,14 @@ export default function Index() {
             fetchNextPage();
           }}
           onEndReachedThreshold={0.0}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={styles.listHeaderTitle}>
+                {t("releases.recentReleases")}
+              </Text>
+              <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
+            </View>
+          }
           ListFooterComponent={renderLoadingFooter}
         ></FlatList>
       </View>
@@ -159,6 +174,19 @@ const styles = StyleSheet.create({
   listContainer: {
     backgroundColor: "#FFF",
     zIndex: 10,
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: "white",
+  },
+  listHeaderTitle: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: "black",
   },
   text: {
     padding: 10,

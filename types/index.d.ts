@@ -142,6 +142,7 @@ interface RNTrack {
     duration: number | undefined;
   };
   isPreview: boolean;
+  isFeatured?: boolean;
   order: number;
   headers: {};
   type?: "default" | "hls" | "dash" | "smoothstreaming";

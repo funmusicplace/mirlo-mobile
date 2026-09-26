@@ -1,9 +1,47 @@
 import { openInBrowser } from "@/scripts/openInBrowser";
+import { API_ROOT } from "@/constants/api-root";
+import { API_KEY } from "@/constants/api-key";
 
 export function audioTrackType(url: string): "default" | "hls" | "dash" {
   if (url.endsWith(".m3u8")) return "hls";
   if (url.endsWith(".mpd")) return "dash";
   return "default";
+}
+
+export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
+  return {
+    title: track.title,
+    artist: album.artist.name,
+    artwork: album.cover.sizes[600],
+    url: `${API_ROOT}${track.audio.url}`,
+    allowIndividualSale: track.allowIndividualSale,
+    id: track.id,
+    trackArtists: track.trackArtists,
+    queueIndex: track.order,
+    trackGroupId: album.trackGroupId,
+    trackGroup: {
+      userTrackGroupPurchases: album.userTrackGroupPurchases,
+      artistId: album.artistId,
+      urlSlug: album.urlSlug,
+      cover: album.cover,
+      title: album.title,
+      artist: album.artist,
+      id: album.id,
+      releaseDate: album.releaseDate,
+      trackGroupId: album.trackGroupId,
+    },
+    audio: {
+      url: track.audio.url,
+      duration: track.audio.duration,
+    },
+    isPreview: track.isPreview,
+    isFeatured: track.isFeatured,
+    order: track.order,
+    headers: {
+      "mirlo-api-key": API_KEY,
+    },
+    type: audioTrackType(track.audio.url),
+  };
 }
 
 export const isTrackOwnedOrPreview = (
@@ -30,6 +68,18 @@ export const isTrackOwnedOrPreview = (
   );
   return ownsTrack || boughtTrack;
 };
+
+export function pickFeaturedTrack(
+  tracks: RNTrack[],
+  user: LoggedInUser | null | undefined,
+  album: AlbumProps,
+): RNTrack | undefined {
+  const playable = tracks
+    .filter((track) => isTrackOwnedOrPreview(track, user, album))
+    .sort((a, b) => a.order - b.order);
+
+  return playable.find((track) => track.isFeatured) ?? playable[0];
+}
 
 export const isTrackOwned = (
   track: RNTrack,

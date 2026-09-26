@@ -17,13 +17,15 @@ import {
   useFocusEffect,
 } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
-import { audioTrackType, handleExternalPurchase, isTrackOwnedOrPreview } from "@/scripts/utils";
+import {
+  handleExternalPurchase,
+  isTrackOwnedOrPreview,
+  toRNTrack,
+} from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryAlbum } from "@/queries/queries";
 import React, { useCallback, useState } from "react";
-import { API_ROOT } from "@/constants/api-root";
-import { API_KEY } from "@/constants/api-key";
 import TrackPlayer, { State } from "react-native-track-player";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import PlayPauseWrapper from "@/components/PlayPauseWrapper";
@@ -174,38 +176,7 @@ export default function AlbumTracks() {
 
       if (data && data.result.tracks) {
         data.result.tracks.forEach((track) => {
-          const newTrack: RNTrack = {
-            title: track.title,
-            artist: data.result.artist.name,
-            artwork: data.result.cover.sizes[600],
-            url: `${API_ROOT}${track.audio.url}`,
-            allowIndividualSale: track.allowIndividualSale,
-            id: track.id,
-            trackArtists: track.trackArtists,
-            queueIndex: track.order,
-            trackGroupId: data.result.trackGroupId,
-            trackGroup: {
-              userTrackGroupPurchases: data.result.userTrackGroupPurchases,
-              artistId: data.result.artistId,
-              urlSlug: data.result.urlSlug,
-              cover: data.result.cover,
-              title: data.result.title,
-              artist: data.result.artist,
-              id: data.result.id,
-              releaseDate: data.result.releaseDate,
-              trackGroupId: data.result.trackGroupId,
-            },
-            audio: {
-              url: track.audio.url,
-              duration: track.audio.duration,
-            },
-            isPreview: track.isPreview,
-            order: track.order,
-            headers: {
-              "mirlo-api-key": API_KEY,
-            },
-            type: audioTrackType(track.audio.url),
-          };
+          const newTrack: RNTrack = toRNTrack(track, data.result);
 
           allTracks.push(newTrack);
 
