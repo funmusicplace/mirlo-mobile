@@ -50,3 +50,7 @@ app-example
 /*.pdf
 /*.zip
 /handoff.md
+
+# Storybook
+storybook-static/
+*storybook.log
