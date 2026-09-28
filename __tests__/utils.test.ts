@@ -2,9 +2,12 @@ import {
   audioTrackType,
   isTrackOwned,
   isTrackOwnedOrPreview,
+  trackGroupUrl,
 } from "@/scripts/utils";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
+import { createMockAlbum } from "@/__mocks__/mockAlbum";
+import { createMockArtist } from "@/__mocks__/mockArtist";
 
 describe("audioTrackType", () => {
   test("returns 'hls' for .m3u8 URLs", () => {
@@ -77,6 +80,18 @@ describe("isTrackOwned", () => {
     const user = createMockUser();
     // @ts-expect-error - validating defensive check
     expect(isTrackOwned(null, undefined, user)).toBe(false);
+  });
+});
+
+describe("trackGroupUrl", () => {
+  test("builds the mirlo.space release URL from the artist and track group slugs", () => {
+    const trackGroup = createMockAlbum({
+      urlSlug: "my-album",
+      artist: createMockArtist({ urlSlug: "my-artist" }),
+    });
+    expect(trackGroupUrl(trackGroup)).toBe(
+      "https://mirlo.space/my-artist/release/my-album",
+    );
   });
 });
 
