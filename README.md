@@ -264,12 +264,24 @@ git checkout -b feature/your-feature-name
    - Clear description of what you changed
    - Screenshots/videos if it's a UI change
    - 
-**4. Testing Your Changes**
- 
- After your PR merges to preview:
+**4. Testing a PR on your phone**
 
-   - Changes are automatically available in our preview app builds
-   - Maintainers will test your changes before promoting to production
+Every PR to `main` gets an "Expo preview is ready!" comment with a QR code. It only opens in **Mirlo Dev**, the development build, which installs next to the store app.
+
+One-time setup:
+
+- **Android:** install the Mirlo Dev APK from the link a maintainer shares (the EAS `development` build).
+- **iOS:**
+  1. A maintainer runs `eas device:create` and sends you the link.
+  2. Open it on your iPhone in Safari and install the profile.
+  3. The maintainer rebuilds Mirlo Dev with `eas build -p ios --profile development` so it includes your device.
+  4. Install it from the build link, then turn on Settings > Privacy & Security > Developer Mode.
+
+Once that's done, scan the QR code in the PR comment with your camera.
+
+Store builds up to iOS 1.0.3 and Android 1.0.2 still claim the link, so a scan can open the store app instead. Delete the store app on iOS, or pick Mirlo Dev in Android's chooser.
+
+Mirlo Dev needs a rebuild when native code or `runtimeVersion` changes.
 
 ### What Happens Next
 
