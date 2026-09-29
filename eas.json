@@ -24,6 +24,11 @@
         "APP_VARIANT": "development"
       }
     },
+    "development-testflight": {
+      "extends": "development",
+      "distribution": "store",
+      "autoIncrement": true
+    },
     "preview": {
       "distribution": "internal",
       "channel": "preview"
@@ -43,6 +48,7 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "development-testflight": {}
   }
 }
