@@ -270,18 +270,19 @@ Every PR to `main` gets an "Expo preview is ready!" comment with a QR code. It o
 
 One-time setup:
 
-- **Android:** install the Mirlo Dev APK from the link a maintainer shares (the EAS `development` build).
-- **iOS:**
-  1. A maintainer runs `eas device:create` and sends you the link.
-  2. Open it on your iPhone in Safari and install the profile.
-  3. The maintainer rebuilds Mirlo Dev with `eas build -p ios --profile development` so it includes your device.
-  4. Install it from the build link, then turn on Settings > Privacy & Security > Developer Mode.
+- **Android:** install [the Mirlo Dev APK](https://expo.dev/artifacts/eas/LiG28XBkmUFQMDwMOcOZCeNBH0gbedrYvNs0WAIz5eQ.apk).
+- **iOS:** ask a maintainer to add you as a Mirlo Dev tester in App Store Connect. Accept the email invite, install [TestFlight](https://apps.apple.com/app/testflight/id899247664), then install Mirlo Dev from it. New Mirlo Dev builds arrive through TestFlight on their own.
 
-Once that's done, scan the QR code in the PR comment with your camera.
+Then scan the QR code in the PR comment with your camera.
 
 Store builds up to iOS 1.0.3 and Android 1.0.2 still claim the link, so a scan can open the store app instead. Delete the store app on iOS, or pick Mirlo Dev in Android's chooser.
 
-Mirlo Dev needs a rebuild when native code or `runtimeVersion` changes.
+Maintainers rebuild Mirlo Dev when native code or `runtimeVersion` changes, and at least every 90 days on iOS because TestFlight builds expire:
+
+```bash
+eas build -p ios --profile development-testflight --submit
+eas build -p android --profile development # then update the APK link above
+```
 
 ### What Happens Next
 
