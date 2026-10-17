@@ -100,6 +100,7 @@ export default function NowPlaying() {
               >
                 <Pressable
                   style={{ flexShrink: 1 }}
+                  hitSlop={12}
                   onPress={() => {
                     router.dismiss(1);
                   }}
@@ -129,6 +130,7 @@ export default function NowPlaying() {
               >
                 <Pressable
                   style={{ flexShrink: 1 }}
+                  hitSlop={12}
                   onPress={() => {
                     router.dismiss(1);
                   }}

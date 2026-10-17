@@ -436,6 +436,7 @@ export default function AlbumTracks() {
               </Pressable>
               <Pressable
                 style={{ marginTop: 30 }}
+                hitSlop={12}
                 onPress={() => setModalVisible(!modalVisible)}
               >
                 <Text style={{ color: "#666", fontSize: 16 }}>Close</Text>
