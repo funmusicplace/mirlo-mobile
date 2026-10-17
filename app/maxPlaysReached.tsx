@@ -10,10 +10,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
 import { mirloRed } from "@/constants/mirlo-red";
+import { useColors } from "@/constants/colors";
 import { useAuthContext } from "@/state/AuthContext";
 import { useState } from "react";
 
 export default function MaxPlaysReached() {
+  const colors = useColors();
   const router = useRouter();
   const { activeTrack } = usePlayer();
   const { user } = useAuthContext();
@@ -36,7 +38,9 @@ export default function MaxPlaysReached() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -44,7 +48,7 @@ export default function MaxPlaysReached() {
           justifyContent: "space-between",
           width: "100%",
           height: 60,
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.header,
         }}
       >
         <Pressable
@@ -60,7 +64,7 @@ export default function MaxPlaysReached() {
           <Ionicons
             name="chevron-down-outline"
             size={40}
-            style={{ color: "#696969" }}
+            style={{ color: colors.secondaryText }}
           ></Ionicons>
         </Pressable>
       </View>
@@ -212,7 +216,6 @@ export default function MaxPlaysReached() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start",
   },

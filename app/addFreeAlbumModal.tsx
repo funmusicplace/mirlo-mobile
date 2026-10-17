@@ -2,6 +2,7 @@ import DismissModalBar from "@/components/DismissModalBar";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mirloRed } from "@/constants/mirlo-red";
+import { useColors } from "@/constants/colors";
 import { usePlayer } from "@/state/PlayerContext";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
@@ -10,7 +11,8 @@ import { authRefresh } from "@/queries/authQueries";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function addFreeAlbumModal() {
+export default function AddFreeAlbumModal() {
+  const colors = useColors();
   const { user, refreshLoggedInUser } = useAuthContext();
   const queryClient = useQueryClient();
   const { trackGroupTitle, trackGroupId } = useLocalSearchParams();
@@ -42,7 +44,9 @@ export default function addFreeAlbumModal() {
   }, [trackGroupId]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <DismissModalBar />
       <View
         style={{
@@ -103,7 +107,6 @@ export default function addFreeAlbumModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start",
   },

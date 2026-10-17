@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import { useAuthContext } from "@/state/AuthContext";
 import { Link, router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +11,8 @@ import CollectionPurchase from "@/components/CollectionPurchase";
 import { isFavoritedTrack, isWishlisted } from "@/types/typeguards";
 import { useTranslation } from "react-i18next";
 import ErrorNotification from "@/components/ErrorNotification";
+import { useColors } from "@/constants/colors";
+import Text from "@/components/ThemedText";
 
 export default function Collections() {
   const { user } = useAuthContext();
@@ -25,6 +21,7 @@ export default function Collections() {
   const { isPending, isError, data, error } = useQuery(queryWishlist(userId));
   const { t } = useTranslation();
   const [showError, setShowError] = useState<boolean>(true);
+  const colors = useColors();
   const [list, setList] = useState<
     (
       | {
@@ -68,7 +65,7 @@ export default function Collections() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -94,8 +91,10 @@ export default function Collections() {
   // console.log(wishlist);
   // console.log(trackFavorites);
   return (
-    <View style={{ flex: 1, paddingTop: top, backgroundColor: "white" }}>
-      <View style={styles.container}>
+    <View
+      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
+    >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View
           style={{
             flexDirection: "row",
@@ -105,8 +104,8 @@ export default function Collections() {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           }}
         >
           <SearchButton />
@@ -114,7 +113,10 @@ export default function Collections() {
         </View>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={list}
           //keyExtractor={(item, index) => `${item.trackGroupId}-${index}`}
           renderItem={({ item }) => {
@@ -170,7 +172,6 @@ export default function Collections() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
@@ -180,7 +181,6 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   listContainer: {
-    backgroundColor: "#FFF",
     paddingBottom: 10,
   },
   text: {

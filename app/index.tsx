@@ -15,10 +15,12 @@ import ErrorNotification from "@/components/ErrorNotification";
 import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 20;
+import { useColors } from "@/constants/colors";
 
 export default function Index() {
   const { t } = useTranslation("translation");
   const { setIsDataLoaded } = useAppIsReadyContext();
+  const colors = useColors();
   const {
     isPending,
     isError,
@@ -64,7 +66,7 @@ export default function Index() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -91,15 +93,17 @@ export default function Index() {
       <View style={{ marginVertical: 30 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
     );
   };
   return (
-    <View style={{ flex: 1, paddingTop: top, backgroundColor: "white" }}>
-      <View style={styles.container}>
+    <View
+      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
+    >
+      <View style={[styles.container, { backgroundColor: colors.muted }]}>
         <View
           style={{
             flexDirection: "row",
@@ -109,8 +113,8 @@ export default function Index() {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           }}
         >
           <SearchButton />
@@ -118,7 +122,10 @@ export default function Index() {
         </View>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={trackGroups}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={({ item }) => (
@@ -167,12 +174,10 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "#FFF",
     zIndex: 10,
   },
   listHeader: {

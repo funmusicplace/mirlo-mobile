@@ -1,5 +1,10 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Image, StyleSheet, useColorScheme } from "react-native";
 import { Link } from "expo-router";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
+
+const logoLight = require("@/assets/images/mirlo-logo-logoOnly-light.png");
+const logoDark = require("@/assets/images/mirlo-logo-logoOnly-dark.png");
 
 export default function TrackGroupItem({
   id,
@@ -9,25 +14,27 @@ export default function TrackGroupItem({
   artistId,
   urlSlug,
 }: AlbumProps) {
+  const colors = useColors();
+  const isDark = useColorScheme() === "dark";
   return (
     <View style={styles.listItem}>
       <Image
         source={
           cover?.sizes
             ? { uri: cover?.sizes[120] }
-            : { uri: require("@/assets/images/mirlo-logo-logoOnly-light.png") }
+            : { uri: isDark ? logoDark : logoLight }
         }
-        style={styles.image}
+        style={[styles.image, { backgroundColor: colors.muted }]}
       />
       <View style={{ marginLeft: 15, width: 300 }}>
         <Text
-          style={{ color: "black", fontSize: 15, fontWeight: "bold" }}
+          style={{ color: colors.text, fontSize: 15, fontWeight: "bold" }}
           ellipsizeMode="tail"
           numberOfLines={1}
         >
           {title}
         </Text>
-        <Text style={{ color: "black", fontSize: 14 }}>{artist.name}</Text>
+        <Text style={{ color: colors.text, fontSize: 14 }}>{artist.name}</Text>
       </View>
     </View>
   );
@@ -43,6 +50,5 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 1,
-    backgroundColor: "#f0f0f0", // placeholder color while loading
   },
 });

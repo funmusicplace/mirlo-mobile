@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import * as api from "../queries/fetch/fetchWrapper";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useColors } from "@/constants/colors";
 
 type WishlistButton = {
   trackGroup: {
@@ -26,6 +27,7 @@ export default function WishlistButton({
     !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)
   );
   const router = useRouter();
+  const colors = useColors();
 
   const onPress = useCallback(async () => {
     if (!user) {
@@ -48,7 +50,7 @@ export default function WishlistButton({
     <Pressable onPress={onPress} style={style}>
       <Ionicons
         name={isInWishlist ? "heart" : "heart-outline"}
-        color={isInWishlist ? "#BE3455": "#ababab"}
+        color={isInWishlist ? colors.accent : colors.inactive}
         size={size}
       />
     </Pressable>

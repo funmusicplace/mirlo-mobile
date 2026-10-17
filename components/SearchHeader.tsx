@@ -1,12 +1,14 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Pressable, Text, View, ViewProps } from "react-native";
+import { Pressable, View, ViewProps } from "react-native";
 import SearchBar from "./searchBar";
 import { useRouter } from "expo-router";
 import { useSearch } from "@/state/SearchContext";
+import { useColors } from "@/constants/colors";
 
 export default function SearchHeader({ style }: ViewProps) {
   const router = useRouter();
   const { setSearchValue, setSearchResults } = useSearch();
+  const colors = useColors();
   return (
     <View>
       <View
@@ -19,8 +21,8 @@ export default function SearchHeader({ style }: ViewProps) {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           },
           style,
         ]}
@@ -28,7 +30,7 @@ export default function SearchHeader({ style }: ViewProps) {
         <Ionicons
           name="search-outline"
           size={30}
-          style={{ color: "#ababab" }}
+          style={{ color: colors.inactive }}
         ></Ionicons>
         <SearchBar />
         <Pressable
@@ -41,7 +43,7 @@ export default function SearchHeader({ style }: ViewProps) {
           <Ionicons
             name="close-outline"
             size={30}
-            style={{ color: "#ababab", marginHorizontal: 15 }}
+            style={{ color: colors.inactive, marginHorizontal: 15 }}
           ></Ionicons>
         </Pressable>
       </View>

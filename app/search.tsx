@@ -5,7 +5,6 @@ import {
   FlatList,
   ActivityIndicator,
   StyleSheet,
-  Text,
   ScrollView,
 } from "react-native";
 import { useSearch } from "@/state/SearchContext";
@@ -18,6 +17,8 @@ import { optionDisplay } from "@/components/SearchOptionRenderer";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useColors } from "@/constants/colors";
+import Text from "@/components/ThemedText";
 
 export default function SearchPage() {
   const {
@@ -37,6 +38,7 @@ export default function SearchPage() {
   const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useTranslation("translation");
+  const colors = useColors();
 
   const tagPills = useMemo(() => {
     const group = tags?.results.map((tag, index) => {
@@ -69,7 +71,7 @@ export default function SearchPage() {
       <View
         style={{
           flex: 1,
-          backgroundColor: "white",
+          backgroundColor: colors.background,
           paddingTop: top,
           paddingBottom: bottom,
           justifyContent: "space-between",
@@ -78,7 +80,7 @@ export default function SearchPage() {
         <SearchHeader style={{ borderBottomWidth: 1, marginBottom: 1 }} />
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -89,7 +91,7 @@ export default function SearchPage() {
     <View
       style={{
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: colors.background,
         paddingTop: top,
         paddingBottom: bottom,
       }}
@@ -113,7 +115,7 @@ export default function SearchPage() {
         <View style={{ marginVertical: 30, flex: 1 }}>
           <ActivityIndicator
             size="large"
-            color="#BE3455"
+            color={colors.accent}
             style={styles.loadSpinner}
           />
         </View>
@@ -126,7 +128,7 @@ export default function SearchPage() {
           <View
             style={{
               flex: 1,
-              backgroundColor: "white",
+              backgroundColor: colors.background,
               justifyContent: "flex-start",
               alignItems: "center",
             }}
@@ -140,7 +142,7 @@ export default function SearchPage() {
       {!isSearching && showSuggestions && searchResults.length > 0 && (
         <FlatList
           style={{
-            backgroundColor: "white",
+            backgroundColor: colors.background,
             flex: 1,
             width: "100%",
           }}
@@ -156,6 +158,7 @@ export default function SearchPage() {
 function TypeLinks() {
   const router = useRouter();
   const { t } = useTranslation("translation");
+  const colors = useColors();
   return (
     <View
       style={{
@@ -163,10 +166,18 @@ function TypeLinks() {
         paddingVertical: 15,
       }}
     >
-      <Link href={{ pathname: "/topSold" }} onPress={() => router.back()}>
+      <Link
+        href={{ pathname: "/topSold" }}
+        onPress={() => router.back()}
+        style={{ color: colors.text }}
+      >
         Popular{" >"}
       </Link>
-      <Link href={{ pathname: "/mostPlayed" }} onPress={() => router.back()}>
+      <Link
+        href={{ pathname: "/mostPlayed" }}
+        onPress={() => router.back()}
+        style={{ color: colors.text }}
+      >
         {t("mobileApp.searchScreen.topListened")}
         {" >"}
       </Link>

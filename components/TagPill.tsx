@@ -1,4 +1,5 @@
 import { Link, useRouter } from "expo-router";
+import { useColors } from "@/constants/colors";
 
 type TagPillProps = {
   key: number;
@@ -7,6 +8,7 @@ type TagPillProps = {
 
 export default function TagPill({ tagName }: TagPillProps) {
   const router = useRouter();
+  const colors = useColors();
   return (
     <Link
       href={{
@@ -14,14 +16,15 @@ export default function TagPill({ tagName }: TagPillProps) {
         params: { tag: tagName },
       }}
       style={{
-        backgroundColor: "#f0f0f0",
+        backgroundColor: colors.muted,
         borderWidth: 1,
-        borderColor: "#e3e1e1",
+        borderColor: colors.border,
         padding: 6,
         paddingHorizontal: 15,
         borderRadius: 18,
         marginRight: 5,
         marginVertical: 5,
+        color: colors.text,
       }}
       onPress={() => router.back()}
     >

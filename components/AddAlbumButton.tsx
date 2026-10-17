@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCallback } from "react";
 import { getLocales } from "expo-localization";
 import * as Linking from "expo-linking";
+import { useColors } from "@/constants/colors";
 
 type AddAlbumButtonProps = {
   trackGroup: AlbumProps;
@@ -40,6 +41,7 @@ export default function AddAlbumButton({
 }: AddAlbumButtonProps) {
   const { user } = useAuthContext();
   const router = useRouter();
+  const colors = useColors();
 
   const ids: number[] | undefined = user?.userTrackGroupPurchases?.map(
     (purchase) => purchase.trackGroupId,
@@ -68,7 +70,7 @@ export default function AddAlbumButton({
   }, [setModalVisible, user, trackGroup, router]);
   return ids && ids.includes(trackGroup.id) ? null : (
     <Pressable onPress={onPress} style={style}>
-      <Ionicons name="add-circle-outline" size={size} color="#ababab" />
+      <Ionicons name="add-circle-outline" size={size} color={colors.inactive} />
     </Pressable>
   );
 }

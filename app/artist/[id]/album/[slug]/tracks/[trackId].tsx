@@ -4,13 +4,13 @@ import { useLocalSearchParams } from "expo-router";
 import {
   View,
   Pressable,
-  Text,
   Image,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   FlatList,
-  useWindowDimensions} from "react-native";
+  useWindowDimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, useRouter } from "expo-router";
@@ -27,6 +27,8 @@ import FavoriteTrackButton from "@/components/FavoriteTrackButton";
 import ErrorNotification from "@/components/ErrorNotification";
 import ShareButton from "@/components/ShareButton";
 import MarqueeText from "@/components/MarqueeText";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -42,6 +44,7 @@ export default function TrackView() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const [showError, setShowError] = useState<boolean>(true);
+  const colors = useColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -88,7 +91,7 @@ export default function TrackView() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -126,14 +129,14 @@ export default function TrackView() {
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.header,
         }}
       >
         <Pressable onPress={() => router.dismiss()}>
           <Ionicons
             name="chevron-back-outline"
             size={40}
-            style={{ color: "#696969" }}
+            style={{ color: colors.secondaryText }}
           ></Ionicons>
         </Pressable>
         {filteredTrack && (
@@ -142,10 +145,13 @@ export default function TrackView() {
           />
         )}
       </View>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={album}
           keyExtractor={(item, index) => `${index}-${item.id || item.title}`}
           renderItem={({ item }) =>
@@ -160,7 +166,10 @@ export default function TrackView() {
             <View style={{ marginBottom: 10 }}>
               <Image
                 source={{ uri: data.result?.cover?.sizes[600] }}
-                style={[styles.image, { width: width }]}
+                style={[
+                  styles.image,
+                  { width: width, backgroundColor: colors.muted },
+                ]}
                 resizeMode="cover"
               />
               <View
@@ -185,7 +194,7 @@ export default function TrackView() {
                     <Pressable style={{ flexShrink: 1 }}>
                       <MarqueeText
                         style={{
-                          color: "#BE3455",
+                          color: colors.accent,
                           marginBottom: 5,
                           fontWeight: "bold",
                         }}
@@ -203,7 +212,7 @@ export default function TrackView() {
                         pathname: "/artist/[id]/artist-page",
                         params: { id: data.result?.artistId },
                       }}
-                      style={{ color: "#BE3455", fontWeight: "bold" }}
+                      style={{ color: colors.accent, fontWeight: "bold" }}
                     >
                       {data.result?.artist.name}
                     </Link>
@@ -257,6 +266,7 @@ function TrackPlayButton() {
     setShuffled,
   } = usePlayer();
   const [q, setQ] = useState<RNTrack[] | null>(null);
+  const colors = useColors();
 
   async function getQ() {
     const queue = (await TrackPlayer.getQueue()) as RNTrack[];
@@ -344,7 +354,7 @@ function TrackPlayButton() {
         }
         size={70}
         style={{ marginHorizontal: 5 }}
-        color={playableTracks.length ? "black" : "lightgrey"}
+        color={playableTracks.length ? colors.text : colors.inactive}
       />
     </TouchableOpacity>
   );
@@ -376,12 +386,10 @@ function formatUTCDate(utcDate: string | undefined) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "flex-start",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "white",
     paddingHorizontal: "5%",
   },
   listItem: {
@@ -400,7 +408,6 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 380,
-    backgroundColor: "#f0f0f0", // placeholder color while loading
     alignSelf: "center",
   },
   loadSpinner: {
