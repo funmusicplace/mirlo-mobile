@@ -103,6 +103,16 @@ export default function Menu() {
               <Text style={{ fontSize: 20 }}>{t("profile.yourWishlist")}</Text>
             </Pressable>
             <Pressable
+              onPress={() => {
+                router.back();
+                router.push("/about");
+              }}
+              style={styles.link}
+            >
+              <Ionicons name="information-circle-outline" size={25} />
+              <Text style={{ fontSize: 20 }}>{t("headerMenu.about")}</Text>
+            </Pressable>
+            <Pressable
               style={[
                 styles.link,
                 {
