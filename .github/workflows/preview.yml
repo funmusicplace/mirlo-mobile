@@ -40,4 +40,5 @@ jobs:
       - name: Create preview
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --branch ${{ github.event.pull_request.head.ref }}
+          # Without --environment the bundle gets no EXPO_PUBLIC_API_ROOT or API key
+          command: eas update --auto --branch ${{ github.event.pull_request.head.ref }} --environment preview
