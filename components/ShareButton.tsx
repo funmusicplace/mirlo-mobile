@@ -1,6 +1,7 @@
 import { Pressable, Share, Platform } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
+import { useColors } from "@/constants/colors";
 
 type ShareButtonProps = {
   url: string;
@@ -8,6 +9,7 @@ type ShareButtonProps = {
 
 export default function ShareButton({ url }: ShareButtonProps) {
   const { t } = useTranslation("translation");
+  const colors = useColors();
 
   const onPress = async () => {
     try {
@@ -27,7 +29,7 @@ export default function ShareButton({ url }: ShareButtonProps) {
       <Ionicons
         name={Platform.OS === "ios" ? "share-outline" : "share-social-outline"}
         size={30}
-        color="#696969"
+        color={colors.secondaryText}
       />
     </Pressable>
   );

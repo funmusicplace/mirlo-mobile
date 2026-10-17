@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  LayoutChangeEvent,
-  StyleSheet,
-  Text,
-  TextProps,
-  View,
-} from "react-native";
+import { LayoutChangeEvent, StyleSheet, TextProps, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -17,6 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import Text from "@/components/ThemedText";
 
 const PAUSE_MS = 2000;
 const SPEED_PX_PER_SEC = 30;

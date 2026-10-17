@@ -8,7 +8,7 @@ import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import { queryAlbum } from "@/queries/queries";
 import { pickFeaturedTrack, toRNTrack } from "@/scripts/utils";
-import { mirloRed } from "@/constants/mirlo-red";
+import { useColors } from "@/constants/colors";
 
 export default function PlayFeaturedButton({
   albums,
@@ -16,6 +16,7 @@ export default function PlayFeaturedButton({
   albums: AlbumProps[];
 }) {
   const { t } = useTranslation("translation");
+  const colors = useColors();
   const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const { isPlaying, activeTrack, setActiveTrack, setShuffled } = usePlayer();
@@ -77,12 +78,12 @@ export default function PlayFeaturedButton({
       }
     >
       {loading ? (
-        <ActivityIndicator color={mirloRed} />
+        <ActivityIndicator color={colors.accent} />
       ) : (
         <Ionicons
           name={showPause ? "pause-circle" : "play-circle"}
           size={44}
-          color={mirloRed}
+          color={colors.accent}
         />
       )}
     </TouchableOpacity>

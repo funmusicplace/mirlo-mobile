@@ -112,9 +112,13 @@ export default function Menu() {
                 router.back();
                 router.push("/about");
               }}
-              style={styles.link}
+              style={[styles.link, { backgroundColor: colors.muted }]}
             >
-              <Ionicons name="information-circle-outline" size={25} />
+              <Ionicons
+                name="information-circle-outline"
+                size={25}
+                color={colors.text}
+              />
               <Text style={{ fontSize: 20 }}>{t("headerMenu.about")}</Text>
             </Pressable>
             <Pressable

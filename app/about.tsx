@@ -1,9 +1,11 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 import DismissModalBar from "@/components/DismissModalBar";
 import { openInBrowser } from "@/scripts/openInBrowser";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 type AboutLinkInfo = {
   label: string;
@@ -20,16 +22,22 @@ function onLinkPress(url: string) {
 }
 
 function AboutLink({ label, url }: AboutLinkInfo) {
+  const colors = useColors();
+
   return (
-    <Pressable style={styles.link} onPress={() => onLinkPress(url)}>
+    <Pressable
+      style={[styles.link, { backgroundColor: colors.muted }]}
+      onPress={() => onLinkPress(url)}
+    >
       <Text style={{ fontSize: 20 }}>{label}</Text>
-      <Ionicons name="open-outline" size={20} />
+      <Ionicons name="open-outline" size={20} color={colors.text} />
     </Pressable>
   );
 }
 
 export default function About() {
   const { t } = useTranslation("translation");
+  const colors = useColors();
 
   const aboutLinks: AboutLinkInfo[] = [
     { label: "mirlo.space", url: "https://mirlo.space" },
@@ -49,10 +57,12 @@ export default function About() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <DismissModalBar />
       <ScrollView
-        style={styles.content}
+        style={[styles.content, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
         <Text style={styles.heading}>{t("footer.aboutHeading")}</Text>
@@ -74,11 +84,9 @@ export default function About() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
   },
   content: {
     flex: 1,
-    backgroundColor: "white",
   },
   contentContainer: {
     padding: 30,
@@ -93,7 +101,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   link: {
-    backgroundColor: "#edebeb",
     flexDirection: "row",
     width: "100%",
     padding: 10,

@@ -1,4 +1,4 @@
-import { ActivityIndicator, View, FlatList, Text } from "react-native";
+import { ActivityIndicator, View, FlatList } from "react-native";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
 import { StyleSheet } from "react-native";
@@ -13,9 +13,10 @@ import { Link } from "expo-router";
 import { API_ROOT } from "@/constants/api-root";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useTranslation } from "react-i18next";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 const PAGE_SIZE = 20;
-import { useColors } from "@/constants/colors";
 
 export default function Index() {
   const { t } = useTranslation("translation");
@@ -157,7 +158,12 @@ export default function Index() {
           }}
           onEndReachedThreshold={0.0}
           ListHeaderComponent={
-            <View style={styles.listHeader}>
+            <View
+              style={[
+                styles.listHeader,
+                { backgroundColor: colors.background },
+              ]}
+            >
               <Text style={styles.listHeaderTitle}>
                 {t("releases.recentReleases")}
               </Text>
@@ -186,12 +192,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 10,
-    backgroundColor: "white",
   },
   listHeaderTitle: {
     fontWeight: "bold",
     fontSize: 20,
-    color: "black",
   },
   text: {
     padding: 10,
