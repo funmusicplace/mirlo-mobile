@@ -161,7 +161,6 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const incrementedRef = useRef(false);
 
   const activeTrackOwnedRef = useRef<boolean>(false);
-  const activeTrackIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     ensureTrackPlayerInitialized()
@@ -176,7 +175,6 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
   // Clear cache when user changes (ownership might change with different users)
   useEffect(() => {
     activeTrackOwnedRef.current = false;
-    activeTrackIdRef.current = null;
   }, [user]);
 
   useTrackPlayerEvents(
@@ -213,7 +211,6 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Cache ownership status when track changes
         activeTrackOwnedRef.current = isTrackOwned(track);
-        activeTrackIdRef.current = track.id;
         incrementedRef.current = false; // Reset for new track
       }
       if (event.type === Event.PlaybackQueueEnded) {
@@ -242,22 +239,17 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
         // Increment play count once when reaching 50%
         if (!incrementedRef.current && progressRatio >= 0.5) {
           incrementedRef.current = true;
-          console.log(
-            track.title + ": " + (activeTrackIdRef.current || track.id),
-          );
+          console.log(track.title + ": " + track.id);
 
           // If there's not a logged-in user, we need to track plays locally. We only want to track plays if we need to -> if maxFreePlays is set.
           // This way we don't take up memory tracking plays for songs that can be played an unlimited number of times without being purchased.
           // We are tracking plays locally to determine if this device has reached maxFreePlays.
           // The api point is used to register the trackPlay in the database.
           if (!user && track.trackGroup.artist.maxFreePlays !== undefined) {
-            incrementPlayCount(activeTrackIdRef.current || track.id);
+            incrementPlayCount(track.id);
           }
           try {
-            const res = await api.get(
-              `/v1/tracks/${activeTrackIdRef.current}/trackPlay`,
-              {},
-            );
+            const res = await api.get(`/v1/tracks/${track.id}/trackPlay`, {});
             console.log(res);
           } catch (error) {
             console.error("Failed to record track play:", error);
@@ -275,7 +267,7 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
             (event.type === Event.PlaybackProgressUpdated &&
               event.position === 0)) &&
           (await reachedMaxPlays(
-            activeTrackIdRef.current || track.id,
+            track.id,
             track.trackGroup.artist.maxFreePlays,
           ))
         ) {

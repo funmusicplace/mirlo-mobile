@@ -728,7 +728,13 @@
     "socialInstagram": "{{username}} on Instagram",
     "socialMastodon": "{{username}} on Mastodon",
     "socialX": "{{username}} on X",
-    "socialBlueSky": "{{username}} on BlueSky"
+    "socialBlueSky": "{{username}} on BlueSky",
+    "aboutHeading": "Mirlo",
+    "about": "About us",
+    "contact": "Contact us",
+    "connectHeading": "Connect",
+    "terms": "Terms and conditions",
+    "privacy": "Privacy"
   },
   "notifications": {
     "notifications": "Notifications",
@@ -918,5 +924,11 @@
     "faqDescription": "Some frequently asked questions about Mirlo",
     "whatWeBuilding": "What we're building",
     "people": "The people doing it "
+  },
+  "mobileApp": {
+    "searchScreen": {
+      "searchByPopular": "Search By Popular Tags",
+      "topListened": "Most Listened To"
+    }
   }
 }

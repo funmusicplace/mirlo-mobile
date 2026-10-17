@@ -1,5 +1,4 @@
 import {
-  Text,
   View,
   StyleSheet,
   FlatList,
@@ -8,7 +7,8 @@ import {
   TouchableOpacity,
   Pressable,
   useWindowDimensions,
-  Modal} from "react-native";
+  Modal,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useLocalSearchParams,
@@ -17,13 +17,16 @@ import {
   useFocusEffect,
 } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
-import { audioTrackType, handleExternalPurchase, isTrackOwnedOrPreview } from "@/scripts/utils";
+import {
+  handleExternalPurchase,
+  isTrackOwnedOrPreview,
+  toRNTrack,
+  trackGroupUrl,
+} from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryAlbum } from "@/queries/queries";
 import React, { useCallback, useState } from "react";
-import { API_ROOT } from "@/constants/api-root";
-import { API_KEY } from "@/constants/api-key";
 import TrackPlayer, { State } from "react-native-track-player";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import PlayPauseWrapper from "@/components/PlayPauseWrapper";
@@ -33,7 +36,11 @@ import { linkifyUrls } from "@/scripts/utils";
 import WishlistButton from "@/components/WishlistButton";
 import ErrorNotification from "@/components/ErrorNotification";
 import AddAlbumButton from "@/components/AddAlbumButton";
+import ShareButton from "@/components/ShareButton";
 import { mirloRed } from "@/constants/mirlo-red";
+import MarqueeText from "@/components/MarqueeText";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -46,6 +53,7 @@ function AlbumPlayButton() {
     setActiveTrack,
     setShuffled,
   } = usePlayer();
+  const colors = useColors();
 
   const togglePlayBack = useCallback(async () => {
     try {
@@ -121,7 +129,7 @@ function AlbumPlayButton() {
         }
         size={70}
         style={{ marginHorizontal: 5 }}
-        color={playableTracks.length ? "black" : "lightgrey"}
+        color={playableTracks.length ? colors.text : colors.inactive}
       />
     </TouchableOpacity>
   );
@@ -165,6 +173,7 @@ export default function AlbumTracks() {
   const { width } = useWindowDimensions();
   const [showError, setShowError] = useState<boolean>(true);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const colors = useColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -174,38 +183,7 @@ export default function AlbumTracks() {
 
       if (data && data.result.tracks) {
         data.result.tracks.forEach((track) => {
-          const newTrack: RNTrack = {
-            title: track.title,
-            artist: data.result.artist.name,
-            artwork: data.result.cover.sizes[600],
-            url: `${API_ROOT}${track.audio.url}`,
-            allowIndividualSale: track.allowIndividualSale,
-            id: track.id,
-            trackArtists: track.trackArtists,
-            queueIndex: track.order,
-            trackGroupId: data.result.trackGroupId,
-            trackGroup: {
-              userTrackGroupPurchases: data.result.userTrackGroupPurchases,
-              artistId: data.result.artistId,
-              urlSlug: data.result.urlSlug,
-              cover: data.result.cover,
-              title: data.result.title,
-              artist: data.result.artist,
-              id: data.result.id,
-              releaseDate: data.result.releaseDate,
-              trackGroupId: data.result.trackGroupId,
-            },
-            audio: {
-              url: track.audio.url,
-              duration: track.audio.duration,
-            },
-            isPreview: track.isPreview,
-            order: track.order,
-            headers: {
-              "mirlo-api-key": API_KEY,
-            },
-            type: audioTrackType(track.audio.url),
-          };
+          const newTrack: RNTrack = toRNTrack(track, data.result);
 
           allTracks.push(newTrack);
 
@@ -226,7 +204,7 @@ export default function AlbumTracks() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -257,14 +235,15 @@ export default function AlbumTracks() {
           params: { tag: tagName },
         }}
         style={{
-          backgroundColor: "#f0f0f0",
+          backgroundColor: colors.muted,
           borderWidth: 1,
-          borderColor: "#e3e1e1",
+          borderColor: colors.border,
           padding: 10,
           paddingHorizontal: 15,
           borderRadius: 18,
           marginRight: 10,
           marginVertical: 5,
+          color: colors.text,
         }}
       >
         {tagName}
@@ -278,25 +257,29 @@ export default function AlbumTracks() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.header,
         }}
       >
         <Pressable onPress={() => router.dismiss()}>
           <Ionicons
             name="chevron-back-outline"
             size={40}
-            style={{ color: "#696969" }}
+            style={{ color: colors.secondaryText }}
           ></Ionicons>
         </Pressable>
+        <ShareButton url={trackGroupUrl(data.result)} />
       </View>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={album}
           keyExtractor={(item, index) => `${index}-${item.id || item.title}`}
           renderItem={({ item }) =>
@@ -315,6 +298,7 @@ export default function AlbumTracks() {
                 style={[
                   styles.image,
                   { width: width, height: width < 380 ? width * 0.9 : width },
+                  { backgroundColor: colors.muted },
                 ]}
                 resizeMode={width < 380 ? "stretch" : "cover"}
               />
@@ -327,17 +311,15 @@ export default function AlbumTracks() {
                 }}
               >
                 <View style={{ maxWidth: "55%", marginRight: 10 }}>
-                  <Text
+                  <MarqueeText
                     style={{
-                      color: "black",
+                      color: colors.text,
                       marginBottom: 5,
                       fontWeight: "bold",
                     }}
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
                   >
                     {selectedAlbum?.title}
-                  </Text>
+                  </MarqueeText>
                   <Text>
                     {/* const result = str.replace(/<[^>]*>/g, '').trim(); */}
                     {t("trackGroupDetails.byArtist")
@@ -348,7 +330,7 @@ export default function AlbumTracks() {
                         pathname: "/artist/[id]/artist-page",
                         params: { id: selectedAlbum?.artistId },
                       }}
-                      style={{ color: "#BE3455", fontWeight: "bold" }}
+                      style={{ color: colors.accent, fontWeight: "bold" }}
                     >
                       {selectedAlbum?.artist.name}
                     </Link>
@@ -393,7 +375,12 @@ export default function AlbumTracks() {
 
               {selectedAlbum?.about ? (
                 <View style={{ marginBottom: 20 }}>
-                  <Markdown>
+                  <Markdown
+                    style={{
+                      body: { color: colors.text },
+                      link: { color: colors.accent },
+                    }}
+                  >
                     {linkifyUrls(
                       selectedAlbum.about.replace(/([^\n])\n([^\n])/g, "$1 $2"),
                     )}
@@ -418,7 +405,9 @@ export default function AlbumTracks() {
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <View style={styles.modalView}>
+            <View
+              style={[styles.modalView, { backgroundColor: colors.background }]}
+            >
               <Pressable
                 style={{
                   flexDirection: "row",
@@ -436,9 +425,12 @@ export default function AlbumTracks() {
               </Pressable>
               <Pressable
                 style={{ marginTop: 30 }}
+                hitSlop={12}
                 onPress={() => setModalVisible(!modalVisible)}
               >
-                <Text style={{ color: "#666", fontSize: 16 }}>Close</Text>
+                <Text style={{ color: colors.secondaryText, fontSize: 16 }}>
+                  Close
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -451,12 +443,10 @@ export default function AlbumTracks() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "flex-start",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "white",
     paddingHorizontal: "5%",
     gap: 3,
   },
@@ -477,7 +467,6 @@ const styles = StyleSheet.create({
   image: {
     height: 380,
     marginBottom: 10,
-    backgroundColor: "#f0f0f0", // placeholder color while loading
     alignSelf: "center",
   },
   loadSpinner: {
@@ -485,7 +474,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
     paddingBottom: 20,

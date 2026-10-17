@@ -4,6 +4,7 @@ import SearchButton from "@/components/SearchButton";
 import { StyleSheet } from "react-native";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import TrackGroupItem from "@/components/TrackGroupItem";
+import PlayFeaturedButton from "@/components/PlayFeaturedButton";
 import { useEffect, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,9 +12,16 @@ import * as api from "../queries/fetch/fetchWrapper";
 import { Link } from "expo-router";
 import { API_ROOT } from "@/constants/api-root";
 import ErrorNotification from "@/components/ErrorNotification";
+import { useTranslation } from "react-i18next";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
+
+const PAGE_SIZE = 20;
 
 export default function Index() {
+  const { t } = useTranslation("translation");
   const { setIsDataLoaded } = useAppIsReadyContext();
+  const colors = useColors();
   const {
     isPending,
     isError,
@@ -28,7 +36,7 @@ export default function Index() {
     queryFn: ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
       params.append("skip", String(pageParam));
-      params.append("take", String(20));
+      params.append("take", String(PAGE_SIZE));
       params.append("distinctArtists", "true");
       params.append("isReleased", "released");
 
@@ -36,7 +44,9 @@ export default function Index() {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.results.length === 20 ? allPages.length * 20 : null;
+      return lastPage.results.length === PAGE_SIZE
+        ? allPages.length * PAGE_SIZE
+        : null;
     },
   });
   const { top } = useSafeAreaInsets();
@@ -57,7 +67,7 @@ export default function Index() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -84,15 +94,17 @@ export default function Index() {
       <View style={{ marginVertical: 30 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
     );
   };
   return (
-    <View style={{ flex: 1, paddingTop: top, backgroundColor: "white" }}>
-      <View style={styles.container}>
+    <View
+      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
+    >
+      <View style={[styles.container, { backgroundColor: colors.muted }]}>
         <View
           style={{
             flexDirection: "row",
@@ -102,8 +114,8 @@ export default function Index() {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           }}
         >
           <SearchButton />
@@ -111,7 +123,10 @@ export default function Index() {
         </View>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={trackGroups}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={({ item }) => (
@@ -142,6 +157,19 @@ export default function Index() {
             fetchNextPage();
           }}
           onEndReachedThreshold={0.0}
+          ListHeaderComponent={
+            <View
+              style={[
+                styles.listHeader,
+                { backgroundColor: colors.background },
+              ]}
+            >
+              <Text style={styles.listHeaderTitle}>
+                {t("releases.recentReleases")}
+              </Text>
+              <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
+            </View>
+          }
           ListFooterComponent={renderLoadingFooter}
         ></FlatList>
       </View>
@@ -152,13 +180,22 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "#FFF",
     zIndex: 10,
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  listHeaderTitle: {
+    fontWeight: "bold",
+    fontSize: 20,
   },
   text: {
     padding: 10,

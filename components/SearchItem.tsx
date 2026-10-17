@@ -1,8 +1,19 @@
-import { View, Pressable, Text, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Pressable,
+  Image,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useSearch } from "@/state/SearchContext";
 import { toUpper } from "lodash";
 import { useTranslation } from "react-i18next";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
+
+const logoLight = require("@/assets/images/mirlo-logo-logoOnly-light.png");
+const logoDark = require("@/assets/images/mirlo-logo-logoOnly-dark.png");
 
 type Result = {
   result: {
@@ -36,6 +47,8 @@ export default function SearchItem({ result, index }: Result) {
   const { t } = useTranslation();
   const router = useRouter();
   const { setSearchResults, setShowSuggestions } = useSearch();
+  const colors = useColors();
+  const isDark = useColorScheme() === "dark";
   return (
     <View style={{ marginVertical: 5 }}>
       <Pressable
@@ -53,9 +66,11 @@ export default function SearchItem({ result, index }: Result) {
                 ? { uri: result.trackGroupCover.sizes[120] }
                 : result.avatar?.sizes?.[120]
                   ? { uri: result.avatar.sizes[120] }
-                  : require("@/assets/images/mirlo-logo-logoOnly-light.png")
+                  : isDark
+                    ? logoDark
+                    : logoLight
             }
-            style={styles.image}
+            style={[styles.image, { backgroundColor: colors.muted }]}
           />
           <View style={{ marginLeft: 15, width: 300, gap: 2 }}>
             <Text
@@ -69,7 +84,7 @@ export default function SearchItem({ result, index }: Result) {
               <Text
                 ellipsizeMode="tail"
                 numberOfLines={1}
-                style={{ fontSize: 15, color: "grey" }}
+                style={{ fontSize: 15, color: colors.secondaryText }}
               >
                 {t("profile.albumLink")
                   .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
@@ -77,7 +92,7 @@ export default function SearchItem({ result, index }: Result) {
                 {result.artistName.trim()}
               </Text>
             )}
-            <Text style={{ fontSize: 12, color: "grey" }}>
+            <Text style={{ fontSize: 12, color: colors.secondaryText }}>
               {toUpper(result.category)}
             </Text>
           </View>
@@ -113,6 +128,5 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 1,
-    backgroundColor: "white", // placeholder color while loading
   },
 });

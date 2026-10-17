@@ -13,8 +13,10 @@ import { useAuthContext } from "@/state/AuthContext";
 import { usePlayer } from "@/state/PlayerContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { mirloRed } from "@/constants/mirlo-red";
+import { useColors } from "@/constants/colors";
 
 export default function EmailPurchaseInfoModal() {
+  const colors = useColors();
   const { trackGroupId, artist, trackGroupTitle } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthContext();
@@ -37,7 +39,9 @@ export default function EmailPurchaseInfoModal() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <DismissModalBar />
 
       <View
@@ -142,7 +146,6 @@ export default function EmailPurchaseInfoModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start",
   },

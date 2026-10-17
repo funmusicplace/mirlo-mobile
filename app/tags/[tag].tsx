@@ -1,7 +1,6 @@
 import {
   View,
   StyleSheet,
-  Text,
   ActivityIndicator,
   FlatList,
   Pressable,
@@ -16,10 +15,13 @@ import TrackGroupItem from "@/components/TrackGroupItem";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useState } from "react";
+import { useColors } from "@/constants/colors";
+import Text from "@/components/ThemedText";
 export default function TagsView() {
   const { tag } = useLocalSearchParams();
 
   const [showError, setShowError] = useState<boolean>(true);
+  const colors = useColors();
 
   const {
     isPending,
@@ -52,7 +54,7 @@ export default function TagsView() {
       <View style={{ flex: 1 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -79,7 +81,7 @@ export default function TagsView() {
       <View style={{ marginVertical: 30 }}>
         <ActivityIndicator
           size="large"
-          color="#BE3455"
+          color={colors.accent}
           style={styles.loadSpinner}
         />
       </View>
@@ -87,8 +89,10 @@ export default function TagsView() {
   };
 
   return (
-    <View style={{ flex: 1, paddingTop: top, backgroundColor: "white" }}>
-      <View style={styles.container}>
+    <View
+      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
+    >
+      <View style={[styles.container, { backgroundColor: colors.muted }]}>
         <View
           style={{
             flexDirection: "row",
@@ -98,8 +102,8 @@ export default function TagsView() {
             width: "100%",
             height: 60,
             borderBottomWidth: 3,
-            borderBottomColor: "#e8e9eb",
-            backgroundColor: "white",
+            borderBottomColor: colors.border,
+            backgroundColor: colors.background,
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -107,7 +111,7 @@ export default function TagsView() {
               <Ionicons
                 name="chevron-back-outline"
                 size={40}
-                style={{ color: "#696969" }}
+                style={{ color: colors.secondaryText }}
               ></Ionicons>
             </Pressable>
             <Text style={{ fontSize: 15 }}>Tag: {tag}</Text>
@@ -116,7 +120,10 @@ export default function TagsView() {
         </View>
         <FlatList
           style={{ width: "100%" }}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { backgroundColor: colors.background },
+          ]}
           data={trackGroups}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={({ item }) => (
@@ -152,12 +159,10 @@ export default function TagsView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
   listContainer: {
-    backgroundColor: "#FFF",
     zIndex: 10,
   },
   text: {

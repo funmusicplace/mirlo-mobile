@@ -21,7 +21,7 @@ import { Pressable } from "react-native";
 import { Link, router, usePathname } from "expo-router";
 import { isTrackOwned } from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
-import { mirloRed } from "@/constants/mirlo-red";
+import { useColors } from "@/constants/colors";
 
 export default function Footer({ style }: ViewProps) {
   const progress = useProgress();
@@ -34,10 +34,12 @@ export default function Footer({ style }: ViewProps) {
   const { user } = useAuthContext();
   const { width, height } = useWindowDimensions();
   const size = width < 380 ? 30 : 40;
+  const colors = useColors();
   return (
     <View
       style={[
         styles.footer,
+        { backgroundColor: colors.background },
         { paddingBottom: bottom, height: 80 + bottom, position: "relative" },
         style,
       ]}
@@ -48,8 +50,8 @@ export default function Footer({ style }: ViewProps) {
         minimumValue={0}
         maximumValue={progress.duration}
         thumbTintColor="transparent"
-        minimumTrackTintColor="#BE3455"
-        maximumTrackTintColor="#d6d6d6"
+        minimumTrackTintColor={colors.accent}
+        maximumTrackTintColor={colors.border}
         onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
       />
       <View
@@ -95,7 +97,7 @@ export default function Footer({ style }: ViewProps) {
               accessibilityRole="button"
               accessibilityHint="Navigates to recent releases"
               size={size}
-              color={pathname === "/" ? "#BE3455" : "#ababab"}
+              color={pathname === "/" ? colors.accent : colors.inactive}
             ></Ionicons>
           </Pressable>
 
@@ -128,9 +130,10 @@ export default function Footer({ style }: ViewProps) {
               //name="heart-outline"
               name={pathname === "/collections" ? "library" : "library-outline"}
               size={size}
-              color={pathname === "/collections" ? "#BE3455" : "#ababab"}
+              color={
+                pathname === "/collections" ? colors.accent : colors.inactive
+              }
               style={{ marginHorizontal: 15 }}
-              // #BE3455
             ></Ionicons>
           </Pressable>
 
@@ -163,8 +166,7 @@ export default function Footer({ style }: ViewProps) {
               //name="heart-outline"
               name={pathname === "/wishlist" ? "heart" : "heart-outline"}
               size={size}
-              color={pathname === "/wishlist" ? "#BE3455" : "#ababab"}
-              // #BE3455
+              color={pathname === "/wishlist" ? colors.accent : colors.inactive}
             ></Ionicons>
           </Pressable>
         </View>
@@ -205,6 +207,7 @@ export default function Footer({ style }: ViewProps) {
 
 function FooterPlayButton() {
   const { playbackState, isPlaying } = usePlayer();
+  const colors = useColors();
   const playIcon = <Ionicons name="play" size={40} />;
   const pauseIcon = <Ionicons name="pause" size={40} />;
 
@@ -242,6 +245,7 @@ function FooterPlayButton() {
             : "play"
         }
         size={40}
+        color={colors.text}
       />
     </TouchableOpacity>
   );
@@ -250,7 +254,6 @@ function FooterPlayButton() {
 const styles = StyleSheet.create({
   footer: {
     width: "100%",
-    backgroundColor: "white",
     // borderWidth: 1,
     // borderColor: "black",
   },
