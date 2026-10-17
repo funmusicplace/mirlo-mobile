@@ -17,7 +17,12 @@ import {
   useFocusEffect,
 } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
-import { audioTrackType, handleExternalPurchase, isTrackOwnedOrPreview } from "@/scripts/utils";
+import {
+  audioTrackType,
+  handleExternalPurchase,
+  isTrackOwnedOrPreview,
+  trackGroupUrl,
+} from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryAlbum } from "@/queries/queries";
@@ -33,6 +38,7 @@ import { linkifyUrls } from "@/scripts/utils";
 import WishlistButton from "@/components/WishlistButton";
 import ErrorNotification from "@/components/ErrorNotification";
 import AddAlbumButton from "@/components/AddAlbumButton";
+import ShareButton from "@/components/ShareButton";
 import { mirloRed } from "@/constants/mirlo-red";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
@@ -278,7 +284,7 @@ export default function AlbumTracks() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
@@ -292,6 +298,7 @@ export default function AlbumTracks() {
             style={{ color: "#696969" }}
           ></Ionicons>
         </Pressable>
+        <ShareButton url={trackGroupUrl(data.result)} />
       </View>
       <View style={styles.container}>
         <FlatList

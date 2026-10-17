@@ -67,7 +67,9 @@ export const linkifyUrls = (text: string) => {
   });
 };
 
+export const trackGroupUrl = (trackGroup: AlbumProps) =>
+  `https://mirlo.space/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`;
+
 export const handleExternalPurchase = (trackGroup: AlbumProps) => {
-  const purchaseUrl = `https://mirlo.space/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`;
-  openInBrowser(purchaseUrl);
+  openInBrowser(trackGroupUrl(trackGroup));
 };

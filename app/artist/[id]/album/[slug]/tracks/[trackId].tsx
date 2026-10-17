@@ -19,12 +19,13 @@ import TrackPlayer, { PlaybackState, State } from "react-native-track-player";
 import { usePlayer } from "@/state/PlayerContext";
 import { API_KEY } from "@/constants/api-key";
 import { API_ROOT } from "@/constants/api-root";
-import { audioTrackType } from "@/scripts/utils";
+import { audioTrackType, trackGroupUrl } from "@/scripts/utils";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import FavoriteTrackButton from "@/components/FavoriteTrackButton";
 import ErrorNotification from "@/components/ErrorNotification";
+import ShareButton from "@/components/ShareButton";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -120,7 +121,7 @@ export default function TrackView() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
           paddingHorizontal: 10,
           width: "100%",
           height: 60,
@@ -134,6 +135,11 @@ export default function TrackView() {
             style={{ color: "#696969" }}
           ></Ionicons>
         </Pressable>
+        {filteredTrack && (
+          <ShareButton
+            url={`${trackGroupUrl(data.result)}/tracks/${filteredTrack.id}`}
+          />
+        )}
       </View>
       <View style={styles.container}>
         <FlatList
