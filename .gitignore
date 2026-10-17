@@ -54,3 +54,9 @@ app-example
 # Storybook
 storybook-static/
 *storybook.log
+
+# Play service account key for eas submit, keep local
+google-service-account.json
+
+# Playwright MCP page snapshots
+.playwright-mcp/
