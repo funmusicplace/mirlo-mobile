@@ -38,6 +38,7 @@ import ErrorNotification from "@/components/ErrorNotification";
 import AddAlbumButton from "@/components/AddAlbumButton";
 import ShareButton from "@/components/ShareButton";
 import { mirloRed } from "@/constants/mirlo-red";
+import MarqueeText from "@/components/MarqueeText";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -301,17 +302,15 @@ export default function AlbumTracks() {
                 }}
               >
                 <View style={{ maxWidth: "55%", marginRight: 10 }}>
-                  <Text
+                  <MarqueeText
                     style={{
                       color: "black",
                       marginBottom: 5,
                       fontWeight: "bold",
                     }}
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
                   >
                     {selectedAlbum?.title}
-                  </Text>
+                  </MarqueeText>
                   <Text>
                     {/* const result = str.replace(/<[^>]*>/g, '').trim(); */}
                     {t("trackGroupDetails.byArtist")
