@@ -16,6 +16,7 @@ import { queryMostPlayed } from "@/queries/queries";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Index() {
   const { isPending, isError, data, error } = useQuery(queryMostPlayed({}));
@@ -23,6 +24,7 @@ export default function Index() {
   const trackGroups = data?.results;
   const router = useRouter();
   const [showError, setShowError] = useState<boolean>(true);
+  const { t } = useTranslation("translation");
 
   if (isPending) {
     return (
@@ -73,7 +75,7 @@ export default function Index() {
             ></Ionicons>
           </Pressable>
           <Text style={{ fontSize: 20, flex: 1, textAlign: "center" }}>
-            Most Listened To
+            {t("mobileApp.searchScreen.topListened")}
           </Text>
           <MenuButton style={{ marginHorizontal: 10 }} />
         </View>
