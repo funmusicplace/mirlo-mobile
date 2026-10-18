@@ -78,6 +78,7 @@ export default function EmailVerificationModal() {
       } catch (err) {
         console.error("issue verifying email");
         setEmailError(err as Error);
+        setShowError(true);
       } finally {
         setIsLoading(false);
       }
@@ -106,6 +107,7 @@ export default function EmailVerificationModal() {
         console.log(err);
         console.error("issue verifying code", err);
         setCodeError(err as Error);
+        setShowError(true);
       } finally {
         setIsLoading(false);
       }

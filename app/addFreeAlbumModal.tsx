@@ -42,8 +42,9 @@ export default function AddFreeAlbumModal() {
       console.log(response);
     } catch (err) {
       console.error("Issue purchasing free album", err);
+      setAdding(false);
     }
-  }, [trackGroupId]);
+  }, [trackGroupId, user, queryClient, refreshLoggedInUser]);
 
   return (
     <SafeAreaView
