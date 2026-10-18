@@ -54,6 +54,8 @@ export default function LoginForm() {
   };
 
   const onSubmit = async (data: LoginInputs) => {
+    // The keyboard's Go key bypasses the button's loading guard
+    if (isPending) return;
     login(data, {
       onSuccess() {
         console.log("logged in successfully");

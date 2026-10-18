@@ -58,7 +58,13 @@ export const TrackItem = ({
         onPress={onPress}
         disabled={!canPlayTrack}
         accessibilityRole="button"
-        accessibilityLabel={track.title}
+        accessibilityLabel={[
+          `${track.order}. ${track.title}`,
+          contributors,
+          track.audio?.duration ? formatTime(track.audio.duration) : "",
+        ]
+          .filter(Boolean)
+          .join(", ")}
         accessibilityState={{ selected: active, disabled: !canPlayTrack }}
         android_ripple={{ color: colors.tintX }}
         style={({ pressed }) => [

@@ -27,7 +27,7 @@ describe("<TrackItem />", () => {
       />,
     );
 
-    fireEvent.press(screen.getByRole("button", { name: "Mover" }));
+    fireEvent.press(screen.getByRole("button", { name: /Mover/ }));
 
     expect(onPress).toHaveBeenCalledTimes(1);
     expect(screen.getByText("2")).toBeTruthy();
