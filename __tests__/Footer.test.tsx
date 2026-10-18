@@ -79,10 +79,6 @@ jest.mock("react-native/Libraries/Utilities/useWindowDimensions", () => ({
 
 const flat = (el: { props: { style?: unknown } }) =>
   StyleSheet.flatten(el.props.style as never) as Record<string, unknown>;
-const rootStyle = () =>
-  StyleSheet.flatten(
-    (screen.toJSON() as { props: { style: unknown } }).props.style as never,
-  ) as Record<string, unknown>;
 // RNTL skips every event while onStartShouldSetResponder is false, so lay out directly
 const layout = (el: { props: { onLayout: (e: unknown) => void } }) =>
   act(() => el.props.onLayout({ nativeEvent: { layout: { width: 400 } } }));
