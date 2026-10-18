@@ -1,14 +1,15 @@
+import { useRef, useState } from "react";
 import {
-  View,
-  StyleSheet,
+  GestureResponderEvent,
   Image,
-  TouchableOpacity,
-  ViewProps,
-  Text,
-  useWindowDimensions,
   Platform,
+  Pressable,
+  PressableProps,
+  StyleSheet,
+  View,
+  ViewProps,
+  useWindowDimensions,
 } from "react-native";
-import Slider from "@react-native-community/slider";
 import TrackPlayer, {
   PlaybackState,
   State,
@@ -16,200 +17,255 @@ import TrackPlayer, {
 } from "react-native-track-player";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { usePlayer } from "@/state/PlayerContext";
-import { Pressable } from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link, router, usePathname } from "expo-router";
-import { isTrackOwned } from "@/scripts/utils";
+import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import { useColors } from "@/constants/colors";
+import { skipTrack } from "@/scripts/trackPlayUtils";
+
+const HIT_SIZE = 44;
+const SEEK_STEP_SECONDS = 10;
+const ART_MIN_WINDOW_WIDTH = 360;
+
+const NAV_ITEMS = [
+  {
+    route: "/",
+    icon: "home",
+    label: "Recent Releases",
+    hint: "Navigates to recent releases",
+  },
+  {
+    route: "/collections",
+    icon: "library",
+    label: "Your Collection",
+    hint: "Navigates to your collection page",
+  },
+  {
+    route: "/wishlist",
+    icon: "heart",
+    label: "Your Wishlist",
+    hint: "Navigates to your wishlist page",
+  },
+] as const;
 
 export default function Footer({ style }: ViewProps) {
-  const progress = useProgress();
-  const { bottom } = useSafeAreaInsets();
-  const { playableTracks, activeTrack } = usePlayer() as {
-    activeTrack: RNTrack | undefined;
-    playableTracks: RNTrack[];
-  };
+  const insets = useSafeAreaInsets();
+  const { activeTrack } = usePlayer();
   const pathname = usePathname();
   const { user } = useAuthContext();
-  const { width, height } = useWindowDimensions();
-  const size = width < 380 ? 30 : 40;
+  const { width } = useWindowDimensions();
   const colors = useColors();
+
+  function navigate(route: (typeof NAV_ITEMS)[number]["route"]) {
+    if (route === "/") {
+      router.dismissTo("/");
+    } else if (!user) {
+      router.push({ pathname: "/emailVerificationModal" });
+    } else if (pathname === "/") {
+      router.navigate(route);
+    } else if (pathname !== route) {
+      router.dismissTo(route);
+    }
+  }
+
   return (
     <View
       style={[
         styles.footer,
-        { backgroundColor: colors.background },
-        { paddingBottom: bottom, height: 80 + bottom, position: "relative" },
+        {
+          backgroundColor: colors.playerBackground,
+          borderTopColor: colors.playerShadow,
+          paddingBottom: insets.bottom,
+        },
         style,
       ]}
     >
-      <Slider
-        style={styles.progressBar}
-        value={progress.position}
-        minimumValue={0}
-        maximumValue={progress.duration}
-        thumbTintColor="transparent"
-        minimumTrackTintColor={colors.accent}
-        maximumTrackTintColor={colors.border}
-        onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
-      />
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          height: "100%",
-          // On Android, the bottom safe-area inset can be unexpectedly large
-          // on some skins/emulators, which used to leave empty white space
-          // between centered icons and the gesture bar. Anchoring the icon
-          // rows to the bottom of the content area keeps them flush above
-          // the gesture bar regardless of inset size. iOS keeps top anchoring
-          // because its layout is hand-tuned with the negative marginTop
-          // below.
-          alignItems: Platform.OS === "ios" ? "flex-start" : "flex-end",
-          justifyContent: "space-between",
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            // On Android we want the icon row to size to its content so it
-            // can sit at the bottom of the parent (alignItems:flex-end above).
-            // On iOS, full-height + negative marginTop is the original layout.
-            height: Platform.OS === "ios" ? "100%" : undefined,
-            alignItems: "center",
-            marginLeft: 20,
-            // Hand-calibrated lift for iOS home-indicator geometry; on Android
-            // we already anchor to the bottom via the parent's alignItems, so
-            // no lift is needed.
-            marginTop: Platform.OS === "ios" ? -20 : 0,
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              router.dismissTo("/");
-            }}
-            style={{ justifyContent: "center", alignItems: "center" }}
-          >
-            <Ionicons
-              name={pathname === "/" ? "home" : "home-outline"}
-              accessibilityLabel="Recent Releases"
-              accessibilityRole="button"
-              accessibilityHint="Navigates to recent releases"
-              size={size}
-              color={pathname === "/" ? colors.accent : colors.inactive}
-            ></Ionicons>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              if (!user) {
-                router.push({
-                  pathname: "/emailVerificationModal",
-                });
-              } else {
-                if (pathname === "/") {
-                  router.navigate("/collections");
-                } else if (pathname === "/collections") {
-                  return;
-                } else {
-                  router.dismissTo("/collections");
-                }
-              }
-            }}
-            accessibilityLabel="Your Collection"
-            accessibilityRole="button"
-            accessibilityHint="Navigates to your collection page"
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginLeft: 10,
-            }}
-          >
-            <Ionicons
-              //name="heart-outline"
-              name={pathname === "/collections" ? "library" : "library-outline"}
-              size={size}
-              color={
-                pathname === "/collections" ? colors.accent : colors.inactive
-              }
-              style={{ marginHorizontal: 15 }}
-            ></Ionicons>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              if (!user) {
-                router.push({
-                  pathname: "/emailVerificationModal",
-                });
-              } else {
-                if (pathname === "/") {
-                  router.navigate("/wishlist");
-                } else if (pathname === "/wishlist") {
-                  return;
-                } else {
-                  router.dismissTo("/wishlist");
-                }
-              }
-            }}
-            accessibilityLabel="Your Wishlist"
-            accessibilityRole="button"
-            accessibilityHint="Navigates to your wishlist page"
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginLeft: 10,
-            }}
-          >
-            <Ionicons
-              //name="heart-outline"
-              name={pathname === "/wishlist" ? "heart" : "heart-outline"}
-              size={size}
-              color={pathname === "/wishlist" ? colors.accent : colors.inactive}
-            ></Ionicons>
-          </Pressable>
+      {activeTrack && <ProgressBar />}
+      <View style={styles.row}>
+        <View style={styles.group}>
+          {NAV_ITEMS.map(({ route, icon, label, hint }) => {
+            const active = pathname === route;
+            return (
+              <FooterButton
+                key={route}
+                onPress={() => navigate(route)}
+                accessibilityLabel={label}
+                accessibilityHint={hint}
+                accessibilityState={{ selected: active }}
+              >
+                <Ionicons
+                  name={active ? icon : `${icon}-outline`}
+                  size={26}
+                  color={active ? colors.accent : colors.inactive}
+                />
+              </FooterButton>
+            );
+          })}
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            // Match the left icons' Android sizing: auto-height so the row
-            // can sit at flex-end of the parent.
-            height: Platform.OS === "ios" ? "100%" : undefined,
-            alignItems: "center",
-            marginTop: Platform.OS === "ios" ? -20 : 0,
-          }}
-        >
-          {activeTrack && <FooterPlayButton />}
-          <Link
-            href={{
-              pathname: "/now-playing",
-              params: {
-                id: activeTrack?.trackGroup.artistId,
-                slug: activeTrack?.trackGroup.urlSlug,
-              },
-            }}
-            disabled={activeTrack ? false : true}
-          >
-          {activeTrack && activeTrack.artwork ?
-<Image
-              source={
-                  { uri: activeTrack.artwork }
-              }
-              style={styles.image}
-            /> : null}
-          </Link>
-        </View>
+        {activeTrack && (
+          <View style={styles.group}>
+            {width >= ART_MIN_WINDOW_WIDTH && activeTrack.artwork ? (
+              <Link
+                href={{
+                  pathname: "/now-playing",
+                  params: {
+                    id: activeTrack.trackGroup.artistId,
+                    slug: activeTrack.trackGroup.urlSlug,
+                  },
+                }}
+                asChild
+              >
+                <FooterButton
+                  // Link asChild injects role="link"
+                  role="button"
+                  accessibilityLabel="Now playing"
+                >
+                  <Image
+                    source={{ uri: activeTrack.artwork }}
+                    resizeMode="cover"
+                    style={styles.art}
+                  />
+                </FooterButton>
+              </Link>
+            ) : null}
+            <SkipButton direction="previous" />
+            <FooterPlayButton />
+            <SkipButton direction="next" />
+          </View>
+        )}
       </View>
     </View>
+  );
+}
+
+function FooterButton(props: Omit<PressableProps, "style">) {
+  const colors = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      android_ripple={{
+        color: colors.border,
+        borderless: true,
+        radius: HIT_SIZE / 2,
+      }}
+      {...props}
+      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+    />
+  );
+}
+
+function ProgressBar() {
+  const { position, duration } = useProgress();
+  const colors = useColors();
+  const width = useRef(0);
+  const originX = useRef(0);
+  // releasedAt is the polled position when the finger lifted, null while dragging
+  const [scrub, setScrub] = useState<{
+    seconds: number;
+    releasedAt: number | null;
+  } | null>(null);
+
+  // Hold the seek target until useProgress polls a new position
+  if (scrub && scrub.releasedAt !== null && scrub.releasedAt !== position) {
+    setScrub(null);
+  }
+
+  const shown = scrub ? scrub.seconds : position;
+  const fraction = duration > 0 ? Math.min(shown / duration, 1) : 0;
+  const max = Math.round(duration);
+
+  // locationX shifts with the view under the finger, pageX does not
+  const secondsAt = (e: GestureResponderEvent) =>
+    Math.min(
+      Math.max((e.nativeEvent.pageX - originX.current) / width.current, 0),
+      1,
+    ) * duration;
+
+  function seek(seconds: number) {
+    setScrub({ seconds, releasedAt: position });
+    TrackPlayer.seekTo(seconds).catch((error) => {
+      setScrub(null);
+      console.error("issue seeking", error);
+    });
+  }
+
+  return (
+    <View
+      style={styles.seekArea}
+      onLayout={(e) => {
+        width.current = e.nativeEvent.layout.width;
+      }}
+      onStartShouldSetResponder={() => duration > 0 && width.current > 0}
+      onResponderTerminationRequest={() => false}
+      onResponderGrant={(e) => {
+        originX.current = e.nativeEvent.pageX - e.nativeEvent.locationX;
+        setScrub({ seconds: secondsAt(e), releasedAt: null });
+      }}
+      onResponderMove={(e) =>
+        setScrub({ seconds: secondsAt(e), releasedAt: null })
+      }
+      onResponderRelease={(e) => seek(secondsAt(e))}
+      onResponderTerminate={() => setScrub(null)}
+      accessible
+      accessibilityRole="adjustable"
+      accessibilityLabel="Track progress"
+      // A zero range reads as "NaN" in VoiceOver
+      accessibilityValue={
+        max > 0
+          ? { min: 0, max, now: Math.round(fraction * duration) }
+          : undefined
+      }
+      accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+      onAccessibilityAction={(e) => {
+        if (duration <= 0) return;
+        const step =
+          e.nativeEvent.actionName === "increment"
+            ? SEEK_STEP_SECONDS
+            : -SEEK_STEP_SECONDS;
+        seek(Math.min(Math.max(shown + step, 0), duration));
+      }}
+    >
+      <View
+        style={[
+          styles.progress,
+          { width: `${fraction * 100}%`, backgroundColor: colors.accent },
+        ]}
+      />
+    </View>
+  );
+}
+
+function SkipButton({ direction }: { direction: "previous" | "next" }) {
+  const colors = useColors();
+  const next = direction === "next";
+
+  async function onPress() {
+    try {
+      await skipTrack(direction);
+    } catch (error) {
+      console.error(`issue skipping to the ${direction} track`, error);
+    }
+  }
+
+  return (
+    <FooterButton
+      accessibilityLabel={next ? "Next track" : "Previous track"}
+      onPress={onPress}
+    >
+      <MaterialIcons
+        name={next ? "skip-next" : "skip-previous"}
+        size={22}
+        color={colors.accent}
+      />
+    </FooterButton>
   );
 }
 
 function FooterPlayButton() {
   const { playbackState, isPlaying } = usePlayer();
   const colors = useColors();
-  const playIcon = <Ionicons name="play" size={40} />;
-  const pauseIcon = <Ionicons name="pause" size={40} />;
+  const playing = playbackState.state === State.Buffering || isPlaying;
 
   async function onPress(playbackState: PlaybackState | { state: undefined }) {
     try {
@@ -234,47 +290,63 @@ function FooterPlayButton() {
   }
 
   return (
-    <TouchableOpacity
-      style={styles.button}
+    <FooterButton
+      accessibilityLabel={playing ? "Pause" : "Play"}
       onPress={() => onPress(playbackState)}
     >
-      <Ionicons
-        name={
-          playbackState.state === State.Buffering || isPlaying
-            ? "pause-outline"
-            : "play"
-        }
-        size={40}
-        color={colors.text}
-      />
-    </TouchableOpacity>
+      <View style={[styles.playCircle, { borderColor: colors.accent }]}>
+        <Ionicons
+          name={playing ? "pause-outline" : "play-outline"}
+          size={18}
+          color={colors.accent}
+        />
+      </View>
+    </FooterButton>
   );
 }
 
 const styles = StyleSheet.create({
   footer: {
     width: "100%",
-    // borderWidth: 1,
-    // borderColor: "black",
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  progressBar: {
-    alignSelf: "stretch",
-    marginLeft: -16,
-    marginRight: -20,
-    padding: 0,
-    marginTop: -21,
+  seekArea: {
+    height: 24,
   },
-  image: {
-    width: 80,
-    height: "100%",
-    //marginTop: -20,
+  progress: {
+    height: 6.4,
+  },
+  row: {
+    minHeight: 56,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  group: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   button: {
-    // borderWidth: 1,
-    // borderColor: "black",
-    //marginTop: -20,
-    height: "100%",
+    width: HIT_SIZE,
+    height: HIT_SIZE,
+    alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+  },
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
+  },
+  art: {
+    width: 40,
+    height: 40,
+  },
+  playCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
