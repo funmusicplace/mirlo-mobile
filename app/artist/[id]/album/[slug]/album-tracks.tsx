@@ -256,6 +256,12 @@ export default function AlbumTracks() {
     link: linkStyle,
   };
 
+  // Web credits: 14 on a 20.8 line inside a 0.9 opacity wrapper
+  const creditsStyles = {
+    ...markdownStyles,
+    body: { ...type.small, lineHeight: 20.8, color: colors.text },
+  };
+
   const tagPills = selectedAlbum.tags?.map((tagName, index) => (
     <TagPill key={index} tagName={tagName} />
   ));
@@ -340,7 +346,16 @@ export default function AlbumTracks() {
                   backgroundColor: colors.tint,
                 }}
                 resizeMode="cover"
+                accessibilityLabel={selectedAlbum.coverImageAlt || undefined}
               />
+              {selectedAlbum.coverCredit ? (
+                <Text style={styles.coverCredit}>
+                  {t("trackGroupDetails.coverCredit", {
+                    credit: selectedAlbum.coverCredit,
+                    defaultValue: "Cover art: {{credit}}",
+                  })}
+                </Text>
+              ) : null}
             </View>
             <View style={[styles.gutter, styles.actions]}>
               <ShareButton url={trackGroupUrl(selectedAlbum)} />
@@ -368,6 +383,13 @@ export default function AlbumTracks() {
               <Text style={[type.caption, { color: colors.secondaryText }]}>
                 {releaseDate}
               </Text>
+            ) : null}
+            {selectedAlbum.credits ? (
+              <View style={styles.credits}>
+                <Markdown style={creditsStyles}>
+                  {selectedAlbum.credits}
+                </Markdown>
+              </View>
             ) : null}
             {tagPills?.length ? <TagPillList>{tagPills}</TagPillList> : null}
           </View>
@@ -433,6 +455,16 @@ const styles = StyleSheet.create({
   playButton: {
     width: "70%",
     borderWidth: 1,
+  },
+  // Web caption: 12 on a 16 line at 0.75 opacity, 4 below the cover
+  coverCredit: {
+    ...type.xsmall,
+    opacity: 0.75,
+    marginTop: spacing.xs,
+  },
+  credits: {
+    opacity: 0.9,
+    marginTop: spacing.md,
   },
   footer: {
     paddingHorizontal: gutter + spacing.sm,
