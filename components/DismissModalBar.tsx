@@ -1,40 +1,62 @@
-import { View, Pressable, useWindowDimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { HeaderButton } from "@/components/ScreenHeader";
+import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { radius, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
-export default function DismissModalBar() {
+type DismissModalBarProps = {
+  title?: string;
+};
+
+// Web Modal header: h2 title on the left, close button on the right
+export default function DismissModalBar({ title }: DismissModalBarProps) {
   const router = useRouter();
-  const { width, height } = useWindowDimensions();
   const colors = useColors();
 
   return (
     <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: "100%",
-        height: height * 0.08,
-        backgroundColor: colors.header,
-      }}
+      style={[
+        styles.bar,
+        title
+          ? [styles.titled, { borderBottomColor: colors.border }]
+          : styles.untitled,
+      ]}
     >
-      <Pressable
-        onPress={() => router.dismiss()}
-        style={{
-          width: "100%",
-          height: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "row",
-        }}
-      >
-        <Ionicons
-          name="chevron-down-outline"
-          size={40}
-          style={{ color: colors.secondaryText }}
-        ></Ionicons>
-      </Pressable>
+      {title ? (
+        <Text accessibilityRole="header" style={styles.title}>
+          {title}
+        </Text>
+      ) : null}
+      <HeaderButton accessibilityLabel="Close" onPress={() => router.dismiss()}>
+        <FontAwesome5 name="times" size={20} color={colors.text} />
+      </HeaderButton>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    alignItems: "center",
+    // The web pads the sheet top by --mi-border-radius-x
+    paddingTop: radius.lg,
+    paddingHorizontal: spacing.lg,
+    // Also keeps the close button hit slop inside the bar for Android
+    paddingBottom: spacing.sm,
+  },
+  titled: {
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+  },
+  untitled: {
+    justifyContent: "flex-end",
+  },
+  title: {
+    ...type.heading,
+    flexShrink: 1,
+    maxWidth: "85%",
+  },
+});

@@ -1,22 +1,19 @@
 import * as api from "../queries/fetch/fetchWrapper";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  FlatList} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
-import { mirloRed } from "@/constants/mirlo-red";
 import { useColors } from "@/constants/colors";
 import { useAuthContext } from "@/state/AuthContext";
 import { useState } from "react";
+import Button from "@/components/Button";
+import DismissModalBar from "@/components/DismissModalBar";
+import Text from "@/components/ThemedText";
+import { spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 export default function MaxPlaysReached() {
   const colors = useColors();
-  const router = useRouter();
   const { activeTrack } = usePlayer();
   const { user } = useAuthContext();
   const [isEmailSent, setIsEmailSent] = useState<boolean>(false);
@@ -39,184 +36,72 @@ export default function MaxPlaysReached() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.screen, { backgroundColor: colors.background }]}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          height: 60,
-          backgroundColor: colors.header,
-        }}
-      >
-        <Pressable
-          onPress={() => router.dismiss()}
-          style={{
-            width: "100%",
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "row",
-          }}
-        >
-          <Ionicons
-            name="chevron-down-outline"
-            size={40}
-            style={{ color: colors.secondaryText }}
-          ></Ionicons>
-        </Pressable>
-      </View>
-
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          paddingHorizontal: 20,
-          paddingTop: 50,
-          width: "100%",
-          backgroundColor: mirloRed,
-        }}
-      >
-        <Text style={{ fontSize: 20, color: "white" }}>
-          You are out of free plays for the track
+      <DismissModalBar
+        title={`You are out of free plays for the track "${activeTrack?.title ?? ""}"`}
+      />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.intro}>
+          Buy this {activeTrack?.allowIndividualSale ? "track" : "album"} to:
         </Text>
-        <Text style={{ fontSize: 20, marginBottom: 20, color: "white" }}>
-          "{activeTrack?.title}"
-        </Text>
+        <View style={styles.list}>
+          {[
+            `Support ${activeTrack?.artist}`,
+            "Get unlimited streaming",
+            "Get high quality downloads",
+          ].map((text) => (
+            <Text key={text} style={type.body}>
+              • {text}
+            </Text>
+          ))}
+        </View>
 
         {!user && (
-          <Text
-            style={{
-              fontSize: 20,
-              color: "white",
-              margin: 10,
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
+          <Text style={styles.callout}>
             Log In or Sign Up for Purchase Info!
           </Text>
         )}
 
-        {user && !isEmailSent && (
-          <Pressable
+        {user && (
+          <Button
+            title={isEmailSent ? "Email Sent!" : "Email Purchase Info"}
+            startIcon={
+              isEmailSent ? <Ionicons name="checkmark-sharp" /> : undefined
+            }
             onPress={() => {
               sendPurchaseEmail();
             }}
-            style={{
-              alignItems: "center",
-              marginBottom: 10,
-              backgroundColor: "white",
-              borderRadius: 5,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                color: "black",
-                margin: 10,
-                textAlign: "center",
-              }}
-            >
-              Email Purchase Info
-            </Text>
-          </Pressable>
+            disabled={isEmailSent}
+            fullWidth
+            style={styles.action}
+          />
         )}
-
-        {user && isEmailSent && (
-          <Pressable
-            style={{
-              alignItems: "center",
-              marginBottom: 10,
-              backgroundColor: "white",
-              borderRadius: 5,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                color: "black",
-                margin: 10,
-                textAlign: "center",
-              }}
-            >
-              Email Sent! ✅
-            </Text>
-          </Pressable>
-        )}
-        {/* {activeTrack?.allowIndividualSale ? (
-            <Text
-              style={{
-                color: "white",
-                fontSize: 20,
-                margin: 10,
-              }}
-            >
-              OR
-            </Text>
-          ) : null} */}
-
-        {/* {activeTrack?.allowIndividualSale ? (
-          <Pressable
-            onPress={() =>
-              Linking.openURL(
-                `https://mirlo.space/${activeTrack?.trackGroup.artist.urlSlug}/release/${activeTrack?.trackGroup.urlSlug}/tracks/${activeTrack?.id}`
-              )
-            }
-            style={{
-              alignItems: "center",
-              marginVertical: 10,
-              backgroundColor: "white",
-              borderRadius: 5,
-            }}
-          >
-            <Text
-              style={{
-                color: "black",
-                fontSize: 20,
-                margin: 10,
-                textAlign: "center",
-              }}
-            >
-              Buy Track "{activeTrack?.title}"
-            </Text>
-          </Pressable>
-        ) : null} */}
-
-        <Text
-          style={{
-            fontSize: 20,
-            color: "white",
-            alignSelf: "flex-start",
-            marginTop: 20,
-          }}
-        >
-          Buy this {activeTrack?.allowIndividualSale ? "track" : "album"} to:
-        </Text>
-        <FlatList
-          style={{ margin: 10 }}
-          data={[
-            { text: `Support ${activeTrack?.artist}` },
-            { text: "Get unlimited streaming" },
-            { text: "Get high quality downloads" },
-          ]}
-          renderItem={({ item }) => (
-            <Text style={{ color: "white", fontSize: 17, margin: 5 }}>
-              • {item.text}
-            </Text>
-          )}
-        />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
+  },
+  content: {
+    padding: spacing.lg,
+  },
+  intro: {
+    ...type.body,
+    marginBottom: spacing.sm,
+  },
+  list: {
+    gap: spacing.xs,
+  },
+  callout: {
+    ...type.body,
+    fontWeight: "600",
+    marginTop: spacing.xl,
+  },
+  action: {
+    marginTop: spacing.xl,
   },
 });

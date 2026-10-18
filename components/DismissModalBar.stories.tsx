@@ -11,3 +11,15 @@ export default meta;
 type Story = StoryObj<typeof DismissModalBar>;
 
 export const Default: Story = {};
+
+export const WithTitle: Story = {
+  args: {
+    title: "Log in",
+  },
+};
+
+export const LongTitle: Story = {
+  args: {
+    title: 'You are out of free plays for the track "A Very Long Song Title"',
+  },
+};

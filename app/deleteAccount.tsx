@@ -1,16 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 
+import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
 import {
   AUTH_PROFILE_QUERY_KEY,
@@ -20,6 +14,8 @@ import * as api from "@/queries/fetch/fetchWrapper";
 import { useAuthContext } from "@/state/AuthContext";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { radius, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 export default function DeleteAccountScreen() {
   const router = useRouter();
@@ -119,18 +115,15 @@ export default function DeleteAccountScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.screen, { backgroundColor: colors.background }]}
     >
       <DismissModalBar />
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
-        style={[styles.content, { backgroundColor: colors.background }]}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text accessibilityRole="header" style={type.heading}>
             Delete account
           </Text>
-          <Text style={[styles.subtitle, { color: colors.secondaryText }]}>
+          <Text style={[type.body, { color: colors.secondaryText }]}>
             Review the impact below. You'll get a confirmation popup before the
             account is permanently deleted.
           </Text>
@@ -138,15 +131,21 @@ export default function DeleteAccountScreen() {
 
         <View
           style={[
-            styles.card,
-            { backgroundColor: colors.alert, borderColor: colors.alertBorder },
+            styles.box,
+            styles.warning,
+            {
+              backgroundColor: colors.alert,
+              borderLeftColor: colors.alertBorder,
+            },
           ]}
         >
-          <Text style={styles.cardTitle}>What happens next</Text>
+          <Text style={styles.boxTitle}>What happens next</Text>
           {warningItems.map((item) => (
-            <View key={item} style={styles.warningRow}>
-              <Text style={[styles.bullet, { color: colors.accent }]}>•</Text>
-              <Text style={styles.warningText}>{item}</Text>
+            <View key={item} style={styles.bulletRow}>
+              <Text aria-hidden style={type.body}>
+                •
+              </Text>
+              <Text style={[type.body, styles.bulletText]}>{item}</Text>
             </View>
           ))}
         </View>
@@ -166,17 +165,16 @@ export default function DeleteAccountScreen() {
           return (
             <View
               style={[
-                styles.summaryCard,
-                { backgroundColor: colors.muted, borderColor: colors.border },
+                styles.box,
+                styles.summary,
+                { borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.summaryTitle, { color: colors.text }]}>
-                Account summary
-              </Text>
+              <Text style={styles.boxTitle}>Account summary</Text>
               {summaryRows.map((row) => (
                 <Text
                   key={row}
-                  style={[styles.summaryText, { color: colors.secondaryText }]}
+                  style={[type.body, { color: colors.secondaryText }]}
                 >
                   {row}
                 </Text>
@@ -185,121 +183,65 @@ export default function DeleteAccountScreen() {
           );
         })()}
 
-        <Pressable
-          onPress={confirmDelete}
-          style={[styles.deleteButton, isDeleting && styles.disabledButton]}
-          disabled={isDeleting || !user}
-        >
-          {isDeleting ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.deleteButtonText}>Delete account</Text>
-          )}
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.dismiss()}
-          style={[
-            styles.cancelButton,
-            { backgroundColor: colors.background, borderColor: colors.border },
-          ]}
-          disabled={isDeleting}
-        >
-          <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-            Cancel
-          </Text>
-        </Pressable>
+        <View style={styles.actions}>
+          <Button
+            variant="outlined"
+            title="Cancel"
+            onPress={() => router.dismiss()}
+            disabled={isDeleting}
+          />
+          <Button
+            title="Delete account"
+            onPress={confirmDelete}
+            loading={isDeleting}
+            disabled={!user}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
   },
   content: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 40,
-    gap: 18,
+    padding: spacing.lg,
+    gap: spacing.lg,
   },
   header: {
-    gap: 8,
+    gap: spacing.sm,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
+  // Same box metrics as ErrorNotification, the web warning Box
+  box: {
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
   },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 22,
+  warning: {
+    borderLeftWidth: 4,
   },
-  card: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 18,
-    gap: 12,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  warningRow: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "flex-start",
-  },
-  bullet: {
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  warningText: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  summaryCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 18,
-    gap: 8,
-  },
-  summaryTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  summaryText: {
-    fontSize: 16,
-  },
-  deleteButton: {
-    backgroundColor: "#a21d1d",
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 56,
-  },
-  deleteButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  cancelButton: {
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
+  summary: {
     borderWidth: 1,
   },
-  cancelButtonText: {
-    fontSize: 17,
+  boxTitle: {
+    ...type.body,
     fontWeight: "600",
   },
-  disabledButton: {
-    opacity: 0.7,
+  bulletRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  bulletText: {
+    flex: 1,
+  },
+  // Adds to the content gap for the web dialog's 24 above the buttons
+  actions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
   },
 });
