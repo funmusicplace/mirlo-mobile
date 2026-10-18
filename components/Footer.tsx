@@ -23,7 +23,7 @@ import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
-import { gutter } from "@/constants/spacing";
+import { gutter, radius } from "@/constants/spacing";
 
 const HIT_SIZE = 44;
 const SEEK_STEP_SECONDS = 10;
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   playCircle: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.pill,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

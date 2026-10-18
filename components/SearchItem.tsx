@@ -81,11 +81,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: RESULT_INSET,
   },
-  // Web 0.95rem on a 24 line
-  label: {
-    ...type.body,
-    fontSize: 15.2,
-  },
+  label: type.listItem,
   heading: {
     ...type.xsmall,
     fontWeight: "600",

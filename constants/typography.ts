@@ -21,4 +21,5 @@ export const type = {
   chip: { fontSize: 12.8, lineHeight: 16 },
   formLabel: { fontSize: 17.6, lineHeight: 26.4, fontWeight: "600" },
   large: { fontSize: 19.2, lineHeight: 22.4 },
+  listItem: { fontSize: 15.2, lineHeight: 24 },
 } satisfies Record<string, TextStyle>;
