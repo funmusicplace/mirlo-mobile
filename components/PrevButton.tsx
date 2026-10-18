@@ -1,14 +1,11 @@
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Text from "@/components/ThemedText";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { touchTarget } from "@/constants/spacing";
 import { skipTrack } from "@/scripts/trackPlayUtils";
 
 export default function PrevButton() {
   const colors = useColors();
-  const prevIcon = (
-    <Ionicons name="play-skip-back" size={40} color={colors.text} />
-  );
 
   const prevSong = async () => {
     try {
@@ -19,19 +16,12 @@ export default function PrevButton() {
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.button} onPress={prevSong}>
-        <Text>{prevIcon}</Text>
-      </TouchableOpacity>
-    </View>
+    <HeaderButton
+      size={touchTarget}
+      accessibilityLabel="Previous track"
+      onPress={prevSong}
+    >
+      <MaterialIcons name="skip-previous" size={36} color={colors.accent} />
+    </HeaderButton>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    marginRight: 10,
-  },
-});

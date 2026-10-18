@@ -1,12 +1,9 @@
-import { Image, View, TouchableOpacity, StyleSheet } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import { usePlayer } from "@/state/PlayerContext";
-import { API_ROOT } from "@/constants/api-root";
-import { shuffle, pullAt } from "lodash";
-import TrackPlayer, { State } from "react-native-track-player";
-import { useEffect, useState } from "react";
-import Text from "@/components/ThemedText";
+import TrackPlayer from "react-native-track-player";
+import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { touchTarget } from "@/constants/spacing";
 
 export default function ShuffleButton() {
   const { shuffled, setShuffled } = usePlayer();
@@ -103,25 +100,17 @@ export default function ShuffleButton() {
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.button} onPress={onPress}>
-        <Text>
-          <Ionicons
-            name="shuffle"
-            size={30}
-            color={shuffled ? colors.accent : colors.text}
-          />
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <HeaderButton
+      size={touchTarget}
+      accessibilityLabel="Shuffle"
+      accessibilityState={{ selected: shuffled }}
+      onPress={onPress}
+    >
+      <Feather
+        name="shuffle"
+        size={22}
+        color={shuffled ? colors.accent : colors.inactive}
+      />
+    </HeaderButton>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginHorizontal: 10,
-  },
-});

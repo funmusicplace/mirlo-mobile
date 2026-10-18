@@ -1,25 +1,18 @@
-import { Image, View, TouchableOpacity, StyleSheet } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { StyleSheet } from "react-native";
+import Feather from "@expo/vector-icons/Feather";
 import { usePlayer } from "@/state/PlayerContext";
-import { API_ROOT } from "@/constants/api-root";
 import TrackPlayer, { RepeatMode } from "react-native-track-player";
-import { useState } from "react";
 import Text from "@/components/ThemedText";
+import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
+
+const MODE_LABELS = { none: "Off", queue: "Queue", track: "Track" } as const;
 
 export default function LoopButton() {
-  // const [looping, setLooping] = useState<"none" | "track" | "queue">("none");
   const { looping, setLooping } = usePlayer();
   const colors = useColors();
-  const loopIcon = (
-    <Ionicons
-      name="repeat"
-      size={30}
-      color={
-        looping === "queue" || looping === "track" ? colors.accent : colors.text
-      }
-    />
-  );
 
   const onPress = async () => {
     try {
@@ -39,37 +32,32 @@ export default function LoopButton() {
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.button} onPress={onPress}>
-        <Text>{loopIcon}</Text>
-        {looping === "track" && <LoopIndicator />}
-      </TouchableOpacity>
-    </View>
+    <HeaderButton
+      size={touchTarget}
+      accessibilityLabel="Repeat"
+      accessibilityState={{ selected: looping !== "none" }}
+      accessibilityValue={{ text: MODE_LABELS[looping] }}
+      onPress={onPress}
+    >
+      <Feather
+        name="repeat"
+        size={22}
+        color={looping === "none" ? colors.inactive : colors.accent}
+      />
+      {looping === "track" && (
+        <Text style={[type.xsmall, styles.indicator, { color: colors.accent }]}>
+          1
+        </Text>
+      )}
+    </HeaderButton>
   );
 }
 
-const LoopIndicator = () => {
-  const colors = useColors();
-  return (
-    <View style={{ position: "absolute", right: 10, top: 5 }}>
-      <Text style={[styles.loopIndicator, { color: colors.accent }]}>1</Text>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
-  button: {
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginHorizontal: 10,
-    flexDirection: "row",
-    position: "relative",
-  },
-  loopingQueue: {
-    color: "#BE3455",
-  },
-  loopIndicator: {
-    fontSize: 12,
+  indicator: {
+    position: "absolute",
+    top: spacing.xs,
+    right: spacing.xs,
+    fontWeight: "700",
   },
 });

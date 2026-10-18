@@ -1,33 +1,26 @@
-import { Pressable, Text, View, ViewStyle } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCallback, useState } from "react";
-import { useAuthContext } from "@/state/AuthContext";
 import { useTranslation } from "react-i18next";
-import * as api from "../queries/fetch/fetchWrapper";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useColors } from "@/constants/colors";
+import { useAuthContext } from "@/state/AuthContext";
+import * as api from "../queries/fetch/fetchWrapper";
+import Button from "@/components/Button";
 
-type WishlistButton = {
+type WishlistButtonProps = {
   trackGroup: {
     id: number;
   };
-  style?: ViewStyle;
-  size?: number;
 };
 
-export default function WishlistButton({
-  trackGroup,
-  style,
-  size,
-}: WishlistButton) {
+export default function WishlistButton({ trackGroup }: WishlistButtonProps) {
   const { user, refreshLoggedInUser } = useAuthContext();
   const queryClient = useQueryClient();
   const [isInWishlist, setIsInWishlist] = useState(
-    !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)
+    !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id),
   );
   const router = useRouter();
-  const colors = useColors();
+  const { t } = useTranslation("translation");
 
   const onPress = useCallback(async () => {
     if (!user) {
@@ -47,12 +40,16 @@ export default function WishlistButton({
   }, [isInWishlist, trackGroup.id]);
 
   return (
-    <Pressable onPress={onPress} style={style}>
-      <Ionicons
-        name={isInWishlist ? "heart" : "heart-outline"}
-        color={isInWishlist ? colors.accent : colors.inactive}
-        size={size}
-      />
-    </Pressable>
+    <Button
+      variant="outlined"
+      onlyIcon
+      startIcon={<Ionicons name={isInWishlist ? "heart" : "heart-outline"} />}
+      onPress={onPress}
+      accessibilityLabel={
+        isInWishlist
+          ? t("wishlist.removeFromWishlist")
+          : t("wishlist.addToWishlist")
+      }
+    />
   );
 }

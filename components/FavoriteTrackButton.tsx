@@ -1,28 +1,26 @@
-import { Pressable, Text, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useCallback, useEffect, useState } from "react";
-import { useAuthContext } from "@/state/AuthContext";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuthContext } from "@/state/AuthContext";
 import * as api from "../queries/fetch/fetchWrapper";
-import { ViewProps } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
+import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
 
-type FavoriteTrackButton = {
+// Web track row options button
+const BUTTON_SIZE = 28;
+
+type FavoriteTrackButtonProps = {
   track: {
     id: number;
   };
-  style?: ViewProps;
-  size?: number;
 };
 
 export default function FavoriteTrackButton({
   track,
-  style,
-  size,
-}: FavoriteTrackButton) {
+}: FavoriteTrackButtonProps) {
   const { user, refreshLoggedInUser } = useAuthContext();
   const colors = useColors();
+  const { t } = useTranslation("translation");
   const [isInFavorites, setIsInFavorites] = useState(
     !!user?.trackFavorites?.find((w) => w.trackId === track.id),
   );
@@ -42,12 +40,20 @@ export default function FavoriteTrackButton({
   }
 
   return (
-    <Pressable onPress={onPress} style={style}>
+    <HeaderButton
+      size={BUTTON_SIZE}
+      onPress={onPress}
+      accessibilityLabel={
+        isInFavorites
+          ? t("wishlist.removeFromFavorites")
+          : t("wishlist.addToFavorites")
+      }
+    >
       <Ionicons
         name={isInFavorites ? "star" : "star-outline"}
-        color={isInFavorites ? colors.accent : colors.inactive}
-        size={size}
+        color={colors.accent}
+        size={16}
       />
-    </Pressable>
+    </HeaderButton>
   );
 }

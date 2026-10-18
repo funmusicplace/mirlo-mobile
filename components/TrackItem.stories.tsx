@@ -18,7 +18,6 @@ export const Default: Story = {
   args: {
     track: mockRNTrack({ order: 1 }),
     thisSongSelected: false,
-    onTrackScreen: false,
   },
 };
 

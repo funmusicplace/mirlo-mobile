@@ -1,30 +1,19 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { API_ROOT } from "@/constants/api-root";
 import { usePlayer } from "@/state/PlayerContext";
-import { TouchableOpacity, Text, StyleSheet, Pressable } from "react-native";
-import {
-  useCallback,
-  useState,
-  useEffect,
-  PropsWithChildren,
-  useRef,
-} from "react";
+import { useState, useEffect } from "react";
 import TrackPlayer, { PlaybackState, State } from "react-native-track-player";
-import { isEqual } from "lodash";
 import { TrackItem } from "./TrackItem";
-import { isTrackOwnedOrPreview, isTrackOwned } from "@/scripts/utils";
+import { isTrackOwnedOrPreview } from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
-import { reachedMaxPlays } from "@/scripts/trackPlayUtils";
 
-type PlayPauseWrapper = PropsWithChildren<PlayPauseWrapperProps>;
+type Props = {
+  trackObject: RNTrack;
+  selectedAlbum?: AlbumProps;
+};
 
 export default function PlayPauseWrapper({
   trackObject,
-  children,
-  style,
   selectedAlbum,
-  onTrackScreen,
-}: PlayPauseWrapper) {
+}: Props) {
   const {
     playbackState,
     playableTracks,
@@ -124,7 +113,10 @@ export default function PlayPauseWrapper({
   };
 
   return (
-    <Pressable
+    <TrackItem
+      track={trackObject}
+      album={selectedAlbum ? selectedAlbum : undefined}
+      thisSongSelected={thisSongSelected}
       onPress={async () => {
         if (canPlayTrack) {
           await togglePlayBack(playbackState);
@@ -133,29 +125,6 @@ export default function PlayPauseWrapper({
           return;
         }
       }}
-      style={style}
-    >
-      <TrackItem
-        track={trackObject}
-        album={selectedAlbum ? selectedAlbum : undefined}
-        thisSongSelected={thisSongSelected}
-        onTrackScreen={onTrackScreen}
-      ></TrackItem>
-    </Pressable>
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  playPauseButtonContainer: {
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginRight: 0,
-  },
-  playPauseButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    alignSelf: "center",
-    textTransform: "uppercase",
-  },
-});

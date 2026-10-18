@@ -1,7 +1,7 @@
-import { Pressable, Share, Platform } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Platform, Share } from "react-native";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useTranslation } from "react-i18next";
-import { useColors } from "@/constants/colors";
+import Button from "@/components/Button";
 
 type ShareButtonProps = {
   url: string;
@@ -9,7 +9,6 @@ type ShareButtonProps = {
 
 export default function ShareButton({ url }: ShareButtonProps) {
   const { t } = useTranslation("translation");
-  const colors = useColors();
 
   const onPress = async () => {
     try {
@@ -21,16 +20,11 @@ export default function ShareButton({ url }: ShareButtonProps) {
   };
 
   return (
-    <Pressable
+    <Button
+      onlyIcon
+      startIcon={<FontAwesome5 name="share-alt" size={14} solid />}
       onPress={onPress}
-      accessibilityRole="button"
       accessibilityLabel={t("trackGroupEmbed.share")}
-    >
-      <Ionicons
-        name={Platform.OS === "ios" ? "share-outline" : "share-social-outline"}
-        size={30}
-        color={colors.secondaryText}
-      />
-    </Pressable>
+    />
   );
 }
