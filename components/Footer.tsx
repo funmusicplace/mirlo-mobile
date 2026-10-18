@@ -23,6 +23,7 @@ import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
+import { gutter } from "@/constants/spacing";
 
 const HIT_SIZE = 44;
 const SEEK_STEP_SECONDS = 10;
@@ -318,7 +319,7 @@ const styles = StyleSheet.create({
   },
   row: {
     minHeight: 56,
-    paddingHorizontal: 8,
+    paddingHorizontal: gutter,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

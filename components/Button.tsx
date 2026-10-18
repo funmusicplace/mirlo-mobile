@@ -55,7 +55,7 @@ const sizes = {
   big: {
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
-    text: { fontSize: 19.2, lineHeight: 19.2 },
+    text: { ...type.large, lineHeight: type.large.fontSize },
   },
 };
 

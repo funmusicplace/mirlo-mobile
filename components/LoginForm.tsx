@@ -166,18 +166,13 @@ const styles = StyleSheet.create({
     // Keeps the sign up link hit slop inside the column
     paddingBottom: spacing.xl,
   },
-  title: {
-    fontSize: 32,
-    lineHeight: 40,
-  },
+  title: type.pageTitle,
   field: {
     marginTop: spacing.sm,
     marginBottom: spacing.xl,
   },
   label: {
-    fontSize: 17.6,
-    lineHeight: 26.4,
-    fontWeight: "600",
+    ...type.formLabel,
     marginBottom: spacing.sm,
   },
   input: {

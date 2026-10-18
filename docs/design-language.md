@@ -10,7 +10,7 @@ Tokens live in `constants/`. Screens read colors through `useColors()` from `con
 
 - `useColors()` is the only theme system. `ThemedText` applies `colors.text`, and `app/_layout.tsx` maps the tokens into the React Navigation theme.
 - Components read every color from `useColors()`. They don't import `mirloRed` or contain hex values.
-- Use the spacing, radius and type tokens wherever one fits. `TagPill` and `Footer` predate `spacing.ts` and `typography.ts`, so they still use literal sizes.
+- Use the spacing, radius and type tokens wherever one fits. Literal numbers stay only for fixed dimensions that aren't spacing, such as the 6.4 pt progress bar or a 40 pt artwork thumbnail.
 - A new value gets a token in `constants/` and a row in this file in the same change.
 - Light values are the CSS variables on mirlo.space, read with `getComputedStyle` at a 390 px viewport. Where the web source and the live site differ, the live site wins.
 
@@ -126,14 +126,15 @@ Body text uses the system font on both apps. The web stack (`--mi-font-family-st
 | `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Captions |
 | `type.cardTitle` | 14 / 19.25 | 400 | `ReleaseCard` title | Release grid titles |
 | `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent` |
+| `type.chip` | 12.8 / 16 | 400 | `Pill` (0.8rem) | Tag chips |
+| `type.formLabel` | 17.6 / 26.4 | 600 | Login form labels | Form labels |
+| `type.large` | 19.2 / 22.4 | 400 | Artist name `h1`, big buttons (1.2rem) | Artist name (with weight 600), "Releases" tab, `Button` size big |
 
 Measured elements without a style of their own start from the nearest style:
 
 | Element | Web at 390 px | Mobile |
 | --- | --- | --- |
-| Tag chip | 12.8 / 16 | `type.caption` with `lineHeight: 16` |
-| Track row | title 16 on a 28 line, index 14 | `type.body` with `lineHeight: 28`, index in `type.small` |
-| Form label | 17.6, weight 600 | `fontSize: 17.6`, `lineHeight: 26.4`, `fontWeight: "600"` |
+| Track row | title 14 on a 28 line, index 14, duration 12 weight 700 | `type.small` for title and index, `type.xsmall` weight 700 for the duration |
 | Player title | 12 / 18, weight 600 | `type.xsmall` with `lineHeight: 18`, `fontWeight: "600"` |
 | Player meta | 10.4 | `fontSize: 10.4` |
 

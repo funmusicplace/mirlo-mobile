@@ -8,6 +8,8 @@ import {
   ViewProps,
 } from "react-native";
 import { useColors } from "@/constants/colors";
+import { radius, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type TagPillProps = {
   tagName: string;
@@ -66,20 +68,17 @@ const styles = StyleSheet.create({
   list: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: spacing.sm,
     // Keeps the hit slop inside the parent, Android clips touches outside it
     paddingVertical: HIT_SLOP.top,
-    marginVertical: 16 - HIT_SLOP.top,
+    marginVertical: spacing.lg - HIT_SLOP.top,
   },
   pill: {
     borderWidth: 1,
-    borderRadius: 15,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     overflow: "hidden",
   },
-  label: {
-    fontSize: 12.8,
-    lineHeight: 16,
-  },
+  label: type.chip,
 });
