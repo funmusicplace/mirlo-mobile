@@ -338,7 +338,7 @@ function TrackPlayButton() {
       rounded
       title={
         playing
-          ? t("clickToPlay.pause")
+          ? t("clickToPlay.pause", "Pause")
           : t("playableCover.playTrack", "Play track")
       }
       startIcon={

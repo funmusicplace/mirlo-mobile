@@ -137,7 +137,7 @@ function AlbumPlayButton() {
       rounded
       title={
         playing
-          ? t("clickToPlay.pause")
+          ? t("clickToPlay.pause", "Pause")
           : t("playableCover.playAlbum", "Play album")
       }
       startIcon={
