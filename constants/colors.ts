@@ -41,6 +41,9 @@ export const colors = {
     inputPlaceholder: "#757575",
     overlay: "rgba(0, 0, 0, 0.85)",
     scrim: "rgba(0, 0, 0, 0.5)",
+    coverChip: "rgba(17, 17, 17, 0.8)",
+    coverChipBorder: "rgba(255, 255, 255, 0.25)",
+    coverChipText: palette.white,
   },
   dark: {
     background: palette.black,
@@ -68,6 +71,9 @@ export const colors = {
     inputPlaceholder: palette.neutral500,
     overlay: "rgba(0, 0, 0, 0.85)",
     scrim: "rgba(0, 0, 0, 0.5)",
+    coverChip: "rgba(17, 17, 17, 0.8)",
+    coverChipBorder: "rgba(255, 255, 255, 0.25)",
+    coverChipText: palette.white,
   },
 };
 
