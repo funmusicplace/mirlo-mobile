@@ -155,7 +155,12 @@ export default function SearchPage() {
       )}
 
       {showNoResults && (
-        <View style={[styles.card, { backgroundColor: colors.background }]}>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
+        >
           <Text
             style={[
               type.small,
@@ -241,8 +246,10 @@ const styles = StyleSheet.create({
   underline: {
     textDecorationLine: "underline",
   },
+  // The border separates the card from the overlay in dark mode
   card: {
     borderRadius: radius.sm,
+    borderWidth: 1,
     overflow: "hidden",
   },
   // Sized to its rows until it reaches the bottom of the overlay

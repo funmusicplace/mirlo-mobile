@@ -74,8 +74,6 @@ export const TrackItem = ({
               type.small,
               active && { color: colors.accent, fontWeight: "600" },
             ]}
-            ellipsizeMode="tail"
-            numberOfLines={1}
           >
             {track.title}
           </Text>
