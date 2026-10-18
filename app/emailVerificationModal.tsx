@@ -18,6 +18,7 @@ import DismissModalBar from "@/components/DismissModalBar";
 import { useTranslation } from "react-i18next";
 import ErrorNotification from "@/components/ErrorNotification";
 import { storeTokens } from "@/queries/authQueries";
+import { useColors } from "@/constants/colors";
 
 type VerifyEmailInputs = {
   email: string;
@@ -57,6 +58,11 @@ export default function EmailVerificationModal() {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
 
   const [showError, setShowError] = useState(true);
+  const colors = useColors();
+  const inputColors = {
+    backgroundColor: colors.inputBackground,
+    color: colors.inputText,
+  };
   const [codeError, setCodeError] = useState<Error | null>(null);
   const [emailError, setEmailError] = useState<Error | null>(null);
 
@@ -155,7 +161,7 @@ export default function EmailVerificationModal() {
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               key="email-input"
-              style={styles.inputStyle}
+              style={[styles.inputStyle, inputColors]}
               autoCapitalize="none"
               inputMode="email"
               //{...(Platform.OS === "android" && { autoComplete: "email" })}
@@ -164,7 +170,7 @@ export default function EmailVerificationModal() {
               //})}
               autoComplete="email"
               //keyboardType="email-address"
-              placeholderTextColor="#555"
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -208,8 +214,8 @@ export default function EmailVerificationModal() {
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               key="verification-code-input"
-              style={styles.inputStyle}
-              placeholderTextColor="#555"
+              style={[styles.inputStyle, inputColors]}
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -250,7 +256,6 @@ const styles = StyleSheet.create({
     width: 300,
     height: 40,
     paddingHorizontal: 10,
-    backgroundColor: "white",
   },
   formText: {
     alignItems: "center",

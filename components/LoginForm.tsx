@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import ErrorNotification from "./ErrorNotification";
+import { useColors } from "@/constants/colors";
 
 type LoginInputs = {
   email: string;
@@ -36,6 +37,11 @@ export default function LoginForm() {
   const [showError, setShowError] = useState<boolean>(true);
 
   const { mutate: login } = useLoginMutation();
+  const colors = useColors();
+  const inputColors = {
+    backgroundColor: colors.inputBackground,
+    color: colors.inputText,
+  };
 
   const handleBrowserOpen = async () => {
     await openInBrowser("https://mirlo.space/signup");
@@ -79,13 +85,13 @@ export default function LoginForm() {
           rules={{ required: true }}
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              style={styles.inputStyle}
+              style={[styles.inputStyle, inputColors]}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
               autoComplete="email"
               textContentType="emailAddress"
-              placeholderTextColor="#555"
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -101,8 +107,8 @@ export default function LoginForm() {
           rules={{ required: true }}
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              style={styles.inputStyle}
-              placeholderTextColor="#555"
+              style={[styles.inputStyle, inputColors]}
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -167,7 +173,6 @@ const styles = StyleSheet.create({
     width: 300,
     height: 40,
     paddingHorizontal: 10,
-    backgroundColor: "white",
   },
   formText: {
     alignItems: "center",

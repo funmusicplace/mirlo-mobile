@@ -14,6 +14,9 @@ export const colors = {
     danger: "red",
     alert: "#fff7f8",
     alertBorder: "#f0d3d9",
+    inputBackground: "#ffffff",
+    inputText: "#111111",
+    inputPlaceholder: "#757575",
   },
   dark: {
     background: "#121212",
@@ -27,6 +30,9 @@ export const colors = {
     danger: "#ff6b6b",
     alert: "#2a1d21",
     alertBorder: "#4a2c35",
+    inputBackground: "#ffffff",
+    inputText: "#111111",
+    inputPlaceholder: "#757575",
   },
 };
 
