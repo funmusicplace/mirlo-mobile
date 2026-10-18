@@ -242,7 +242,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Colors | `--mi-fixed-bg-color` and `--mi-fixed-fg-color` by page tone: off-white on light pages, `#111` on dark | `playerBackground` by system theme |
 | Edge | Drop shadow, 1.6 px blur, foreground at 30% | Hairline top border in `playerShadow` |
 | Progress | 6.4 accent fill on the top edge, 16 px hit area, `slider` role, 5 s and 30 s keyboard steps | 6.4 accent fill, 24 pt hit area, drag to seek, `adjustable` role with 10 s steps |
-| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 40 pt art in a 44 pt button when the window is at least 360 wide, opens now playing, no title text |
+| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 40 pt art in a 44 pt button at every width, opens now playing, no title text. Below 360 pt the skip buttons hide instead, Now playing still has them |
 | Controls | Skip: 30 px buttons with 22 px `MdSkipPrevious` and `MdSkipNext`. Play/pause: 40 circle, 1 px accent border, 17.6 glyph (`VscPlay`, `TfiControlPause`) | Skip: `MaterialIcons` at 22 in 44 pt buttons. Play/pause: 40 circle, 1 pt `accent` border, Ionicons `play-outline` and `pause-outline` at 18 |
 | Navigation | None | Recent Releases, Your Collection, Your Wishlist: Ionicons at 26, filled in `accent` when active, outlined in `inactive` otherwise |
 | Visibility | Shown while a track is loaded | Player part shows while a track is loaded, except on `/now-playing`. The nav row always shows |
