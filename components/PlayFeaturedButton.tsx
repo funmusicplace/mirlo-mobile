@@ -1,5 +1,5 @@
-import { ActivityIndicator, TouchableOpacity } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,8 @@ import { useAuthContext } from "@/state/AuthContext";
 import { queryAlbum } from "@/queries/queries";
 import { pickFeaturedTrack, toRNTrack } from "@/scripts/utils";
 import { useColors } from "@/constants/colors";
+import { radius } from "@/constants/spacing";
+import { HeaderButton } from "@/components/ScreenHeader";
 
 export default function PlayFeaturedButton({
   albums,
@@ -69,7 +71,7 @@ export default function PlayFeaturedButton({
   };
 
   return (
-    <TouchableOpacity
+    <HeaderButton
       onPress={onPress}
       disabled={loading}
       accessibilityRole="button"
@@ -77,15 +79,28 @@ export default function PlayFeaturedButton({
         showPause ? t("clickToPlay.pause") : t("clickToPlay.play")
       }
     >
-      {loading ? (
-        <ActivityIndicator color={colors.accent} />
-      ) : (
-        <Ionicons
-          name={showPause ? "pause-circle" : "play-circle"}
-          size={44}
-          color={colors.accent}
-        />
-      )}
-    </TouchableOpacity>
+      <View style={[styles.circle, { backgroundColor: colors.button }]}>
+        {loading ? (
+          <ActivityIndicator size="small" color={colors.buttonText} />
+        ) : (
+          <FontAwesome5
+            name={showPause ? "pause" : "play"}
+            size={12}
+            color={colors.buttonText}
+            solid
+          />
+        )}
+      </View>
+    </HeaderButton>
   );
 }
+
+const styles = StyleSheet.create({
+  circle: {
+    flex: 1,
+    alignSelf: "stretch",
+    borderRadius: radius.pill,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

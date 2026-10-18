@@ -1,24 +1,18 @@
-import { Pressable } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useRouter } from "expo-router";
+import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
 
 export default function SearchButton() {
   const router = useRouter();
   const colors = useColors();
   return (
-    <Pressable
+    <HeaderButton
       accessibilityLabel="Search"
       accessibilityHint="Opens the search bar"
-      accessibilityRole="button"
-      style={{ flex: 1 }}
       onPress={() => router.push("/search")}
     >
-      <Ionicons
-        name="search-outline"
-        size={30}
-        style={{ color: colors.inactive }}
-      ></Ionicons>
-    </Pressable>
+      <FontAwesome5 name="search" size={20} color={colors.accent} solid />
+    </HeaderButton>
   );
 }
