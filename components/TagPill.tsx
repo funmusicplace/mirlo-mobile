@@ -34,7 +34,7 @@ export default function TagPill({
     <Pressable
       onPress={() => {
         onPress?.();
-        router.push({ pathname: "/tags/[tag]", params: { tag: tagName } });
+        router.navigate({ pathname: "/tags/[tag]", params: { tag: tagName } });
       }}
       accessibilityRole="link"
       hitSlop={HIT_SLOP}

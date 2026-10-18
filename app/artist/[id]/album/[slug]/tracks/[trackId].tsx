@@ -212,7 +212,7 @@ export default function TrackView() {
                   backgroundColor: colors.tint,
                 }}
                 resizeMode="cover"
-                accessibilityLabel={data.result.coverImageAlt || undefined}
+                alt={data.result.coverImageAlt || undefined}
               />
             </View>
             <View style={[styles.gutter, styles.underCover]}>
@@ -264,9 +264,10 @@ function TrackPlayButton() {
     setQ(queue);
   }
 
+  // Starting playback swaps the queue without changing playableTracks
   useEffect(() => {
     getQ();
-  }, [playableTracks]);
+  }, [playableTracks, activeTrack]);
 
   const togglePlayBack = async () =>
     // playBackState: PlaybackState | { state: undefined }

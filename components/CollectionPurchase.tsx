@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import TrackGroupItem from "@/components/TrackGroupItem";
 import Text from "@/components/ThemedText";
@@ -42,7 +43,7 @@ export default function CollectionPurchase({
 }
 
 // Web Box with a tint-x border, shown when a grid has nothing in it
-export function CollectionEmpty({ children }: { children: string }) {
+export function CollectionEmpty({ children }: { children: ReactNode }) {
   const colors = useColors();
   return (
     <View style={[styles.empty, { borderColor: colors.tintX }]}>

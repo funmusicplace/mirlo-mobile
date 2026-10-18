@@ -34,7 +34,10 @@ jest.mock("react-i18next", () => {
   const en = jest.requireActual("@/translation/en.json");
   const t = (key: string) =>
     key.split(".").reduce((node, part) => node?.[part], en) ?? key;
-  return { useTranslation: () => ({ t }) };
+  // Renders the translated string as is, the tags inside it become plain text
+  const Trans = ({ i18nKey }: { i18nKey: string }) =>
+    t(i18nKey).replace(/<\/?\w+>/g, "");
+  return { useTranslation: () => ({ t }), Trans };
 });
 
 let mockUser: ReturnType<typeof createMockUser> | null = null;
@@ -107,7 +110,7 @@ test("wishlist puts the newest first and tracks open the track page", () => {
     .map((node) => node.props.children);
   expect(titles).toEqual(["Newer track", "Older album"]);
   fireEvent.press(screen.getByText("Newer track"));
-  expect(mockRouter.push).toHaveBeenCalledWith({
+  expect(mockRouter.navigate).toHaveBeenCalledWith({
     pathname: "/artist/[id]/album/[slug]/tracks/[trackId]",
     params: {
       id: track.trackGroup.artistId,

@@ -27,7 +27,8 @@ import { gutter, radius } from "@/constants/spacing";
 
 const HIT_SIZE = 44;
 const SEEK_STEP_SECONDS = 10;
-const ART_MIN_WINDOW_WIDTH = 360;
+// Below this the skip buttons go, Now playing still has them
+const SKIP_MIN_WINDOW_WIDTH = 360;
 
 const NAV_ITEMS = [
   {
@@ -108,7 +109,7 @@ export default function Footer({ style }: ViewProps) {
         </View>
         {showPlayer && activeTrack && (
           <View style={styles.group}>
-            {width >= ART_MIN_WINDOW_WIDTH && activeTrack.artwork ? (
+            {activeTrack.artwork ? (
               <Link
                 href={{
                   pathname: "/now-playing",
@@ -132,9 +133,11 @@ export default function Footer({ style }: ViewProps) {
                 </FooterButton>
               </Link>
             ) : null}
-            <SkipButton direction="previous" />
+            {width >= SKIP_MIN_WINDOW_WIDTH && (
+              <SkipButton direction="previous" />
+            )}
             <FooterPlayButton />
-            <SkipButton direction="next" />
+            {width >= SKIP_MIN_WINDOW_WIDTH && <SkipButton direction="next" />}
           </View>
         )}
       </View>

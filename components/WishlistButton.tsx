@@ -1,5 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -20,6 +20,13 @@ export default function WishlistButton({ trackGroup }: WishlistButtonProps) {
     !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id),
   );
   const router = useRouter();
+
+  // Signing in while the screen is open must refresh the heart
+  useEffect(() => {
+    setIsInWishlist(
+      !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id),
+    );
+  }, [user, trackGroup.id]);
   const { t } = useTranslation("translation");
 
   const onPress = useCallback(async () => {
@@ -37,7 +44,14 @@ export default function WishlistButton({ trackGroup }: WishlistButtonProps) {
       queryKey: ["fetchWishlist", { userId: user.id }],
     });
     refreshLoggedInUser();
-  }, [isInWishlist, trackGroup.id]);
+  }, [
+    isInWishlist,
+    trackGroup.id,
+    user,
+    router,
+    queryClient,
+    refreshLoggedInUser,
+  ]);
 
   return (
     <Button

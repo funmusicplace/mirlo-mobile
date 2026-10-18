@@ -1,5 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/state/AuthContext";
 import * as api from "../queries/fetch/fetchWrapper";
@@ -25,6 +25,12 @@ export default function FavoriteTrackButton({
     !!user?.trackFavorites?.find((w) => w.trackId === track.id),
   );
 
+  useEffect(() => {
+    setIsInFavorites(
+      !!user?.trackFavorites?.find((w) => w.trackId === track.id),
+    );
+  }, [user, track.id]);
+
   const onPress = useCallback(async () => {
     if (!user) return;
 
@@ -45,8 +51,8 @@ export default function FavoriteTrackButton({
       onPress={onPress}
       accessibilityLabel={
         isInFavorites
-          ? t("wishlist.removeFromFavorites")
-          : t("wishlist.addToFavorites")
+          ? t("wishlist.removeFromFavorites", "Remove from favorites")
+          : t("wishlist.addToFavorites", "Add to favorites")
       }
     >
       <Ionicons

@@ -16,7 +16,7 @@ import CollectionPurchase, {
 } from "@/components/CollectionPurchase";
 import { isTrackGroupPurchase, isTrackPurchase } from "@/types/typeguards";
 import ErrorNotification from "@/components/ErrorNotification";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useColors } from "@/constants/colors";
 import { gutter, spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
@@ -100,7 +100,18 @@ export default function Collections() {
           </Text>
         }
         ListEmptyComponent={
-          <CollectionEmpty>{t("profile.collectionEmpty")}</CollectionEmpty>
+          <CollectionEmpty>
+            {/* The string carries the web's link tags, mobile shows them as text */}
+            <Trans
+              t={t}
+              i18nKey="profile.collectionEmpty"
+              components={{
+                releases: <Text />,
+                tags: <Text />,
+                artists: <Text />,
+              }}
+            />
+          </CollectionEmpty>
         }
       />
     );

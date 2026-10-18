@@ -125,7 +125,7 @@ function AlbumPlayButton() {
     } catch (err) {
       console.error("issue with playback", err);
     }
-  }, [isPlaying, playableTracks, setActiveTrack]);
+  }, [isPlaying, playableTracks, setActiveTrack, playbackState, setShuffled]);
 
   const playing =
     playableTracks.length > 0 &&
@@ -346,7 +346,7 @@ export default function AlbumTracks() {
                   backgroundColor: colors.tint,
                 }}
                 resizeMode="cover"
-                accessibilityLabel={selectedAlbum.coverImageAlt || undefined}
+                alt={selectedAlbum.coverImageAlt || undefined}
               />
               {selectedAlbum.coverCredit ? (
                 <Text style={styles.coverCredit}>

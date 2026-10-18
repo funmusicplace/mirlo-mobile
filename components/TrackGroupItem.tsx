@@ -36,7 +36,7 @@ export default function TrackGroupItem({
   return (
     <Pressable
       onPress={() =>
-        router.push(
+        router.navigate(
           href ?? {
             pathname: "/artist/[id]/album/[slug]/album-tracks",
             params: { id: artistId, slug: urlSlug },
