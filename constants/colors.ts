@@ -2,7 +2,7 @@ import { useColorScheme } from "react-native";
 import { mirloRed } from "./mirlo-red";
 
 // Light values are the mirlo.space CSS variables (--mi-*), dark values apply
-// the web's dark tint logic (white overlays at 0.08, 0.18, 0.35) to #111.
+// the web's dark tint logic (white overlays at 0.08, 0.18, 0.35) to #111,
 // docs/design-language.md maps each key to its web variable
 export const palette = {
   black: "#111111",
