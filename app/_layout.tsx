@@ -40,6 +40,19 @@ export default function RootLayout() {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
   const scheme = useColorScheme();
   const colors = useColors();
+  const baseTheme = scheme === "dark" ? DarkTheme : DefaultTheme;
+  // Screens without their own background fall back to this
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      background: colors.background,
+      card: colors.header,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.accent,
+    },
+  };
   const [fontsLoaded, fontError] = useFonts({
     [fonts.display]: require("@/assets/fonts/cubano-sharp.otf"),
   });
@@ -71,9 +84,7 @@ export default function RootLayout() {
         <AuthContextProvider>
           <PlayerContextProvider>
             <SearchContextProvider>
-              <ThemeProvider
-                value={scheme === "dark" ? DarkTheme : DefaultTheme}
-              >
+              <ThemeProvider value={navigationTheme}>
                 <Stack screenOptions={{ animation: "none" }}>
                   <Stack.Screen name="login" options={{ headerShown: false }} />
                   <Stack.Screen
