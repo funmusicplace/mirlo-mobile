@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "@/queries/queries";
-import TagPill from "@/components/TagPill";
+import TagPill, { TagPillList } from "@/components/TagPill";
 import { optionDisplay } from "@/components/SearchOptionRenderer";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
@@ -42,10 +42,12 @@ export default function SearchPage() {
 
   const tagPills = useMemo(() => {
     const group = tags?.results.map((tag, index) => {
-      return <TagPill key={index} tagName={tag.tag} />;
+      return (
+        <TagPill key={index} tagName={tag.tag} onPress={() => router.back()} />
+      );
     });
     return group;
-  }, [tags]);
+  }, [tags, router]);
   const searchCallbackRef = useRef(
     debounce(async (searchString) => {
       if (searchString && searchString.length > 1) {
@@ -104,9 +106,7 @@ export default function SearchPage() {
         !searchResults.length && (
           <ScrollView style={{ marginTop: 20, marginHorizontal: 10, gap: 20 }}>
             <Text>{t("mobileApp.searchScreen.searchByPopular")}</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 3 }}>
-              {tagPills}
-            </View>
+            <TagPillList>{tagPills}</TagPillList>
             <TypeLinks />
           </ScrollView>
         )}

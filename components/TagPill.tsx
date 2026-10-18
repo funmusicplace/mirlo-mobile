@@ -1,34 +1,70 @@
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ViewProps,
+} from "react-native";
 import { useColors } from "@/constants/colors";
 
 type TagPillProps = {
-  key: number;
   tagName: string;
+  onPress?: () => void;
 };
 
-export default function TagPill({ tagName }: TagPillProps) {
-  const router = useRouter();
+// Pads the 26 pt chip to a 44 pt touch target without breaking the web gap
+const HIT_SLOP = { top: 9, bottom: 9, left: 4, right: 4 };
+
+export default function TagPill({ tagName, onPress }: TagPillProps) {
   const colors = useColors();
+  const router = useRouter();
   return (
-    <Link
-      href={{
-        pathname: "/tags/[tag]",
-        params: { tag: tagName },
+    <Pressable
+      onPress={() => {
+        onPress?.();
+        router.push({ pathname: "/tags/[tag]", params: { tag: tagName } });
       }}
-      style={{
-        backgroundColor: colors.muted,
-        borderWidth: 1,
-        borderColor: colors.border,
-        padding: 6,
-        paddingHorizontal: 15,
-        borderRadius: 18,
-        marginRight: 5,
-        marginVertical: 5,
-        color: colors.text,
-      }}
-      onPress={() => router.back()}
+      accessibilityRole="link"
+      hitSlop={HIT_SLOP}
+      android_ripple={{ color: colors.tintX }}
+      style={({ pressed }) => [
+        styles.pill,
+        {
+          borderColor: colors.tintX,
+          backgroundColor:
+            pressed && Platform.OS === "ios" ? colors.tintX : colors.tint,
+        },
+      ]}
     >
-      {tagName}
-    </Link>
+      <Text style={[styles.label, { color: colors.accent }]}>{tagName}</Text>
+    </Pressable>
   );
 }
+
+export function TagPillList({ style, ...props }: ViewProps) {
+  return <View style={[styles.list, style]} {...props} />;
+}
+
+const styles = StyleSheet.create({
+  list: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    // Keeps the hit slop inside the parent, Android clips touches outside it
+    paddingVertical: HIT_SLOP.top,
+    marginVertical: 16 - HIT_SLOP.top,
+  },
+  pill: {
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    overflow: "hidden",
+  },
+  label: {
+    fontSize: 12.8,
+    lineHeight: 16,
+  },
+});

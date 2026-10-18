@@ -41,6 +41,7 @@ import { mirloRed } from "@/constants/mirlo-red";
 import MarqueeText from "@/components/MarqueeText";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import TagPill, { TagPillList } from "@/components/TagPill";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -226,30 +227,9 @@ export default function AlbumTracks() {
 
   const selectedAlbum = data.result;
 
-  const tagPills = selectedAlbum.tags?.map((tagName, index) => {
-    return (
-      <Link
-        key={index}
-        href={{
-          pathname: "/tags/[tag]",
-          params: { tag: tagName },
-        }}
-        style={{
-          backgroundColor: colors.muted,
-          borderWidth: 1,
-          borderColor: colors.border,
-          padding: 10,
-          paddingHorizontal: 15,
-          borderRadius: 18,
-          marginRight: 10,
-          marginVertical: 5,
-          color: colors.text,
-        }}
-      >
-        {tagName}
-      </Link>
-    );
-  });
+  const tagPills = selectedAlbum.tags?.map((tagName, index) => (
+    <TagPill key={index} tagName={tagName} />
+  ));
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -388,9 +368,7 @@ export default function AlbumTracks() {
                 </View>
               ) : null}
 
-              <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                {selectedAlbum.tags && tagPills}
-              </View>
+              {selectedAlbum.tags && <TagPillList>{tagPills}</TagPillList>}
             </View>
           )}
         ></FlatList>

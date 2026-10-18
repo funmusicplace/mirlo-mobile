@@ -12,7 +12,6 @@ type Story = StoryObj<typeof TagPill>;
 
 export const Default: Story = {
   args: {
-    key: 1,
     tagName: "ambient",
   },
 };
