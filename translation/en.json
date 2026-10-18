@@ -52,8 +52,8 @@
   },
   "logIn": {
     "logIn": "Log in",
-    "email": "Email:",
-    "password": "Password:",
+    "email": "Email",
+    "password": "Password",
     "passwordReset": "Forgot your password?",
     "signUp": "Don't have an account yet? Sign up"
   },

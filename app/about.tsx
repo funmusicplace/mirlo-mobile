@@ -1,16 +1,28 @@
-import { Linking, Pressable, ScrollView, StyleSheet } from "react-native";
+import {
+  Linking,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
-import DismissModalBar from "@/components/DismissModalBar";
+import Button from "@/components/Button";
+import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type AboutLinkInfo = {
   label: string;
   url: string;
 };
+
+// Hit slop the link Button adds above and below its 24 pt line
+const LINK_SLOP = (touchTarget - type.body.lineHeight) / 2;
 
 // Linking.openURL would route mirlo.space links back into the app
 function onLinkPress(url: string) {
@@ -21,17 +33,25 @@ function onLinkPress(url: string) {
   }
 }
 
-function AboutLink({ label, url }: AboutLinkInfo) {
-  const colors = useColors();
+type AboutLinksProps = {
+  links: AboutLinkInfo[];
+  style?: StyleProp<ViewStyle>;
+};
 
+function AboutLinks({ links, style }: AboutLinksProps) {
   return (
-    <Pressable
-      style={[styles.link, { backgroundColor: colors.muted }]}
-      onPress={() => onLinkPress(url)}
-    >
-      <Text style={{ fontSize: 20 }}>{label}</Text>
-      <Ionicons name="open-outline" size={20} color={colors.text} />
-    </Pressable>
+    <View style={[styles.links, style]}>
+      {links.map((link) => (
+        <Button
+          key={link.url}
+          variant="link"
+          accessibilityRole="link"
+          title={link.label}
+          onPress={() => onLinkPress(link.url)}
+          style={styles.link}
+        />
+      ))}
+    </View>
   );
 }
 
@@ -58,53 +78,48 @@ export default function About() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.screen, { backgroundColor: colors.background }]}
     >
-      <DismissModalBar />
-      <ScrollView
-        style={[styles.content, { backgroundColor: colors.background }]}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <Text style={styles.heading}>{t("footer.aboutHeading")}</Text>
-        {aboutLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
-        <Text style={styles.subheading}>{t("footer.connectHeading")}</Text>
-        {connectLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
-        {legalLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
+      <ScreenHeader left={<BackButton />} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[type.display, styles.title]} accessibilityRole="header">
+          {t("footer.aboutHeading")}
+        </Text>
+        <AboutLinks links={aboutLinks} />
+        <Text style={[type.heading, styles.heading]} accessibilityRole="header">
+          {t("footer.connectHeading")}
+        </Text>
+        <AboutLinks links={connectLinks} />
+        <AboutLinks links={legalLinks} style={styles.group} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
   },
   content: {
-    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
   },
-  contentContainer: {
-    padding: 30,
-    gap: 20,
+  title: {
+    marginBottom: spacing.sm,
   },
   heading: {
-    fontSize: 25,
-    fontWeight: "bold",
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  subheading: {
-    fontSize: 20,
-    fontWeight: "bold",
+  group: {
+    marginTop: spacing.lg,
+  },
+  // Android drops touches outside the parent, so the slop stays inside
+  links: {
+    paddingVertical: LINK_SLOP,
+    gap: LINK_SLOP * 2,
   },
   link: {
-    flexDirection: "row",
-    width: "100%",
-    padding: 10,
-    alignItems: "center",
-    gap: 10,
+    alignSelf: "flex-start",
   },
 });
