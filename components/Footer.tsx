@@ -54,6 +54,8 @@ export default function Footer({ style }: ViewProps) {
   const insets = useSafeAreaInsets();
   const { activeTrack } = usePlayer();
   const pathname = usePathname();
+  // Now playing shows these controls full size
+  const showPlayer = !!activeTrack && pathname !== "/now-playing";
   const { user } = useAuthContext();
   const { width } = useWindowDimensions();
   const colors = useColors();
@@ -82,7 +84,7 @@ export default function Footer({ style }: ViewProps) {
         style,
       ]}
     >
-      {activeTrack && <ProgressBar />}
+      {showPlayer && <ProgressBar />}
       <View style={styles.row}>
         <View style={styles.group}>
           {NAV_ITEMS.map(({ route, icon, label, hint }) => {
@@ -104,7 +106,7 @@ export default function Footer({ style }: ViewProps) {
             );
           })}
         </View>
-        {activeTrack && (
+        {showPlayer && activeTrack && (
           <View style={styles.group}>
             {width >= ART_MIN_WINDOW_WIDTH && activeTrack.artwork ? (
               <Link
