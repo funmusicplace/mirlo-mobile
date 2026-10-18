@@ -1,4 +1,9 @@
-import { ActivityIndicator, View, FlatList } from "react-native";
+import {
+  ActivityIndicator,
+  View,
+  FlatList,
+  RefreshControl,
+} from "react-native";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
 import { StyleSheet } from "react-native";
@@ -37,8 +42,9 @@ export default function Index() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetching,
     isFetchingNextPage,
+    isRefetching,
+    refetch,
   } = useInfiniteQuery<{ results: AlbumProps[] }>({
     queryKey: ["infiniteTrackGroups"],
     queryFn: ({ pageParam = 0 }) => {
@@ -98,7 +104,7 @@ export default function Index() {
   }
 
   const renderLoadingFooter = () => {
-    if (!isFetching && !isFetchingNextPage) return null;
+    if (!isFetchingNextPage) return null;
 
     return (
       <View style={{ marginVertical: spacing.xxl }}>
@@ -136,6 +142,16 @@ export default function Index() {
       />
       <FlatList
         ref={listRef}
+        // Native counterpart of the web's Refresh button on this list
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching && !isFetchingNextPage}
+            onRefresh={refetch}
+            tintColor={colors.accent}
+            colors={[colors.accent]}
+            progressBackgroundColor={colors.background}
+          />
+        }
         numColumns={2}
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
