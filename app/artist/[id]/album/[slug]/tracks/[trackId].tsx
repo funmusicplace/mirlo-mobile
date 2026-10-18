@@ -212,6 +212,7 @@ export default function TrackView() {
                   backgroundColor: colors.tint,
                 }}
                 resizeMode="cover"
+                accessibilityLabel={data.result.coverImageAlt || undefined}
               />
             </View>
             <View style={[styles.gutter, styles.underCover]}>
