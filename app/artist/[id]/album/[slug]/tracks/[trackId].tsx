@@ -1,11 +1,9 @@
-import { queryAlbum, queryTrackGroups } from "@/queries/queries";
+import { queryAlbum } from "@/queries/queries";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import {
   View,
-  Pressable,
   Image,
-  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   FlatList,
@@ -15,20 +13,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, useRouter } from "expo-router";
 import PlayPauseWrapper from "@/components/PlayPauseWrapper";
-import TrackPlayer, { PlaybackState, State } from "react-native-track-player";
+import TrackPlayer, { State } from "react-native-track-player";
 import { usePlayer } from "@/state/PlayerContext";
 import { API_KEY } from "@/constants/api-key";
 import { API_ROOT } from "@/constants/api-root";
-import { audioTrackType, trackGroupUrl } from "@/scripts/utils";
+import { audioTrackType, linkifyUrls, trackGroupUrl } from "@/scripts/utils";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import { useTranslation } from "react-i18next";
-import FavoriteTrackButton from "@/components/FavoriteTrackButton";
+import { Trans, useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import Markdown from "react-native-markdown-display";
 import ErrorNotification from "@/components/ErrorNotification";
 import ShareButton from "@/components/ShareButton";
-import MarqueeText from "@/components/MarqueeText";
+import Button from "@/components/Button";
+import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
+import SearchButton from "@/components/SearchButton";
+import MenuButton from "@/components/MenuButton";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -39,7 +43,7 @@ export default function TrackView() {
     queryAlbum({ slug: slug, id: id }),
   );
   const router = useRouter();
-  const { playableTracks, setPlayableTracks } = usePlayer();
+  const { setPlayableTracks } = usePlayer();
   const [album, setAlbum] = useState<RNTrack[]>();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -88,11 +92,11 @@ export default function TrackView() {
 
   if (isPending) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.screen}>
         <ActivityIndicator
           size="large"
           color={colors.accent}
-          style={styles.loadSpinner}
+          style={styles.screen}
         />
       </View>
     );
@@ -101,7 +105,7 @@ export default function TrackView() {
   if (isError) {
     console.error(error);
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.screen}>
         <ErrorNotification
           visible={showError}
           onDismiss={() => setShowError(false)}
@@ -119,139 +123,125 @@ export default function TrackView() {
     router.dismissTo(`/artist/${id}/album/${slug}/album-tracks`);
   }
 
+  const releaseDate = formatReleaseDate(data.result.releaseDate, t);
+  const coverSize = width - 2 * gutter;
+  const linkStyle = {
+    color: colors.accent,
+    textDecorationLine: "underline" as const,
+  };
+  const markdownStyles = {
+    body: { ...type.body, color: colors.text },
+    paragraph: { marginTop: 0, marginBottom: spacing.md },
+    link: linkStyle,
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 10,
-          width: "100%",
-          height: 60,
-          backgroundColor: colors.header,
-        }}
-      >
-        <Pressable onPress={() => router.dismiss()}>
-          <Ionicons
-            name="chevron-back-outline"
-            size={40}
-            style={{ color: colors.secondaryText }}
-          ></Ionicons>
-        </Pressable>
-        {filteredTrack && (
-          <ShareButton
-            url={`${trackGroupUrl(data.result)}/tracks/${filteredTrack.id}`}
-          />
-        )}
-      </View>
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <FlatList
-          style={{ width: "100%" }}
-          contentContainerStyle={[
-            styles.listContainer,
-            { backgroundColor: colors.background },
-          ]}
-          data={album}
-          keyExtractor={(item, index) => `${index}-${item.id || item.title}`}
-          renderItem={({ item }) =>
-            data.result ? (
-              <PlayPauseWrapper
-                trackObject={item}
-                onTrackScreen={true}
-              ></PlayPauseWrapper>
-            ) : null
-          }
-          ListHeaderComponent={() => (
-            <View style={{ marginBottom: 10 }}>
-              <Image
-                source={{ uri: data.result?.cover?.sizes[600] }}
-                style={[
-                  styles.image,
-                  { width: width, backgroundColor: colors.muted },
-                ]}
-                resizeMode="cover"
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginVertical: 10,
-                }}
-              >
-                <View style={{ maxWidth: "65%" }}>
-                  <Link
-                    href={{
-                      pathname: "/artist/[id]/album/[slug]/album-tracks",
-                      params: {
-                        id: data.result?.artistId,
-                        slug: data.result?.urlSlug,
-                      },
-                    }}
-                    asChild
-                  >
-                    <Pressable style={{ flexShrink: 1 }}>
-                      <MarqueeText
-                        style={{
-                          color: colors.accent,
-                          marginBottom: 5,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {data.result?.title}
-                      </MarqueeText>
-                    </Pressable>
-                  </Link>
-                  <Text>
-                    {t("profile.albumLink")
-                      .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                      .trim() + " "}
-                    <Link
-                      href={{
-                        pathname: "/artist/[id]/artist-page",
-                        params: { id: data.result?.artistId },
-                      }}
-                      style={{ color: colors.accent, fontWeight: "bold" }}
-                    >
-                      {data.result?.artist.name}
-                    </Link>
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {filteredTrack && (
-                    <FavoriteTrackButton track={filteredTrack} size={40} />
-                  )}
-                  <TrackPlayButton />
-                </View>
-              </View>
-            </View>
-          )}
-          ListFooterComponent={() => (
-            <View style={{ marginVertical: 10 }}>
+    <SafeAreaView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+    >
+      <ScreenHeader
+        left={<BackButton />}
+        right={
+          <>
+            <SearchButton />
+            <MenuButton />
+          </>
+        }
+      />
+      <FlatList
+        data={album}
+        keyExtractor={(item, index) => `${index}-${item.id || item.title}`}
+        renderItem={({ item }) => <PlayPauseWrapper trackObject={item} />}
+        ListHeaderComponent={
+          <View>
+            <View style={styles.gutter}>
               <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 20,
-                  marginBottom: 15,
-                }}
+                accessibilityRole="header"
+                style={[type.title, styles.title]}
               >
-                {t("trackGroupDetails.about")}
+                {filteredTrack?.title}
               </Text>
-              <Text style={{ fontStyle: "italic", marginBottom: 20 }}>
-                {formatUTCDate(data.result?.releaseDate)}
+              <Text style={type.small}>
+                <Trans
+                  t={t}
+                  i18nKey="trackGroupDetails.fromAlbum"
+                  values={{ album: data.result.title }}
+                  components={{
+                    albumLink: (
+                      <Link
+                        href={{
+                          pathname: "/artist/[id]/album/[slug]/album-tracks",
+                          params: {
+                            id: data.result.artistId,
+                            slug: data.result.urlSlug,
+                          },
+                        }}
+                        style={linkStyle}
+                      />
+                    ),
+                  }}
+                />
               </Text>
-              <Text style={{ marginBottom: 20 }}>{data.result?.about}</Text>
+              <Text style={[type.small, styles.byline]}>
+                <Trans
+                  t={t}
+                  i18nKey="trackGroupDetails.byArtist"
+                  values={{ artist: data.result.artist.name }}
+                  components={{
+                    artistLink: (
+                      <Link
+                        href={{
+                          pathname: "/artist/[id]/artist-page",
+                          params: { id: data.result.artistId },
+                        }}
+                        style={linkStyle}
+                      />
+                    ),
+                  }}
+                />
+              </Text>
+              <Image
+                source={{
+                  uri:
+                    data.result.cover?.sizes[1200] ??
+                    data.result.cover?.sizes[600],
+                }}
+                style={{
+                  width: coverSize,
+                  height: coverSize,
+                  backgroundColor: colors.tint,
+                }}
+                resizeMode="cover"
+                alt={data.result.coverImageAlt || undefined}
+              />
             </View>
-          )}
-        ></FlatList>
-      </View>
+            <View style={[styles.gutter, styles.underCover]}>
+              <Text style={[type.caption, { color: colors.secondaryText }]}>
+                {releaseDate}
+              </Text>
+              {filteredTrack && (
+                <ShareButton
+                  url={`${trackGroupUrl(data.result)}/tracks/${filteredTrack.id}`}
+                />
+              )}
+            </View>
+            <View style={styles.play}>
+              <TrackPlayButton />
+            </View>
+          </View>
+        }
+        ListFooterComponent={
+          data.result.about ? (
+            <View style={styles.footer}>
+              <Markdown style={markdownStyles}>
+                {linkifyUrls(
+                  data.result.about.replace(/([^\n])\n([^\n])/g, "$1 $2"),
+                )}
+              </Markdown>
+            </View>
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -267,15 +257,17 @@ function TrackPlayButton() {
   } = usePlayer();
   const [q, setQ] = useState<RNTrack[] | null>(null);
   const colors = useColors();
+  const { t } = useTranslation();
 
   async function getQ() {
     const queue = (await TrackPlayer.getQueue()) as RNTrack[];
     setQ(queue);
   }
 
+  // Starting playback swaps the queue without changing playableTracks
   useEffect(() => {
     getQ();
-  }, [playableTracks]);
+  }, [playableTracks, activeTrack]);
 
   const togglePlayBack = async () =>
     // playBackState: PlaybackState | { state: undefined }
@@ -336,81 +328,94 @@ function TrackPlayButton() {
       }
     };
 
+  const playing =
+    playableTracks.length > 0 &&
+    (isPlaying || playbackState.state === State.Buffering) &&
+    activeTrack?.trackGroup?.urlSlug ===
+      playableTracks[0].trackGroup?.urlSlug &&
+    playableTracks.length === q?.length;
+
   return (
-    <TouchableOpacity
+    <Button
+      rounded
+      title={
+        playing
+          ? t("clickToPlay.pause", "Pause")
+          : t("playableCover.playTrack", "Play track")
+      }
+      startIcon={
+        <Ionicons name={playing ? "pause-outline" : "play-outline"} size={16} />
+      }
       onPress={() => togglePlayBack()}
-      disabled={playableTracks.length ? false : true}
-    >
-      <Ionicons
-        name={
-          playableTracks.length
-            ? (isPlaying || playbackState.state === State.Buffering) &&
-              activeTrack?.trackGroup?.urlSlug ===
-                playableTracks[0].trackGroup?.urlSlug &&
-              playableTracks.length === q?.length
-              ? "pause-circle-outline"
-              : "play-circle-outline"
-            : "play-circle-outline"
-        }
-        size={70}
-        style={{ marginHorizontal: 5 }}
-        color={playableTracks.length ? colors.text : colors.inactive}
-      />
-    </TouchableOpacity>
+      disabled={!playableTracks.length}
+      style={[
+        styles.playButton,
+        {
+          borderColor: playableTracks.length ? colors.button : colors.disabled,
+        },
+      ]}
+    />
   );
 }
 
-function formatUTCDate(utcDate: string | undefined) {
-  const { t } = useTranslation();
+function formatReleaseDate(utcDate: string | undefined, t: TFunction) {
   if (!utcDate) return undefined;
   const date = new Date(utcDate);
+  const upcoming = date.getTime() > Date.now();
 
   // Account for timezone offset
   const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
 
-  const options: DateTimeFormatOptions = {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  };
+  // The web leaves the year off upcoming releases
+  const options: DateTimeFormatOptions = upcoming
+    ? { month: "long", day: "numeric" }
+    : { month: "long", day: "numeric", year: "numeric" };
   const result = localDate.toLocaleDateString("en-US", options);
 
-  return date.getTime() > Date.now()
-    ? `${t("trackGroupCard.releaseDate").trim()} ${result}`
-    : t("trackGroupCard.released").substring(
-        0,
-        t("trackGroupCard.released").indexOf(":") + 1,
-      ) + ` ${result}`;
+  return t(
+    upcoming
+      ? "trackGroupDetails.futureRelease"
+      : "trackGroupDetails.pastRelease",
+    { date: result },
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    alignItems: "flex-start",
-    justifyContent: "space-evenly",
   },
-  listContainer: {
-    paddingHorizontal: "5%",
+  gutter: {
+    paddingHorizontal: gutter,
   },
-  listItem: {
+  title: {
+    paddingTop: spacing.xl,
+    marginBottom: spacing.sm,
+  },
+  byline: {
+    marginBottom: spacing.md,
+  },
+  // A full touch target tall, so Android keeps the share button's hit slop
+  underCover: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 5,
     justifyContent: "space-between",
-    marginVertical: 5,
+    minHeight: touchTarget,
+    gap: spacing.sm,
   },
-  listHeader: {
-    alignContent: "center",
+  // Padding keeps the button's hit slop inside the wrapper
+  play: {
+    alignItems: "center",
+    paddingVertical: spacing.lg,
+    paddingHorizontal: gutter + spacing.xl,
   },
-  text: {
-    padding: 10,
-    fontWeight: "bold",
+  // Web ClickToPlayTracks: 70% wide with a 1 px border, 42 tall
+  playButton: {
+    width: "70%",
+    borderWidth: 1,
   },
-  image: {
-    height: 380,
-    alignSelf: "center",
-  },
-  loadSpinner: {
-    flex: 1,
+  footer: {
+    paddingHorizontal: gutter + spacing.sm,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
 });

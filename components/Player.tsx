@@ -1,55 +1,33 @@
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ViewStyle,
-  StyleProp,
-  ViewProps,
-} from "react-native";
+import { Platform, Pressable, StyleSheet, View, ViewProps } from "react-native";
 import { usePlayer } from "@/state/PlayerContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import NextButton from "./NextButton";
 import PrevButton from "./PrevButton";
 import LoopButton from "./LoopButton";
 import ShuffleButton from "./ShuffleButton";
-import { Link } from "expo-router";
-import TrackPlayer, {
-  State,
-  PlaybackState,
-  useProgress,
-} from "react-native-track-player";
-import Slider from "@react-native-community/slider";
+import TrackPlayer, { State, PlaybackState } from "react-native-track-player";
 import { useColors } from "@/constants/colors";
+import { radius } from "@/constants/spacing";
 
-type PlayerStyleProps = {
-  bottomDistance: number;
-};
-
-type PlayButtonProps = {
-  buttonColor?: string;
-};
+// The footer play circle (40) scaled for the full screen
+const PLAY_SIZE = 64;
 
 export default function Player({ style }: ViewProps) {
   return (
-    //<View style={style}>
-    <View style={[styles.buttonsContainer, style]}>
+    <View style={[styles.controls, style]}>
       <ShuffleButton />
       <PrevButton />
-      <PlayerPlayButton buttonColor="black" />
+      <PlayerPlayButton />
       <NextButton />
       <LoopButton />
     </View>
-    //</View>
   );
 }
 
-function PlayerPlayButton({ buttonColor }: PlayButtonProps) {
+function PlayerPlayButton() {
   const { playbackState, isPlaying } = usePlayer();
   const colors = useColors();
-  const playIcon = <Ionicons name="play" size={40} />;
-  const pauseIcon = <Ionicons name="pause" size={40} />;
+  const playing = playbackState.state === State.Buffering || isPlaying;
 
   async function onPress(playbackState: PlaybackState | { state: undefined }) {
     try {
@@ -72,57 +50,46 @@ function PlayerPlayButton({ buttonColor }: PlayButtonProps) {
   }
 
   return (
-    <TouchableOpacity
-      style={styles.button}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={playing ? "Pause" : "Play"}
+      android_ripple={{
+        color: colors.tintX,
+        borderless: true,
+        radius: PLAY_SIZE / 2,
+      }}
       onPress={() => onPress(playbackState)}
+      style={({ pressed }) => [
+        styles.play,
+        { borderColor: colors.accent },
+        pressed && styles.pressed,
+      ]}
     >
       <Ionicons
-        name={
-          playbackState.state === State.Buffering || isPlaying
-            ? "pause-circle-outline"
-            : "play-circle-outline"
-        }
-        size={75}
-        color={colors.text}
+        name={playing ? "pause-outline" : "play-outline"}
+        size={28}
+        color={colors.accent}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  progressBar: {
-    alignSelf: "stretch",
-    marginLeft: 5,
-    marginRight: 5,
-  },
-  container: {
-    width: "90%",
-    position: "absolute",
-    padding: 5,
-    paddingHorizontal: 10,
-    bottom: 100,
-    backgroundColor: "#ededed",
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    boxShadow: "0 0 3 5 rgb(0, 0, 0, .5)",
-    borderRadius: 10,
-    zIndex: 10,
-  },
-  buttonsContainer: {
+  controls: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-evenly",
   },
-  button: {
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    marginHorizontal: 5,
+  play: {
+    width: PLAY_SIZE,
+    height: PLAY_SIZE,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  playPauseButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    alignSelf: "center",
-    textTransform: "uppercase",
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

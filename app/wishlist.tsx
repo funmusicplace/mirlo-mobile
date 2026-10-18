@@ -1,20 +1,29 @@
 import { View, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import { useAuthContext } from "@/state/AuthContext";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { queryWishlist } from "@/queries/queries";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
-import CollectionPurchase from "@/components/CollectionPurchase";
-import { isFavoritedTrack, isWishlisted } from "@/types/typeguards";
+import ScreenHeader, { HeaderButton } from "@/components/ScreenHeader";
+import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
+import { useGridColumnWidth } from "@/components/TrackGroupItem";
+import CollectionPurchase, {
+  CollectionEmpty,
+  CollectionItem,
+} from "@/components/CollectionPurchase";
 import { useTranslation } from "react-i18next";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 import Text from "@/components/ThemedText";
 
-export default function Collections() {
+type WishlistItem = CollectionItem & { createdAt: Date };
+
+export default function Wishlist() {
   const { user } = useAuthContext();
   const userId = user?.id;
   const { top } = useSafeAreaInsets();
@@ -22,18 +31,8 @@ export default function Collections() {
   const { t } = useTranslation();
   const [showError, setShowError] = useState<boolean>(true);
   const colors = useColors();
-  const [list, setList] = useState<
-    (
-      | {
-          userId: number;
-          trackGroupId: number;
-          trackGroup: AlbumProps;
-          createdAt: Date;
-        }
-      | { userId: number; trackId: number; track: RNTrack; createdAt: Date }
-      | string
-    )[]
-  >([]);
+  const columnWidth = useGridColumnWidth();
+  const listRef = useRef<FlatList<WishlistItem>>(null);
   const wishlist = data?.results;
   const trackFavorites = user?.trackFavorites;
 
@@ -43,156 +42,110 @@ export default function Collections() {
     }
   }, [user]);
 
-  useEffect(() => {
-    wishlist?.sort(
+  // Releases and favorited tracks in one grid, newest first like the web
+  const items = useMemo(() => {
+    const releases: WishlistItem[] = (wishlist ?? [])
+      .filter((item) => item.trackGroup)
+      .map((item) => ({
+        key: `album-${item.trackGroupId}`,
+        createdAt: item.createdAt,
+        trackGroup: item.trackGroup,
+      }));
+    const tracks: WishlistItem[] = (trackFavorites ?? []).map((item) => ({
+      key: `track-${item.trackId}`,
+      createdAt: item.createdAt,
+      trackGroup: item.track.trackGroup,
+      track: item.track,
+    }));
+    return [...releases, ...tracks].sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-    trackFavorites?.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-    setList([
-      t("profile.yourWishlist"),
-      ...(wishlist ?? []),
-      t("profile.favoritedTracks"),
-      ...(trackFavorites ?? []),
-    ]);
-  }, [wishlist, trackFavorites, t]);
+  }, [wishlist, trackFavorites]);
 
-  if (isPending) {
-    return (
-      <View style={{ flex: 1 }}>
-        <ActivityIndicator
-          size="large"
-          color={colors.accent}
-          style={styles.loadSpinner}
-        />
-      </View>
+  let content: ReactNode;
+  // The query is disabled while signed out, so it stays pending
+  if (isPending && userId) {
+    content = (
+      <ActivityIndicator
+        size="large"
+        color={colors.accent}
+        style={styles.loadSpinner}
+      />
     );
-  }
-
-  if (isError) {
+  } else if (isError) {
     console.error(error);
-    return (
-      <View style={{ flex: 1 }}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={error}
-        />
-      </View>
+    content = (
+      <ErrorNotification
+        visible={showError}
+        onDismiss={() => setShowError(false)}
+        error={error}
+      />
+    );
+  } else {
+    content = (
+      <FlatList
+        ref={listRef}
+        numColumns={2}
+        columnWrapperStyle={{ gap: spacing.md }}
+        contentContainerStyle={{ paddingHorizontal: gutter }}
+        data={items}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => (
+          <CollectionPurchase
+            trackGroup={item.trackGroup}
+            track={item.track}
+            width={columnWidth}
+          />
+        )}
+        ListHeaderComponent={
+          <Text accessibilityRole="header" style={styles.title}>
+            {t("profile.yourWishlist")}
+          </Text>
+        }
+        ListEmptyComponent={
+          <CollectionEmpty>{t("profile.wishlistEmpty")}</CollectionEmpty>
+        }
+      />
     );
   }
 
-  if (!wishlist && !trackFavorites) {
-    return <Text>No wishlist found</Text>;
-  }
-  // console.log(wishlist);
-  // console.log(trackFavorites);
   return (
     <View
       style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
     >
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 10,
-            width: "100%",
-            height: 60,
-            borderBottomWidth: 3,
-            borderBottomColor: colors.border,
-            backgroundColor: colors.background,
-          }}
-        >
-          <SearchButton />
-          <MenuButton />
-        </View>
-        <FlatList
-          style={{ width: "100%" }}
-          contentContainerStyle={[
-            styles.listContainer,
-            { backgroundColor: colors.background },
-          ]}
-          data={list}
-          //keyExtractor={(item, index) => `${item.trackGroupId}-${index}`}
-          renderItem={({ item }) => {
-            if (isWishlisted(item)) {
-              return (
-                <Link
-                  href={{
-                    pathname: "/artist/[id]/album/[slug]/album-tracks",
-                    params: {
-                      id: item.trackGroup.artistId,
-                      slug: item.trackGroup.urlSlug,
-                    },
-                  }}
-                >
-                  <CollectionPurchase trackGroup={item.trackGroup} />
-                </Link>
-              );
-            } else if (isFavoritedTrack(item)) {
-              return (
-                <Link
-                  href={{
-                    pathname: "/artist/[id]/album/[slug]/tracks/[trackId]",
-                    params: {
-                      id: item.track.trackGroup.artistId,
-                      slug: item.track.trackGroup.urlSlug,
-                      trackId: item.trackId,
-                    },
-                  }}
-                >
-                  <CollectionPurchase
-                    trackGroup={item.track.trackGroup}
-                    track={item.track}
-                  />
-                </Link>
-              );
-            } else if (typeof item === "string") {
-              return (
-                <View
-                  style={{ flexDirection: "row", justifyContent: "flex-start" }}
-                >
-                  <Text style={styles.listText}>{item}</Text>
-                </View>
-              );
+      <ScreenHeader
+        left={
+          <HeaderButton
+            size={LOGO_SIZE}
+            accessibilityLabel="Mirlo"
+            accessibilityHint="Scrolls to the top"
+            onPress={() =>
+              listRef.current?.scrollToOffset({ offset: 0, animated: true })
             }
-            return null;
-          }}
-        ></FlatList>
-      </View>
+          >
+            <MirloLogo />
+          </HeaderButton>
+        }
+        right={
+          <>
+            <SearchButton />
+            <MenuButton />
+          </>
+        }
+      />
+      {content}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 5,
-  },
-  listContainer: {
-    paddingBottom: 10,
-  },
-  text: {
-    padding: 10,
-    fontWeight: "bold",
-  },
-  listText: {
-    padding: 10,
-    fontWeight: "bold",
-    fontSize: 20,
-  },
   loadSpinner: {
     flex: 1,
+  },
+  // Web profile h1: margin 0.7rem 0
+  title: {
+    ...type.pageTitle,
+    marginVertical: spacing.md,
   },
 });

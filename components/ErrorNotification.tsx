@@ -1,11 +1,11 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated} from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Text from "@/components/ThemedText";
+import { useColors } from "@/constants/colors";
+import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type ErrorNotificationProps = {
   onDismiss: () => void;
@@ -13,127 +13,84 @@ type ErrorNotificationProps = {
   error: Error;
 };
 
+// Matches the web warning Box: 30% tinted surface with a 4 pt left rule
 const ErrorNotification = ({
   onDismiss,
   visible = true,
   error,
 }: ErrorNotificationProps) => {
+  const colors = useColors();
   if (!visible) return null;
+
+  const offline = error.message === "Network request failed";
 
   return (
     <SafeAreaView>
-      <View style={[styles.errorNotification]}>
-        <View style={styles.errorIcon}>
-          <Text style={styles.iconText}>⚠️</Text>
+      <View
+        accessibilityRole="alert"
+        style={[
+          styles.box,
+          {
+            backgroundColor: colors.alert,
+            borderLeftColor: colors.alertBorder,
+          },
+        ]}
+      >
+        <View style={styles.content}>
+          <Text style={styles.title}>
+            {offline ? "Connection Issue" : error.name}
+          </Text>
+          <Text style={styles.message}>
+            {offline
+              ? "Unable to connect. Check your internet and try again."
+              : error.message}
+          </Text>
         </View>
-        <View style={styles.errorContent}>
-          {error.message === "Network request failed" ? (
-            <View>
-              <Text style={styles.errorTitle}>Connection Issue</Text>
-              <Text style={styles.errorMessage}>
-                Unable to connect. Check your internet and try again.
-              </Text>
-            </View>
-          ) : (
-            <View>
-              <Text style={styles.errorTitle}>{error.name}</Text>
-              <Text style={styles.errorMessage}>{error.message}</Text>
-            </View>
-          )}
-        </View>
-        <TouchableOpacity
-          style={styles.dismissBtn}
+        <Pressable
           onPress={onDismiss}
-          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss"
+          hitSlop={(touchTarget - 20) / 2}
+          style={({ pressed }) => [styles.dismiss, pressed && styles.pressed]}
         >
-          <Text style={styles.dismissText}>×</Text>
-        </TouchableOpacity>
+          <FontAwesome5 name="times" size={16} color={colors.text} />
+        </Pressable>
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  errorNotification: {
-    backgroundColor: "#ff6b6b",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginHorizontal: 16,
-    marginVertical: 15,
-    borderRadius: 15,
+  box: {
     flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#ff6b6b",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-    width: "80%",
-    gap: 5,
+    alignItems: "flex-start",
+    gap: spacing.sm,
+    marginHorizontal: gutter,
+    marginVertical: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.sm,
+    borderLeftWidth: 4,
   },
-  errorIcon: {
-    width: 24,
-    height: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  iconText: {
-    fontSize: 14,
-  },
-  errorContent: {
+  content: {
     flex: 1,
   },
-  errorTitle: {
-    color: "white",
+  title: {
+    ...type.body,
     fontWeight: "600",
-    fontSize: 16,
-    marginBottom: 2,
   },
-  errorMessage: {
-    color: "white",
-    fontSize: 15,
-    opacity: 0.9,
-    lineHeight: 16,
+  message: {
+    ...type.small,
   },
-  dismissBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  dismiss: {
     width: 20,
     height: 20,
-    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  dismissText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "bold",
+  pressed: {
+    opacity: 0.6,
   },
 });
 
 export default ErrorNotification;
-
-// Usage example:
-/*
-import React from 'react';
-import { View } from 'react-native';
-import ErrorNotification from './ErrorNotification';
-
-const App: React.FC = () => {
-  const [showError, setShowError] = React.useState<boolean>(true);
-
-  return (
-    <View style={{ flex: 1 }}>
-      <ErrorNotification 
-        visible={showError}
-        onDismiss={() => setShowError(false)}
-      />
-      {/* Rest of your app content */
-//</View>
-//);
-//};

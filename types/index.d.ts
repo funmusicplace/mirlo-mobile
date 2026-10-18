@@ -62,6 +62,9 @@ interface UserTrackPurchase {
 
 interface AlbumProps {
   id: number;
+  coverCredit?: string | null;
+  coverImageAlt?: string | null;
+  credits?: string | null;
   cover: {
     sizes: {
       60: string;

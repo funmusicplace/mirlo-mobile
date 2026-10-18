@@ -1,15 +1,17 @@
 import DismissModalBar from "@/components/DismissModalBar";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { mirloRed } from "@/constants/mirlo-red";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useColors } from "@/constants/colors";
-import { usePlayer } from "@/state/PlayerContext";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import * as api from "../queries/fetch/fetchWrapper";
-import { authRefresh } from "@/queries/authQueries";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import Button from "@/components/Button";
+import Text from "@/components/ThemedText";
+import { spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 export default function AddFreeAlbumModal() {
   const colors = useColors();
@@ -29,7 +31,7 @@ export default function AddFreeAlbumModal() {
         `/v1/trackGroups/${trackGroupId}/purchase`,
         {
           price: 0,
-        }
+        },
       );
       queryClient.invalidateQueries({
         queryKey: ["fetchUserPurchases", { userId: user.id }],
@@ -40,39 +42,26 @@ export default function AddFreeAlbumModal() {
       console.log(response);
     } catch (err) {
       console.error("Issue purchasing free album", err);
+      setAdding(false);
     }
-  }, [trackGroupId]);
+  }, [trackGroupId, user, queryClient, refreshLoggedInUser]);
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.screen, { backgroundColor: colors.background }]}
     >
-      <DismissModalBar />
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          paddingHorizontal: 20,
-          paddingTop: 50,
-          width: "100%",
-          backgroundColor: mirloRed,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 20,
-            color: "white",
-            textAlign: "center",
-            marginBottom: 20,
-          }}
-        >
-          Add <Text style={{ fontWeight: "bold" }}>{trackGroupTitle}</Text> to
-          your collection.
-        </Text>
-        <Text style={{ fontSize: 20, marginBottom: 20, color: "white" }}>
+      <DismissModalBar
+        title={`Add ${trackGroupTitle ?? ""} to your collection.`}
+      />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={type.body}>
           You'll add this free album to your collection.
         </Text>
-        <Pressable
+        <Button
+          title={!isAdded ? "Add to Collection" : "Added!"}
+          startIcon={
+            <Ionicons name={!isAdded ? "add-sharp" : "checkmark-sharp"} />
+          }
           onPress={() => {
             if (!adding && !isAdded) {
               getFreeAlbum();
@@ -81,33 +70,23 @@ export default function AddFreeAlbumModal() {
               return;
             }
           }}
-          style={{
-            alignItems: "center",
-            marginBottom: 10,
-            backgroundColor: "white",
-            borderRadius: 5,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              color: "black",
-              margin: 10,
-              textAlign: "center",
-            }}
-          >
-            {!isAdded ? "Add to Collection" : "Added! ✅"}
-          </Text>
-        </Pressable>
-      </View>
+          disabled={isAdded}
+          fullWidth
+          style={styles.action}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
+  },
+  content: {
+    padding: spacing.lg,
+  },
+  action: {
+    marginTop: spacing.xl,
   },
 });

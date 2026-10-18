@@ -1,11 +1,4 @@
-import {
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  TextInput,
-  Pressable,
-} from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { useLoginMutation } from "@/queries/authQueries";
 import { useRouter } from "expo-router";
@@ -13,16 +6,25 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import ErrorNotification from "./ErrorNotification";
+import Button from "./Button";
+import Text from "./ThemedText";
+import { useColors } from "@/constants/colors";
+import { radius, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type LoginInputs = {
   email: string;
   password: string;
 };
 
+// --mi-container-small, the web login column
+const COLUMN_WIDTH = 300;
+
 export default function LoginForm() {
   const {
     control,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<LoginInputs>({
     defaultValues: {
@@ -35,13 +37,25 @@ export default function LoginForm() {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
   const [showError, setShowError] = useState<boolean>(true);
 
-  const { mutate: login } = useLoginMutation();
+  const { mutate: login, isPending } = useLoginMutation();
+  const colors = useColors();
+  const inputStyle = [
+    styles.input,
+    {
+      backgroundColor: colors.inputBackground,
+      borderColor: colors.border,
+      color: colors.inputText,
+    },
+  ];
+  const errorStyle = [type.small, { color: colors.danger }];
 
   const handleBrowserOpen = async () => {
     await openInBrowser("https://mirlo.space/signup");
   };
 
   const onSubmit = async (data: LoginInputs) => {
+    // The keyboard's Go key bypasses the button's loading guard
+    if (isPending) return;
     login(data, {
       onSuccess() {
         console.log("logged in successfully");
@@ -59,33 +73,32 @@ export default function LoginForm() {
       },
     });
   };
+  const submit = handleSubmit(onSubmit);
 
   return (
     <View style={styles.container}>
-      <Text
-        style={{
-          color: "white",
-          fontWeight: "bold",
-          fontSize: 20,
-          marginTop: 20,
-        }}
-      >
+      <Text style={styles.title} accessibilityRole="header">
         {t("logIn")}
       </Text>
-      <View>
-        <Text style={styles.formLabel}>{t("email")}</Text>
+      <View style={styles.field}>
+        <Text style={styles.label}>{t("email")}</Text>
         <Controller
           control={control}
           rules={{ required: true }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({ field: { ref, onChange, onBlur, value } }) => (
             <TextInput
-              style={styles.inputStyle}
+              ref={ref}
+              style={inputStyle}
+              accessibilityLabel={t("email")}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
               autoComplete="email"
               textContentType="emailAddress"
-              placeholderTextColor="#555"
+              returnKeyType="next"
+              submitBehavior="submit"
+              onSubmitEditing={() => setFocus("password")}
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -93,16 +106,22 @@ export default function LoginForm() {
           )}
           name="email"
         />
-        {errors.email && <Text>Email is required</Text>}
+        {errors.email && <Text style={errorStyle}>Email is required</Text>}
+      </View>
 
-        <Text style={styles.formLabel}>{t("password")}</Text>
+      <View style={styles.field}>
+        <Text style={styles.label}>{t("password")}</Text>
         <Controller
           control={control}
           rules={{ required: true }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({ field: { ref, onChange, onBlur, value } }) => (
             <TextInput
-              style={styles.inputStyle}
-              placeholderTextColor="#555"
+              ref={ref}
+              style={inputStyle}
+              accessibilityLabel={t("password")}
+              returnKeyType="go"
+              onSubmitEditing={submit}
+              placeholderTextColor={colors.inputPlaceholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -112,78 +131,63 @@ export default function LoginForm() {
           name="password"
         />
         {errors.password && (
-          <Text style={{ color: "white" }}>Password is required.</Text>
+          <Text style={errorStyle}>Password is required</Text>
         )}
-        {loginError && (
-          <ErrorNotification
-            visible={showError}
-            onDismiss={() => setShowError(false)}
-            error={loginError}
-          />
-        )}
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmit(onSubmit)}
-        >
-          <Text style={styles.text}>{t("logIn")}</Text>
-        </TouchableOpacity>
-
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "row",
-            marginTop: 30,
-          }}
-        >
-          <Pressable onPress={handleBrowserOpen} hitSlop={12}>
-            <Text style={{ color: "white", textDecorationLine: "underline" }}>
-              {t("signUp")}
-            </Text>
-          </Pressable>
-        </View>
       </View>
+      {loginError && (
+        <ErrorNotification
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          error={loginError}
+        />
+      )}
+
+      <Button
+        title={t("logIn")}
+        onPress={submit}
+        loading={isPending}
+        fullWidth
+      />
+
+      <Button
+        variant="link"
+        accessibilityRole="link"
+        title={t("signUp")}
+        onPress={handleBrowserOpen}
+        style={styles.signUp}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    height: 50,
-    flex: 1,
+    width: "100%",
+    maxWidth: COLUMN_WIDTH,
+    alignSelf: "center",
+    // Keeps the sign up link hit slop inside the column
+    paddingBottom: spacing.xl,
   },
-
-  formLabel: {
-    marginTop: 20,
-    fontSize: 20,
-    color: "#fff",
+  title: type.pageTitle,
+  field: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
   },
-  inputStyle: {
-    marginTop: 5,
-    width: 300,
-    height: 40,
-    paddingHorizontal: 10,
-    backgroundColor: "white",
+  label: {
+    ...type.formLabel,
+    marginBottom: spacing.sm,
   },
-  formText: {
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#aaa",
-    fontSize: 20,
+  input: {
+    minHeight: touchTarget,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    fontSize: type.body.fontSize,
+    marginBottom: spacing.xs,
   },
-  text: {
-    color: "#000",
-    fontSize: 20,
-  },
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    backgroundColor: "#FFF",
-    paddingVertical: 5,
+  signUp: {
+    alignSelf: "flex-start",
+    marginTop: spacing.xxl,
   },
 });

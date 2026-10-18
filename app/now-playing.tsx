@@ -3,13 +3,13 @@ import {
   Image,
   StyleSheet,
   Pressable,
+  Platform,
   useWindowDimensions,
   ScrollView,
 } from "react-native";
 import { usePlayer } from "@/state/PlayerContext";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import Player from "@/components/Player";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,180 +17,156 @@ import { useTranslation } from "react-i18next";
 import DismissModalBar from "@/components/DismissModalBar";
 import MarqueeText from "@/components/MarqueeText";
 import Text from "@/components/ThemedText";
+import { formatTime } from "@/components/TrackItem";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 export default function NowPlaying() {
-  const { activeTrack, shuffled } = usePlayer() as {
-    activeTrack: RNTrack | undefined;
-    shuffled: boolean;
-  };
+  const { activeTrack } = usePlayer();
   const progress = useProgress();
   const router = useRouter();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const colors = useColors();
+  const coverSize = width - 2 * gutter;
+  const trackGroup = activeTrack?.trackGroup;
+  const linkStyle = [type.small, { color: colors.accent }];
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <DismissModalBar />
-      <ScrollView style={{ width: width }}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Image
-          source={{ uri: activeTrack?.trackGroup.cover.sizes[600] }}
-          style={[
-            styles.image,
-            { width: width, height: width < 380 ? width * 0.9 : width },
-            { backgroundColor: colors.muted },
-          ]}
-          resizeMode={width < 380 ? "stretch" : "cover"}
+          source={{
+            uri: trackGroup?.cover.sizes[1200] ?? trackGroup?.cover.sizes[600],
+          }}
+          style={{
+            width: coverSize,
+            height: coverSize,
+            backgroundColor: colors.tint,
+          }}
+          resizeMode="cover"
         />
-        <View
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            width: width,
-          }}
-        >
-          <Slider
-            style={styles.progressBar}
-            value={progress.position}
-            minimumValue={0}
-            maximumValue={progress.duration}
-            thumbTintColor="transparent"
-            minimumTrackTintColor={colors.accent}
-            maximumTrackTintColor={colors.border}
-            onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
-          />
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              width: width,
-              paddingHorizontal: 5,
-            }}
+        <Slider
+          style={styles.slider}
+          value={progress.position}
+          minimumValue={0}
+          maximumValue={progress.duration}
+          thumbTintColor="transparent"
+          minimumTrackTintColor={colors.accent}
+          maximumTrackTintColor={colors.tintX}
+          onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
+          accessibilityLabel="Track progress"
+        />
+        <View style={styles.times}>
+          <Text
+            style={[type.xsmall, styles.time, { color: colors.secondaryText }]}
           >
-            <Text>{formatTime(progress.position)}</Text>
-            <Text>{formatTime(progress.duration)}</Text>
-          </View>
+            {formatTime(progress.position)}
+          </Text>
+          <Text
+            style={[type.xsmall, styles.time, { color: colors.secondaryText }]}
+          >
+            {formatTime(progress.duration)}
+          </Text>
         </View>
-        <View
-          style={{
-            alignSelf: "flex-start",
-            margin: 20,
-            gap: 10,
-            maxWidth: width * 0.9,
-          }}
-        >
-          <MarqueeText style={{ fontWeight: "bold" }}>
+        <View style={styles.details}>
+          <MarqueeText style={type.title} accessibilityRole="header">
             {activeTrack?.title}
           </MarqueeText>
-          <View
-            style={{
-              display: "flex",
-            }}
-          >
-            <View style={{ flexDirection: "row" }}>
-              <Text>
-                {t("trackGroupDetails.fromAlbum")
-                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                  .trim() + " "}
-              </Text>
-              <Link
-                href={{
+          <View style={styles.meta}>
+            <Text style={[type.small, { color: colors.secondaryText }]}>
+              {t("trackGroupDetails.fromAlbum")
+                .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
+                .trim() + " "}
+            </Text>
+            <Pressable
+              accessibilityRole="link"
+              android_ripple={{ color: colors.tintX }}
+              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
+              onPress={() => {
+                router.dismiss(1);
+                router.navigate({
                   pathname: "/artist/[id]/album/[slug]/album-tracks",
                   params: {
-                    id: String(activeTrack?.trackGroup.artistId),
-                    slug: String(activeTrack?.trackGroup.urlSlug),
+                    id: String(trackGroup?.artistId),
+                    slug: String(trackGroup?.urlSlug),
                   },
-                }}
-                asChild
-              >
-                <Pressable
-                  style={{ flexShrink: 1 }}
-                  hitSlop={12}
-                  onPress={() => {
-                    router.dismiss(1);
-                  }}
-                >
-                  <MarqueeText
-                    style={[
-                      styles.link,
-                      { maxWidth: "100%", color: colors.accent },
-                    ]}
-                  >
-                    {activeTrack?.trackGroup.title}
-                  </MarqueeText>
-                </Pressable>
-              </Link>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Text>
-                {t("trackGroupDetails.byArtist")
-                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                  .trim() + " "}
-              </Text>
-              <Link
-                href={{
+                });
+              }}
+            >
+              <MarqueeText style={linkStyle}>{trackGroup?.title}</MarqueeText>
+            </Pressable>
+          </View>
+          <View style={styles.meta}>
+            <Text style={[type.small, { color: colors.secondaryText }]}>
+              {t("trackGroupDetails.byArtist")
+                .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
+                .trim() + " "}
+            </Text>
+            <Pressable
+              accessibilityRole="link"
+              android_ripple={{ color: colors.tintX }}
+              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
+              onPress={() => {
+                router.dismiss(1);
+                router.navigate({
                   pathname: "/artist/[id]/artist-page",
-                  params: { id: String(activeTrack?.trackGroup.artistId) },
-                }}
-                asChild
-              >
-                <Pressable
-                  style={{ flexShrink: 1 }}
-                  hitSlop={12}
-                  onPress={() => {
-                    router.dismiss(1);
-                  }}
-                >
-                  <MarqueeText style={[styles.link, { color: colors.accent }]}>
-                    {activeTrack?.artist}
-                  </MarqueeText>
-                </Pressable>
-              </Link>
-            </View>
+                  params: { id: String(trackGroup?.artistId) },
+                });
+              }}
+            >
+              <MarqueeText style={linkStyle}>{activeTrack?.artist}</MarqueeText>
+            </Pressable>
           </View>
         </View>
-        <Player
-          style={{
-            width: width,
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        />
+        <Player style={styles.controls} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Number(seconds.toFixed(0)) % 60;
-
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  const formattedSeconds =
-    remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds;
-
-  return `${formattedMinutes}:${formattedSeconds}`;
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    paddingHorizontal: gutter,
+    paddingBottom: spacing.xl,
+  },
+  slider: {
+    alignSelf: "stretch",
+    marginTop: spacing.sm,
+  },
+  times: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  time: {
+    fontVariant: ["tabular-nums"],
+  },
+  details: {
+    marginTop: spacing.lg,
+  },
+  // Each link row is a full touch target, Android drops hit slop outside the parent
+  meta: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-  },
-  image: {
-    alignSelf: "center",
-  },
-  loadSpinner: {
-    flex: 1,
+    minHeight: touchTarget,
   },
   link: {
-    fontWeight: "bold",
+    flexShrink: 1,
+    alignSelf: "stretch",
+    justifyContent: "center",
   },
-  progressBar: {
-    width: "100%",
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
+  },
+  controls: {
+    marginTop: spacing.lg,
   },
 });

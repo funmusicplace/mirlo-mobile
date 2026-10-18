@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { useRouter } from "expo-router";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { spacing } from "@/constants/spacing";
 
 export default function ProfileLink() {
   const { user } = useAuthContext();
@@ -48,7 +49,7 @@ export default function ProfileLink() {
 
 const styles = StyleSheet.create({
   link: {
-    marginRight: 15,
+    marginRight: spacing.lg,
     alignItems: "center",
     justifyContent: "center",
   },

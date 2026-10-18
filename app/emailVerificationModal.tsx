@@ -1,23 +1,19 @@
-import { useAuthContext } from "@/state/AuthContext";
 import * as api from "../queries/fetch/fetchWrapper";
 import { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Pressable,
-  TextInput,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { mirloRed } from "@/constants/mirlo-red";
 import { useRouter } from "expo-router";
 import DismissModalBar from "@/components/DismissModalBar";
 import { useTranslation } from "react-i18next";
 import ErrorNotification from "@/components/ErrorNotification";
+import Button from "@/components/Button";
+import Text from "@/components/ThemedText";
 import { storeTokens } from "@/queries/authQueries";
+import { useColors } from "@/constants/colors";
+import { radius, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type VerifyEmailInputs = {
   email: string;
@@ -57,6 +53,16 @@ export default function EmailVerificationModal() {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
 
   const [showError, setShowError] = useState(true);
+  const colors = useColors();
+  const inputStyle = [
+    styles.input,
+    {
+      backgroundColor: colors.inputBackground,
+      borderColor: colors.border,
+      color: colors.inputText,
+    },
+  ];
+  const errorStyle = [type.small, { color: colors.danger }];
   const [codeError, setCodeError] = useState<Error | null>(null);
   const [emailError, setEmailError] = useState<Error | null>(null);
 
@@ -72,6 +78,7 @@ export default function EmailVerificationModal() {
       } catch (err) {
         console.error("issue verifying email");
         setEmailError(err as Error);
+        setShowError(true);
       } finally {
         setIsLoading(false);
       }
@@ -100,6 +107,7 @@ export default function EmailVerificationModal() {
         console.log(err);
         console.error("issue verifying code", err);
         setCodeError(err as Error);
+        setShowError(true);
       } finally {
         setIsLoading(false);
       }
@@ -107,168 +115,167 @@ export default function EmailVerificationModal() {
     [email, queryClient, router],
   );
 
-  return !waitingForVerification ? (
-    <SafeAreaView style={styles.container}>
-      <DismissModalBar />
-      {emailError && (
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={emailError}
-        />
-      )}
-      <View style={{ alignItems: "center", paddingTop: 20, flex: 1 }}>
-        <Pressable onPress={() => router.push("/login")}>
-          <Text
-            style={{
-              fontSize: 20,
-              color: "white",
-              margin: 10,
-              textAlign: "center",
-              textDecorationLine: "underline",
-            }}
-          >
-            Login or Sign Up to View!
-          </Text>
-        </Pressable>
-        <Text
-          style={{
-            fontWeight: "bold",
-            color: "white",
-            fontSize: 20,
-            marginVertical: 20,
-          }}
-        >
-          OR
-        </Text>
-        <Text style={styles.formLabel}>{t("email")}</Text>
-        <Controller
-          key="email-controller"
-          control={controlEmail}
-          rules={{
-            required: true,
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: "Invalid email address",
-            },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              key="email-input"
-              style={styles.inputStyle}
-              autoCapitalize="none"
-              inputMode="email"
-              //{...(Platform.OS === "android" && { autoComplete: "email" })}
-              //{...(Platform.OS === "ios" && {
-              //  textContentType: "emailAddress",
-              //})}
-              autoComplete="email"
-              //keyboardType="email-address"
-              placeholderTextColor="#555"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
+  return (
+    <SafeAreaView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+    >
+      <DismissModalBar title={t("logIn")} />
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={styles.content}
+      >
+        {!waitingForVerification ? (
+          <>
+            {emailError && (
+              <ErrorNotification
+                visible={showError}
+                onDismiss={() => setShowError(false)}
+                error={emailError}
+              />
+            )}
+            <Button
+              variant="outlined"
+              accessibilityRole="link"
+              title="Login or Sign Up to View!"
+              onPress={() => router.push("/login")}
+              fullWidth
             />
-          )}
-          name="email"
-        />
-        {emailErrors.email && (
-          <Text style={{ color: "white" }}>
-            Email is required {emailErrors.email.message}
-          </Text>
-        )}
-        <TouchableOpacity
-          style={[styles.button]}
-          disabled={isLoading}
-          onPress={handleSubmitEmail(verifyEmail)}
-        >
-          <Text style={styles.text}>{tVerify("verifyEmail")}</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  ) : (
-    <SafeAreaView style={styles.container}>
-      <DismissModalBar />
-      {codeError && (
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={codeError}
-        />
-      )}
-      <View style={{ paddingTop: 20, alignItems: "center" }}>
-        <Text style={{ color: "white", fontSize: 20, marginBottom: 20 }}>
-          {tVerify("checkEmail")}
-        </Text>
-        <Text style={styles.formLabel}>{tVerify("verificationCode")}</Text>
-        <Controller
-          key="code-controller"
-          control={controlCode}
-          rules={{ required: true }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              key="verification-code-input"
-              style={styles.inputStyle}
-              placeholderTextColor="#555"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
+            <View style={styles.divider}>
+              <View style={[styles.rule, { backgroundColor: colors.border }]} />
+              <Text style={type.body}>OR</Text>
+              <View style={[styles.rule, { backgroundColor: colors.border }]} />
+            </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>{t("email")}</Text>
+              <Controller
+                key="email-controller"
+                control={controlEmail}
+                rules={{
+                  required: true,
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    key="email-input"
+                    style={inputStyle}
+                    accessibilityLabel={t("email")}
+                    autoCapitalize="none"
+                    inputMode="email"
+                    autoComplete="email"
+                    placeholderTextColor={colors.inputPlaceholder}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                )}
+                name="email"
+              />
+              {emailErrors.email && (
+                <Text accessibilityRole="alert" style={errorStyle}>
+                  Email is required {emailErrors.email.message}
+                </Text>
+              )}
+            </View>
+            <Button
+              title={tVerify("verifyEmail")}
+              onPress={handleSubmitEmail(verifyEmail)}
+              loading={isLoading}
+              fullWidth
             />
-          )}
-          name="code"
-        />
-        {codeErrors.code && (
-          <Text style={{ color: "white" }}>Verification Code is required</Text>
+          </>
+        ) : (
+          <>
+            {codeError && (
+              <ErrorNotification
+                visible={showError}
+                onDismiss={() => setShowError(false)}
+                error={codeError}
+              />
+            )}
+            <Text style={styles.instructions}>{tVerify("checkEmail")}</Text>
+            <View style={styles.field}>
+              <Text style={styles.label}>{tVerify("verificationCode")}</Text>
+              <Controller
+                key="code-controller"
+                control={controlCode}
+                rules={{ required: true }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    key="verification-code-input"
+                    style={inputStyle}
+                    accessibilityLabel={tVerify("verificationCode")}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    textContentType="oneTimeCode"
+                    placeholderTextColor={colors.inputPlaceholder}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                )}
+                name="code"
+              />
+              {codeErrors.code && (
+                <Text accessibilityRole="alert" style={errorStyle}>
+                  Verification Code is required
+                </Text>
+              )}
+            </View>
+            <Button
+              title={tVerify("verifyEmailCode")}
+              onPress={handleSubmitCode(verifyCode)}
+              loading={isLoading}
+              fullWidth
+            />
+          </>
         )}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmitCode(verifyCode)}
-          disabled={isLoading}
-        >
-          <Text style={styles.text}>{tVerify("verifyEmailCode")}</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+// Field metrics mirror LoginForm
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: mirloRed,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    height: 50,
+  screen: {
     flex: 1,
   },
-
-  formLabel: {
-    fontSize: 20,
-    color: "#fff",
+  content: {
+    padding: spacing.lg,
   },
-  inputStyle: {
-    marginTop: 5,
-    width: 300,
-    height: 40,
-    paddingHorizontal: 10,
-    backgroundColor: "white",
-  },
-  formText: {
+  // Web "or" divider: 1rem around each rule
+  divider: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    color: "#aaa",
-    fontSize: 20,
+    gap: spacing.lg,
+    padding: spacing.lg,
   },
-  text: {
-    color: "#000",
-    fontSize: 20,
+  rule: {
+    flex: 1,
+    height: 1,
   },
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    backgroundColor: "#FFF",
-    padding: 5,
-    paddingHorizontal: 10,
-    width: 300,
+  instructions: {
+    ...type.body,
+    marginBottom: spacing.sm,
+  },
+  field: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  label: {
+    ...type.formLabel,
+    marginBottom: spacing.sm,
+  },
+  input: {
+    minHeight: touchTarget,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    fontSize: type.body.fontSize,
+    marginBottom: spacing.xs,
   },
 });

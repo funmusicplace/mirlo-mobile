@@ -1,54 +1,101 @@
-import { View, Image, StyleSheet, useColorScheme } from "react-native";
-import { Link } from "expo-router";
+import {
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  useColorScheme,
+  useWindowDimensions,
+} from "react-native";
+import { Href, router } from "expo-router";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 const logoLight = require("@/assets/images/mirlo-logo-logoOnly-light.png");
 const logoDark = require("@/assets/images/mirlo-logo-logoOnly-dark.png");
 
+// Two columns, the web's 3% gap rounds to spacing.md
+export function useGridColumnWidth() {
+  const { width } = useWindowDimensions();
+  return (width - 2 * gutter - spacing.md) / 2;
+}
+
 export default function TrackGroupItem({
-  id,
   cover,
   title,
   artist,
   artistId,
   urlSlug,
-}: AlbumProps) {
+  width,
+  href,
+  showArtist = true,
+}: AlbumProps & { width?: number; href?: Href; showArtist?: boolean }) {
   const colors = useColors();
   const isDark = useColorScheme() === "dark";
   return (
-    <View style={styles.listItem}>
+    <Pressable
+      onPress={() =>
+        router.navigate(
+          href ?? {
+            pathname: "/artist/[id]/album/[slug]/album-tracks",
+            params: { id: artistId, slug: urlSlug },
+          },
+        )
+      }
+      accessibilityRole="link"
+      accessibilityLabel={showArtist ? `${title}, ${artist.name}` : title}
+      // Foreground so the ripple draws over the cover
+      android_ripple={{ color: colors.tintX, foreground: true }}
+      style={({ pressed }) => [
+        styles.card,
+        { width },
+        pressed && styles.pressed,
+      ]}
+    >
       <Image
         source={
           cover?.sizes
-            ? { uri: cover?.sizes[120] }
-            : { uri: isDark ? logoDark : logoLight }
+            ? { uri: cover.sizes[600] }
+            : isDark
+              ? logoDark
+              : logoLight
         }
-        style={[styles.image, { backgroundColor: colors.muted }]}
+        style={[styles.cover, { backgroundColor: colors.tint }]}
       />
-      <View style={{ marginLeft: 15, width: 300 }}>
+      <Text style={styles.title} numberOfLines={1}>
+        {title}
+      </Text>
+      {showArtist && (
         <Text
-          style={{ color: colors.text, fontSize: 15, fontWeight: "bold" }}
-          ellipsizeMode="tail"
+          style={[styles.artist, { color: colors.accent }]}
           numberOfLines={1}
         >
-          {title}
+          {artist.name}
         </Text>
-        <Text style={{ color: colors.text, fontSize: 14 }}>{artist.name}</Text>
-      </View>
-    </View>
+      )}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 5,
+  card: {
+    marginBottom: spacing.lg,
   },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 1,
+  cover: {
+    width: "100%",
+    aspectRatio: 1,
+  },
+  title: {
+    ...type.cardTitle,
+    paddingTop: spacing.sm,
+  },
+  artist: {
+    ...type.cardMeta,
+    marginTop: spacing.xs,
+  },
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

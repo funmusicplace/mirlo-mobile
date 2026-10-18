@@ -12,8 +12,8 @@ describe("useColors", () => {
 
     const { result } = renderHook(() => useColors());
 
-    expect(result.current.background).toBe("white");
-    expect(result.current.text).toBe("black");
+    expect(result.current.background).toBe("#ffffff");
+    expect(result.current.text).toBe("#000000");
     expect(result.current.accent).toBe("#BE3455");
   });
 
@@ -22,9 +22,9 @@ describe("useColors", () => {
 
     const { result } = renderHook(() => useColors());
 
-    expect(result.current.background).toBe("#121212");
-    expect(result.current.text).toBe("#f2f2f2");
-    expect(result.current.accent).toBe("#E0607E");
+    expect(result.current.background).toBe("#111111");
+    expect(result.current.text).toBe("#f5f0f0");
+    expect(result.current.accent).toBe("#e0607e");
   });
 
   test("falls back to light tokens for an unset scheme", () => {
@@ -32,6 +32,6 @@ describe("useColors", () => {
 
     const { result } = renderHook(() => useColors());
 
-    expect(result.current.background).toBe("white");
+    expect(result.current.background).toBe("#ffffff");
   });
 });

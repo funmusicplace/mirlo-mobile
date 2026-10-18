@@ -1,20 +1,33 @@
-import { ActivityIndicator, View, FlatList } from "react-native";
+import {
+  ActivityIndicator,
+  View,
+  FlatList,
+  RefreshControl,
+} from "react-native";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
 import { StyleSheet } from "react-native";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import TrackGroupItem from "@/components/TrackGroupItem";
+import TrackGroupItem, {
+  useGridColumnWidth,
+} from "@/components/TrackGroupItem";
 import PlayFeaturedButton from "@/components/PlayFeaturedButton";
-import { useEffect, useState } from "react";
+import ScreenHeader, {
+  HeaderButton,
+  SectionHeader,
+} from "@/components/ScreenHeader";
+import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
+import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as api from "../queries/fetch/fetchWrapper";
-import { Link } from "expo-router";
 import { API_ROOT } from "@/constants/api-root";
 import ErrorNotification from "@/components/ErrorNotification";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
+import Text from "@/components/ThemedText";
 
 const PAGE_SIZE = 20;
 
@@ -29,8 +42,9 @@ export default function Index() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetching,
     isFetchingNextPage,
+    isRefetching,
+    refetch,
   } = useInfiniteQuery<{ results: AlbumProps[] }>({
     queryKey: ["infiniteTrackGroups"],
     queryFn: ({ pageParam = 0 }) => {
@@ -52,6 +66,8 @@ export default function Index() {
   const { top } = useSafeAreaInsets();
   const trackGroups = data?.pages.flatMap((page) => page.results) || [];
   const [showError, setShowError] = useState<boolean>(true);
+  const listRef = useRef<FlatList<AlbumProps>>(null);
+  const columnWidth = useGridColumnWidth();
 
   useEffect(() => {
     if (data || API_ROOT === "http://localhost:3000") {
@@ -88,10 +104,10 @@ export default function Index() {
   }
 
   const renderLoadingFooter = () => {
-    if (!isFetching && !isFetchingNextPage) return null;
+    if (!isFetchingNextPage) return null;
 
     return (
-      <View style={{ marginVertical: 30 }}>
+      <View style={{ marginVertical: spacing.xxl }}>
         <ActivityIndicator
           size="large"
           color={colors.accent}
@@ -104,102 +120,79 @@ export default function Index() {
     <View
       style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
     >
-      <View style={[styles.container, { backgroundColor: colors.muted }]}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 10,
-            width: "100%",
-            height: 60,
-            borderBottomWidth: 3,
-            borderBottomColor: colors.border,
-            backgroundColor: colors.background,
-          }}
-        >
-          <SearchButton />
-          <MenuButton />
-        </View>
-        <FlatList
-          style={{ width: "100%" }}
-          contentContainerStyle={[
-            styles.listContainer,
-            { backgroundColor: colors.background },
-          ]}
-          data={trackGroups}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          renderItem={({ item }) => (
-            <Link
-              href={{
-                pathname: "/artist/[id]/album/[slug]/album-tracks",
-                params: { id: item.artistId, slug: item.urlSlug },
-              }}
-            >
-              <TrackGroupItem
-                id={item.id}
-                cover={item.cover}
-                title={item.title}
-                artist={item.artist}
-                artistId={item.artistId}
-                urlSlug={item.urlSlug}
-                userTrackGroupPurchases={item.userTrackGroupPurchases}
-                releaseDate={item.releaseDate}
-                tracks={item.tracks}
-                trackGroupId={item.trackGroupId}
-              ></TrackGroupItem>
-            </Link>
-          )}
-          onEndReached={() => {
-            if (!hasNextPage || isFetchingNextPage) {
-              return;
+      <ScreenHeader
+        left={
+          <HeaderButton
+            size={LOGO_SIZE}
+            accessibilityLabel="Mirlo"
+            accessibilityHint="Scrolls to the top"
+            onPress={() =>
+              listRef.current?.scrollToOffset({ offset: 0, animated: true })
             }
-            fetchNextPage();
-          }}
-          onEndReachedThreshold={0.0}
-          ListHeaderComponent={
-            <View
-              style={[
-                styles.listHeader,
-                { backgroundColor: colors.background },
-              ]}
-            >
-              <Text style={styles.listHeaderTitle}>
-                {t("releases.recentReleases")}
-              </Text>
-              <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
-            </View>
+          >
+            <MirloLogo />
+          </HeaderButton>
+        }
+        right={
+          <>
+            <SearchButton />
+            <MenuButton />
+          </>
+        }
+      />
+      <FlatList
+        ref={listRef}
+        // Native counterpart of the web's Refresh button on this list
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching && !isFetchingNextPage}
+            onRefresh={refetch}
+            tintColor={colors.accent}
+            colors={[colors.accent]}
+            progressBackgroundColor={colors.background}
+          />
+        }
+        numColumns={2}
+        columnWrapperStyle={{ gap: spacing.md }}
+        contentContainerStyle={{ paddingHorizontal: gutter }}
+        data={trackGroups}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
+        renderItem={({ item }) => (
+          <TrackGroupItem {...item} width={columnWidth} />
+        )}
+        onEndReached={() => {
+          if (!hasNextPage || isFetchingNextPage) {
+            return;
           }
-          ListFooterComponent={renderLoadingFooter}
-        ></FlatList>
-      </View>
+          fetchNextPage();
+        }}
+        onEndReachedThreshold={0.0}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.explore} accessibilityRole="header">
+              {t("home.exploreMusic", "Explore music")}
+            </Text>
+            <SectionHeader
+              right={
+                <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
+              }
+            >
+              {t("releases.recentReleases")}
+            </SectionHeader>
+          </>
+        }
+        ListFooterComponent={renderLoadingFooter}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  listContainer: {
-    zIndex: 10,
-  },
-  listHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  listHeaderTitle: {
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  text: {
-    padding: 10,
-    fontWeight: "bold",
+  // Web SplashTitle as the section h2, 32 above the next label
+  explore: {
+    ...type.display,
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   loadSpinner: {
     flex: 1,

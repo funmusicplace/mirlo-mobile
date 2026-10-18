@@ -1,15 +1,25 @@
-import { Linking, Pressable, ScrollView, StyleSheet } from "react-native";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
-import DismissModalBar from "@/components/DismissModalBar";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 type AboutLinkInfo = {
   label: string;
   url: string;
+  icon?: "instagram" | "mastodon" | "bluesky";
 };
 
 // Linking.openURL would route mirlo.space links back into the app
@@ -21,17 +31,47 @@ function onLinkPress(url: string) {
   }
 }
 
-function AboutLink({ label, url }: AboutLinkInfo) {
+// One column of the web footer: a bold heading over underlined links
+function AboutColumn({
+  heading,
+  links,
+}: {
+  heading?: string;
+  links: AboutLinkInfo[];
+}) {
   const colors = useColors();
-
   return (
-    <Pressable
-      style={[styles.link, { backgroundColor: colors.muted }]}
-      onPress={() => onLinkPress(url)}
-    >
-      <Text style={{ fontSize: 20 }}>{label}</Text>
-      <Ionicons name="open-outline" size={20} color={colors.text} />
-    </Pressable>
+    <View style={styles.column}>
+      {heading ? (
+        <Text style={styles.heading} accessibilityRole="header">
+          {heading}
+        </Text>
+      ) : null}
+      {links.map((link) => (
+        <Pressable
+          key={link.url}
+          accessibilityRole="link"
+          onPress={() => onLinkPress(link.url)}
+          android_ripple={{ color: colors.tintX }}
+          style={({ pressed }) => [
+            styles.link,
+            pressed && Platform.OS === "ios" && styles.pressed,
+          ]}
+        >
+          {link.icon ? (
+            <FontAwesome6
+              name={link.icon}
+              brand
+              size={type.small.fontSize}
+              color={colors.accent}
+            />
+          ) : null}
+          <Text style={[styles.linkText, { color: colors.accent }]}>
+            {link.label}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
   );
 }
 
@@ -45,66 +85,88 @@ export default function About() {
     { label: t("footer.contact"), url: "mailto:hi@mirlo.space" },
   ];
 
-  const connectLinks: AboutLinkInfo[] = [
-    { label: "Instagram", url: "https://instagram.com/mirlo.space" },
-    { label: "Mastodon", url: "https://musician.social/@mirlo" },
-    { label: "Bluesky", url: "https://bsky.app/profile/mirlo.space" },
-  ];
-
   const legalLinks: AboutLinkInfo[] = [
     { label: t("footer.terms"), url: "https://mirlo.space/pages/terms" },
     { label: t("footer.privacy"), url: "https://mirlo.space/pages/privacy" },
   ];
 
+  const connectLinks: AboutLinkInfo[] = [
+    {
+      label: "Instagram",
+      url: "https://instagram.com/mirlo.space",
+      icon: "instagram",
+    },
+    {
+      label: "Mastodon",
+      url: "https://musician.social/@mirlo",
+      icon: "mastodon",
+    },
+    {
+      label: "Bluesky",
+      url: "https://bsky.app/profile/mirlo.space",
+      icon: "bluesky",
+    },
+  ];
+
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.screen, { backgroundColor: colors.background }]}
     >
-      <DismissModalBar />
-      <ScrollView
-        style={[styles.content, { backgroundColor: colors.background }]}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <Text style={styles.heading}>{t("footer.aboutHeading")}</Text>
-        {aboutLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
-        <Text style={styles.subheading}>{t("footer.connectHeading")}</Text>
-        {connectLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
-        {legalLinks.map((link) => (
-          <AboutLink key={link.url} label={link.label} url={link.url} />
-        ))}
+      <ScreenHeader left={<BackButton />} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.row}>
+          <AboutColumn heading={t("footer.aboutHeading")} links={aboutLinks} />
+          <AboutColumn
+            heading={t("footer.legalHeading", "Legal")}
+            links={legalLinks}
+          />
+        </View>
+        <View style={styles.row}>
+          <AboutColumn
+            heading={t("footer.connectHeading")}
+            links={connectLinks}
+          />
+          <View style={styles.column} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
   },
+  // Web footer: 2rem side padding, two columns 2rem apart
   content: {
-    flex: 1,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.xl,
+    gap: spacing.xl,
   },
-  contentContainer: {
-    padding: 30,
-    gap: 20,
+  row: {
+    flexDirection: "row",
+    gap: spacing.xxl,
+  },
+  column: {
+    flex: 1,
   },
   heading: {
-    fontSize: 25,
-    fontWeight: "bold",
+    ...type.small,
+    fontWeight: "700",
+    marginBottom: spacing.sm,
   },
-  subheading: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
+  // Web rows are 28 apart, 44 is the platform touch target
   link: {
+    minHeight: touchTarget,
     flexDirection: "row",
-    width: "100%",
-    padding: 10,
     alignItems: "center",
-    gap: 10,
+    gap: spacing.sm,
+  },
+  linkText: {
+    ...type.small,
+    textDecorationLine: "underline",
+  },
+  pressed: {
+    opacity: 0.6,
   },
 });

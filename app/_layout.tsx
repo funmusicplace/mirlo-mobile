@@ -14,10 +14,12 @@ import * as Clipboard from "expo-clipboard";
 import { StatusBar } from "expo-status-bar";
 import TrackPlayer from "react-native-track-player";
 import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
 import { AppReadyContextProvider } from "@/state/AppReadyContext";
 import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import { useColors } from "@/constants/colors";
+import { fonts } from "@/constants/typography";
 import "../i18n";
 import { checkForUpdates } from "../scripts/appVersionCheck";
 
@@ -38,6 +40,22 @@ export default function RootLayout() {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
   const scheme = useColorScheme();
   const colors = useColors();
+  const baseTheme = scheme === "dark" ? DarkTheme : DefaultTheme;
+  // Screens without their own background fall back to this
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      background: colors.background,
+      card: colors.header,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.accent,
+    },
+  };
+  const [fontsLoaded, fontError] = useFonts({
+    [fonts.display]: require("@/assets/fonts/cubano-sharp.otf"),
+  });
   // Needed for TanStack Query Devtools
   const onCopy = async (text: string) => {
     try {
@@ -53,10 +71,10 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (isDataLoaded) {
+    if (isDataLoaded && (fontsLoaded || fontError)) {
       SplashScreen.hide();
     }
-  }, [isDataLoaded]);
+  }, [isDataLoaded, fontsLoaded, fontError]);
 
   return (
     <AppReadyContextProvider
@@ -66,9 +84,7 @@ export default function RootLayout() {
         <AuthContextProvider>
           <PlayerContextProvider>
             <SearchContextProvider>
-              <ThemeProvider
-                value={scheme === "dark" ? DarkTheme : DefaultTheme}
-              >
+              <ThemeProvider value={navigationTheme}>
                 <Stack screenOptions={{ animation: "none" }}>
                   <Stack.Screen name="login" options={{ headerShown: false }} />
                   <Stack.Screen

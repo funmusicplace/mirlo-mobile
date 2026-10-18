@@ -1,39 +1,56 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "@/queries/queries";
-import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import {
   View,
   ActivityIndicator,
   StyleSheet,
-  Pressable,
   Image,
-  Dimensions,
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Markdown from "react-native-markdown-display";
-import React from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";
 import Text from "@/components/ThemedText";
+import Button from "@/components/Button";
+import ShareButton from "@/components/ShareButton";
+import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
+import SearchButton from "@/components/SearchButton";
+import MenuButton from "@/components/MenuButton";
+import TrackGroupItem, {
+  useGridColumnWidth,
+} from "@/components/TrackGroupItem";
 import { useColors } from "@/constants/colors";
+import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
+
+const BANNER_HEIGHT = 100;
+const AVATAR_SIZE = 56;
+// Web tab underline
+const TAB_RULE = spacing.xs;
 
 export default function ArtistPage() {
   const { id } = useLocalSearchParams();
   const { data, isError, isPending, error } = useQuery(
-    queryArtist({ artistSlug: String(id) ?? "" })
+    queryArtist({ artistSlug: String(id) ?? "" }),
   );
   const { t } = useTranslation("translation");
   const colors = useColors();
+  const columnWidth = useGridColumnWidth();
+  const listRef = useRef<FlatList<AlbumProps>>(null);
+  const contentHeight = useRef(0);
+  const aboutHeight = useRef(0);
 
   if (isPending) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.screen}>
         <ActivityIndicator
           size="large"
           color={colors.accent}
-          style={styles.loadSpinner}
+          style={styles.screen}
         />
       </View>
     );
@@ -48,212 +65,219 @@ export default function ArtistPage() {
   }
 
   const artistInfo = data;
+  // The API sends the banner as background now
+  const banner =
+    (artistInfo as Artist & { background?: Artist["banner"] }).background ??
+    artistInfo.banner;
+  const bannerUri = banner?.sizes?.[1200] ?? banner?.sizes?.[625];
 
-  const getModifiedData = (data: any) => {
-    if (!data || data.length == 0) return [];
-
-    if (data.length % 2 !== 0) {
-      // add placeholder item for list
-      return [...data, { id: "placeholder", isPlaceholder: true }];
-    }
-
-    return data;
-  };
-
-  const artistAlbums = artistInfo.trackGroups?.map((album) => {
-    return (
-      <View key={album.id} style={styles.albumItem}>
-        <Image
-          style={{ width: "100%", height: itemWidth }}
-          source={{
-            uri: album.cover.sizes[600],
-          }}
-        />
-        <Text style={styles.albumTitle}>{album.title}</Text>
-      </View>
-    );
-  });
-
-  const handleEmpty = () => {
-    return <Text>No Albums Present!</Text>;
-  };
+  // The about section is the list footer, so its top is the content end minus its height
+  const scrollToAbout = () =>
+    listRef.current?.scrollToOffset({
+      offset: Math.max(contentHeight.current - aboutHeight.current, 0),
+    });
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 10,
-          width: "100%",
-          height: 60,
-          backgroundColor: colors.header,
-        }}
-      >
-        <Pressable onPress={() => router.dismiss()}>
-          <Ionicons
-            name="chevron-back-outline"
-            size={40}
-            style={{ color: colors.secondaryText }}
-          ></Ionicons>
-        </Pressable>
-      </View>
+    <SafeAreaView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+    >
+      <ScreenHeader
+        left={<BackButton />}
+        right={
+          <>
+            <SearchButton />
+            <MenuButton />
+          </>
+        }
+      />
       <FlatList
-        style={{ flex: 1 }}
-        contentContainerStyle={[
-          styles.listContainer,
-          { backgroundColor: colors.background },
-        ]}
-        horizontal={false}
-        columnWrapperStyle={{
-          justifyContent: "space-evenly",
-        }}
+        ref={listRef}
         numColumns={2}
-        ListEmptyComponent={handleEmpty}
-        data={getModifiedData(artistInfo.trackGroups)}
-        renderItem={({ item }) => {
-          if (item.isPlaceholder) {
-            return <View style={[styles.albumItem, { opacity: 0 }]} />;
-          }
-
-          return (
-            <View style={styles.albumItem}>
-              <Link
-                href={{
-                  pathname: "/artist/[id]/album/[slug]/album-tracks",
-                  params: { id: item.artistId, slug: item.urlSlug },
-                }}
-              >
-                <Image
-                  style={{ width: "100%", height: itemWidth }}
-                  source={{
-                    uri: item.cover.sizes[600],
-                  }}
-                />
-              </Link>
-              <Text style={styles.albumTitle}>{item.title}</Text>
-            </View>
-          );
-        }}
+        columnWrapperStyle={styles.columns}
+        data={artistInfo.trackGroups}
         keyExtractor={(item) => String(item.id)}
-        ListHeaderComponentStyle={{ marginBottom: 20 }}
-        ListHeaderComponent={() => (
+        renderItem={({ item }) => (
+          <TrackGroupItem {...item} width={columnWidth} showArtist={false} />
+        )}
+        onContentSizeChange={(_, height) => {
+          contentHeight.current = height;
+        }}
+        ListEmptyComponent={
+          <Text
+            style={[type.body, styles.empty, { color: colors.secondaryText }]}
+          >
+            No Albums Present!
+          </Text>
+        }
+        ListHeaderComponent={
           <View>
-            {artistInfo.banner && (
+            {bannerUri ? (
               <Image
-                style={{ width: "100%", height: 150 }}
-                source={{
-                  uri: artistInfo?.banner?.sizes?.[625] || "",
-                }}
+                source={{ uri: bannerUri }}
+                style={[styles.banner, { backgroundColor: colors.tint }]}
+                resizeMode="cover"
               />
-            )}
-            <View style={styles.introBanner}>
-              {artistInfo.avatar && (
+            ) : null}
+            <View style={styles.identity}>
+              {artistInfo.avatar ? (
                 <Image
-                  style={styles.avatar}
+                  style={[styles.avatar, { backgroundColor: colors.tint }]}
                   source={{
-                    uri: artistInfo?.avatar?.sizes?.[600] || "",
+                    uri: artistInfo.avatar.sizes?.[600] || "",
                   }}
                   resizeMode="cover"
                 />
-              )}
-              <View style={{ marginHorizontal: 20, gap: 5 }}>
-                <Text style={{ color: colors.text, fontWeight: "bold" }}>
+              ) : null}
+              <View style={styles.identityText}>
+                <Text accessibilityRole="header" style={styles.name}>
                   {artistInfo.name}
                 </Text>
-                {artistInfo.location && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 5,
-                    }}
-                  >
+                {artistInfo.location ? (
+                  <View style={styles.location}>
                     <Ionicons
                       name="location-outline"
-                      size={20}
-                      color={colors.inactive}
-                    ></Ionicons>
-                    <Text style={{ color: colors.inactive }}>
+                      size={type.small.fontSize}
+                      color={colors.secondaryText}
+                    />
+                    <Text style={[type.small, { color: colors.secondaryText }]}>
                       {artistInfo.location}
                     </Text>
                   </View>
-                )}
+                ) : null}
               </View>
             </View>
+            <View style={[styles.strip, { borderColor: colors.tintX }]}>
+              <Button
+                variant="transparent"
+                size="compact"
+                rounded
+                title={t("artist.about")}
+                textStyle={[styles.stripLabel, { color: colors.text }]}
+                onPress={scrollToAbout}
+              />
+              {artistInfo.urlSlug ? (
+                <ShareButton
+                  url={`https://mirlo.space/${artistInfo.urlSlug}`}
+                />
+              ) : null}
+            </View>
+            <View style={[styles.tab, { borderBottomColor: colors.accent }]}>
+              <Text
+                accessibilityRole="header"
+                style={[type.large, { color: colors.accent }]}
+              >
+                {t("artist.releases")}
+              </Text>
+            </View>
           </View>
-        )}
-        ListFooterComponent={() => (
+        }
+        ListFooterComponent={
           <View
-            style={{
-              gap: 10,
-              marginHorizontal: 20,
-              marginTop: 20,
-              marginBottom: 70,
+            style={styles.about}
+            onLayout={(event) => {
+              aboutHeight.current = event.nativeEvent.layout.height;
             }}
           >
-            <Text style={{ fontWeight: "bold" }}>
-              {t("trackGroupDetails.about")}
+            <Text accessibilityRole="header" style={type.heading}>
+              {t("artist.about")}
             </Text>
-
             {artistInfo.bio ? (
               <Markdown
                 style={{
-                  body: { color: colors.text },
-                  link: { color: colors.accent },
+                  body: { ...type.body, color: colors.text },
+                  paragraph: { marginTop: 0, marginBottom: spacing.md },
+                  link: {
+                    color: colors.accent,
+                    textDecorationLine: "underline",
+                  },
                 }}
               >
                 {linkifyUrls(
-                  artistInfo.bio.replace(/([^\n])\n([^\n])/g, "$1 $2")
+                  artistInfo.bio.replace(/([^\n])\n([^\n])/g, "$1 $2"),
                 )}
               </Markdown>
             ) : (
-              <Text>{artistInfo.name + " is an artist on Mirlo"}</Text>
+              <Text style={type.body}>
+                {artistInfo.name + " is an artist on Mirlo"}
+              </Text>
             )}
           </View>
-        )}
-      ></FlatList>
+        }
+      />
     </SafeAreaView>
   );
 }
 
-const { width } = Dimensions.get("window");
-const itemWidth = (width - 100) / 2;
-
 const styles = StyleSheet.create({
-  avatar: {
-    borderRadius: 25,
-    width: 50,
-    height: 50,
-  },
-  introBanner: {
-    flexDirection: "row",
-    margin: 20,
-    alignItems: "center",
-  },
-  loadSpinner: {
+  screen: {
     flex: 1,
   },
-  listContainer: {
-    alignItems: "stretch",
-    justifyContent: "flex-start",
-    minHeight: "100%",
+  columns: {
+    gap: spacing.md,
+    paddingHorizontal: gutter,
   },
-  image: {
+  empty: {
+    paddingHorizontal: gutter,
+    paddingTop: spacing.lg,
+  },
+  banner: {
     width: "100%",
-    backgroundColor: "#f0f0f0", // placeholder color while loading
+    height: BANNER_HEIGHT,
   },
-  albumItem: {
-    width: itemWidth,
-    marginBottom: 20,
+  identity: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: spacing.lg,
+    padding: gutter,
   },
-  albumTitle: {
-    marginTop: 5,
-    fontSize: 16,
-    fontWeight: "300",
-    textAlign: "center",
+  avatar: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: radius.pill,
+  },
+  identityText: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  name: {
+    ...type.large,
+    fontWeight: "600",
+  },
+  location: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  // A full touch target tall, so Android keeps the share button's hit slop
+  strip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: spacing.sm,
+    minHeight: touchTarget,
+    paddingHorizontal: gutter,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  stripLabel: {
+    fontWeight: "400",
+    textTransform: "uppercase",
+  },
+  // Web tab: 26.4 from the label top to the rule, kept with the 22.4 line
+  tab: {
+    alignSelf: "flex-start",
+    marginLeft: gutter,
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xs,
+    paddingBottom: spacing.xs,
+    borderBottomWidth: TAB_RULE,
+  },
+  // Padding keeps the whole section inside the measured footer height
+  about: {
+    paddingHorizontal: gutter,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
+    gap: spacing.sm,
   },
 });

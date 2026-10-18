@@ -1,56 +1,37 @@
 import LoginForm from "@/components/LoginForm";
-import { View, StyleSheet, Pressable } from "react-native";
+import { ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { router } from "expo-router";
+import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { spacing } from "@/constants/spacing";
 
 export default function Login() {
   const colors = useColors();
+  const { height } = useWindowDimensions();
+  // The web login page pads its column by 10vh
+  const paddingTop = height * 0.1;
+
   return (
-    <SafeAreaView style={[styles.form, { backgroundColor: colors.background }]}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#BE3455",
-        }}
+    <SafeAreaView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+    >
+      <ScreenHeader left={<BackButton />} />
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={[styles.content, { paddingTop }]}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 10,
-            width: "100%",
-            height: 60,
-            backgroundColor: colors.background,
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              if (router.canDismiss()) {
-                router.dismiss();
-              } else {
-                router.dismissTo("/");
-              }
-            }}
-          >
-            <Ionicons
-              name="chevron-back-outline"
-              size={40}
-              style={{ color: colors.inactive }}
-            ></Ionicons>
-          </Pressable>
-        </View>
         <LoginForm />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  form: {
+  screen: {
     flex: 1,
-    justifyContent: "flex-start",
+  },
+  content: {
+    paddingHorizontal: spacing.lg,
   },
 });

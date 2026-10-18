@@ -1,11 +1,16 @@
 import { useAuthContext } from "@/state/AuthContext";
-import { View, StyleSheet } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { isTrackOwnedOrPreview } from "@/scripts/utils";
 import FavoriteTrackButton from "./FavoriteTrackButton";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { gutter, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
-function formatTime(seconds: number) {
+// Web track row index box
+const INDEX_WIDTH = 28;
+
+export function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Number(seconds.toFixed(0)) % 60;
 
@@ -20,19 +25,20 @@ type TrackItemComponentProps = {
   track: RNTrack;
   album?: AlbumProps;
   thisSongSelected: boolean;
-  onTrackScreen: boolean;
+  onPress?: () => void;
 };
 
 export const TrackItem = ({
   track,
   album,
   thisSongSelected,
-  onTrackScreen,
+  onPress,
 }: TrackItemComponentProps) => {
   const { user } = useAuthContext();
   const colors = useColors();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, album);
+  const active = canPlayTrack && thisSongSelected;
 
   let contributors = "";
 
@@ -46,46 +52,34 @@ export const TrackItem = ({
     }
   }
   return (
-    <View style={styles.listItem}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          width: "70%",
-        }}
+    // The favorite sits beside the row button so screen readers reach it
+    <View style={styles.row}>
+      <Pressable
+        onPress={onPress}
+        disabled={!canPlayTrack}
+        accessibilityRole="button"
+        accessibilityLabel={[
+          `${track.order}. ${track.title}`,
+          contributors,
+          track.audio?.duration ? formatTime(track.audio.duration) : "",
+        ]
+          .filter(Boolean)
+          .join(", ")}
+        accessibilityState={{ selected: active, disabled: !canPlayTrack }}
+        android_ripple={{ color: colors.tintX }}
+        style={({ pressed }) => [
+          styles.main,
+          !canPlayTrack && styles.unplayable,
+          pressed && styles.pressed,
+        ]}
       >
-        {track && (
+        <Text style={[type.small, styles.index]}>{track.order}</Text>
+        <View style={styles.titles}>
           <Text
-            style={{
-              color: canPlayTrack ? colors.secondaryText : colors.inactive,
-              fontSize: 16,
-              width: 30,
-              marginLeft: 5,
-              fontWeight: canPlayTrack
-                ? thisSongSelected
-                  ? "bold"
-                  : "normal"
-                : "normal",
-            }}
-          >
-            {track.order}.
-          </Text>
-        )}
-        <View style={{ maxWidth: "90%" }}>
-          <Text
-            style={{
-              color: canPlayTrack ? colors.secondaryText : colors.inactive,
-              fontSize: 16,
-              paddingRight: 5,
-              fontWeight: canPlayTrack
-                ? thisSongSelected
-                  ? "bold"
-                  : "normal"
-                : "normal",
-            }}
-            ellipsizeMode="tail"
-            numberOfLines={1}
+            style={[
+              type.small,
+              active && { color: colors.accent, fontWeight: "600" },
+            ]}
           >
             {track.title}
           </Text>
@@ -96,47 +90,53 @@ export const TrackItem = ({
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
-              style={{ color: colors.secondaryText }}
+              style={[type.xsmall, { color: colors.secondaryText }]}
             >
               {contributors}
             </Text>
           ) : null}
         </View>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          width: "20%",
-        }}
-      >
-        {!onTrackScreen && <FavoriteTrackButton track={track} size={15} />}
-        <Text
-          style={{
-            color: canPlayTrack ? colors.secondaryText : colors.inactive,
-            fontSize: 15,
-            marginRight: 10,
-            fontWeight: canPlayTrack
-              ? thisSongSelected
-                ? "bold"
-                : "normal"
-              : "normal",
-          }}
-        >
+        <Text style={[type.xsmall, styles.duration]}>
           {track.audio.duration ? formatTime(track.audio.duration) : 0}
         </Text>
-      </View>
+      </Pressable>
+      <FavoriteTrackButton track={track} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  listItem: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 5,
-    justifyContent: "space-between",
-    marginVertical: 5,
+    minHeight: touchTarget,
+    // Holds the favorite's hit slop, Android drops touches outside the parent
+    paddingHorizontal: gutter,
+    gap: spacing.sm,
+  },
+  main: {
+    flex: 1,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  index: {
+    width: INDEX_WIDTH,
+    textAlign: "center",
+  },
+  titles: {
+    flex: 1,
+  },
+  duration: {
+    fontWeight: "700",
+  },
+  // Web dims rows that can't play
+  unplayable: {
+    opacity: 0.6,
+  },
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

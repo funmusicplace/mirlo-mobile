@@ -30,7 +30,8 @@
     "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
     "viewAllArtists": "View all artists",
-    "popularTags": "Popular Tags"
+    "popularTags": "Popular Tags",
+    "explore": "Explore"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
@@ -51,8 +52,8 @@
   },
   "logIn": {
     "logIn": "Log in",
-    "email": "Email:",
-    "password": "Password:",
+    "email": "Email",
+    "password": "Password",
     "passwordReset": "Forgot your password?",
     "signUp": "Don't have an account yet? Sign up"
   },
@@ -86,7 +87,9 @@
     "artists": "Artists",
     "albums": "Albums",
     "tracks": "Tracks",
-    "labels": "Labels"
+    "labels": "Labels",
+    "tags": "Tags",
+    "searchMusic": "Search music"
   },
   "profile": {
     "resetPasswordLink": "Want to change your password? Use the reset form.",
@@ -733,6 +736,7 @@
     "about": "About us",
     "contact": "Contact us",
     "connectHeading": "Connect",
+    "legalHeading": "Legal",
     "terms": "Terms and conditions",
     "privacy": "Privacy"
   },
@@ -907,6 +911,7 @@
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
+    "exploreMusic": "Explore music",
     "support": "<red>Directly support artists.</red> Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "supportTeam": "Support Mirlo",

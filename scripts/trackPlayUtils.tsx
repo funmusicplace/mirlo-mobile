@@ -1,3 +1,4 @@
+import TrackPlayer from "react-native-track-player";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 async function getPlays(trackId: number): Promise<number | undefined> {
@@ -67,4 +68,17 @@ export async function incrementPlayCount(trackId: number) {
   } catch (err) {
     console.error(err);
   }
+}
+
+// Wraps around the queue in both directions
+export async function skipTrack(direction: "previous" | "next") {
+  const queue = await TrackPlayer.getQueue();
+  const index = await TrackPlayer.getActiveTrackIndex();
+  const last = queue.length - 1;
+  if (direction === "next") {
+    await (index === last ? TrackPlayer.skip(0) : TrackPlayer.skipToNext());
+  } else {
+    await (index === 0 ? TrackPlayer.skip(last) : TrackPlayer.skipToPrevious());
+  }
+  await TrackPlayer.play();
 }

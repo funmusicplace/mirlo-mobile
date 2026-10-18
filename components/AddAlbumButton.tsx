@@ -1,17 +1,14 @@
 import { useAuthContext } from "@/state/AuthContext";
-import { Router, useRouter, Href } from "expo-router";
-import { Pressable, ViewStyle, Modal } from "react-native";
+import { Router, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { getLocales } from "expo-localization";
-import * as Linking from "expo-linking";
-import { useColors } from "@/constants/colors";
+import Button from "@/components/Button";
 
 type AddAlbumButtonProps = {
   trackGroup: AlbumProps;
   setModalVisible: (modalVisible: boolean) => void;
-  style?: ViewStyle;
-  size?: number;
 };
 
 const getAppStoreRegion = () => {
@@ -34,14 +31,12 @@ const showModal = (
 };
 
 export default function AddAlbumButton({
-  style,
-  size,
   trackGroup,
   setModalVisible,
 }: AddAlbumButtonProps) {
   const { user } = useAuthContext();
   const router = useRouter();
-  const colors = useColors();
+  const { t } = useTranslation("translation");
 
   const ids: number[] | undefined = user?.userTrackGroupPurchases?.map(
     (purchase) => purchase.trackGroupId,
@@ -69,8 +64,13 @@ export default function AddAlbumButton({
     }
   }, [setModalVisible, user, trackGroup, router]);
   return ids && ids.includes(trackGroup.id) ? null : (
-    <Pressable onPress={onPress} style={style}>
-      <Ionicons name="add-circle-outline" size={size} color={colors.inactive} />
-    </Pressable>
+    <Button
+      variant="outlined"
+      onlyIcon
+      // Ionicons pads the plus more than the heart
+      startIcon={<Ionicons name="add" size={20} />}
+      onPress={onPress}
+      accessibilityLabel={t("trackGroupCard.addToCollection")}
+    />
   );
 }
