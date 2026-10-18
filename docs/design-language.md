@@ -409,6 +409,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 - Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
 - Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` does.
 - Text needs 4.5:1 against its background and icons need 3:1. `inactive` is 3.8:1 on white, so it's for icons and inactive states only.
+- Measured pairs, light / dark: `text` on `background` 21 / 16.7, `secondaryText` 9.6 / 9.2, `accent` 5.5 / 5.5, `buttonText` on `button` 5.5, `danger` 11.6 / 7.8, chip `accent` on its `tint` fill 5.2 / 4.5, `inactive` 3.8 / 5.0. Recheck these when a token changes.
 
 ## Intentional platform differences
 
