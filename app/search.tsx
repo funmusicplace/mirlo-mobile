@@ -2,30 +2,47 @@ import { debounce } from "lodash";
 import SearchHeader from "@/components/SearchHeader";
 import {
   View,
-  FlatList,
   ActivityIndicator,
   StyleSheet,
   ScrollView,
+  SectionList,
+  Platform,
+  Pressable,
+  useWindowDimensions,
 } from "react-native";
-import { useSearch } from "@/state/SearchContext";
+import { Result, useSearch } from "@/state/SearchContext";
 import { useEffect, useMemo, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "@/queries/queries";
 import TagPill, { TagPillList } from "@/components/TagPill";
 import { optionDisplay } from "@/components/SearchOptionRenderer";
-import { Link } from "expo-router";
+import { RESULT_INSET, SearchGroupHeading } from "@/components/SearchItem";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/constants/colors";
+import { radius, spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 import Text from "@/components/ThemedText";
+
+// Result groups in the web's order
+const GROUPS = [
+  ["isTag", "headerSearch.tags"],
+  ["isArtist", "headerSearch.artists"],
+  // Local headerSearch.albums still reads "Albums", the web heading is "Releases"
+  ["isTrackGroup", "artist.releases"],
+  ["isTrack", "headerSearch.tracks"],
+] as const;
+
+type GroupedResult = Result &
+  Partial<Record<(typeof GROUPS)[number][0], boolean>>;
 
 export default function SearchPage() {
   const {
     showSuggestions,
     setShowSuggestions,
     searchResults,
-    setSearchValue,
     setIsSearching,
     getOptions,
     setSearchResults,
@@ -35,7 +52,8 @@ export default function SearchPage() {
   const { data: tags, isPending } = useQuery(
     queryTags({ orderBy: "count", take: 25 }),
   );
-  const { top, bottom } = useSafeAreaInsets();
+  const { top } = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const router = useRouter();
   const { t } = useTranslation("translation");
   const colors = useColors();
@@ -43,7 +61,12 @@ export default function SearchPage() {
   const tagPills = useMemo(() => {
     const group = tags?.results.map((tag, index) => {
       return (
-        <TagPill key={index} tagName={tag.tag} onPress={() => router.back()} />
+        <TagPill
+          key={index}
+          tagName={tag.tag}
+          variant="cover"
+          onPress={() => router.back()}
+        />
       );
     });
     return group;
@@ -68,85 +91,98 @@ export default function SearchPage() {
     searchCallbackRef(searchValue);
   }, [searchValue]);
 
-  if (isPending) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-          paddingTop: top,
-          paddingBottom: bottom,
-          justifyContent: "space-between",
-        }}
-      >
-        <SearchHeader style={{ borderBottomWidth: 1, marginBottom: 1 }} />
-        <ActivityIndicator
-          size="large"
-          color={colors.accent}
-          style={styles.loadSpinner}
-        />
-      </View>
-    );
-  }
+  const sections = useMemo(
+    () =>
+      GROUPS.map(([flag, title]) => ({
+        title: t(title),
+        data: searchResults.filter((result) => (result as GroupedResult)[flag]),
+      })).filter((section) => section.data.length > 0),
+    [searchResults, t],
+  );
+
+  const showDiscovery =
+    !isSearching && !showSuggestions && !searchValue && !searchResults.length;
+  const showNoResults =
+    !!searchValue &&
+    showSuggestions &&
+    !isSearching &&
+    searchResults.length < 1;
+  const showResults =
+    !isSearching && showSuggestions && searchResults.length > 0;
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-        paddingTop: top,
-        paddingBottom: bottom,
-      }}
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.overlay,
+          // Web dialog starts 10vh down
+          paddingTop: Math.max(top, height * 0.1),
+        },
+      ]}
     >
-      <SearchHeader style={{ borderBottomWidth: 1, marginBottom: 1 }} />
+      {/* The overlay is dark in both themes */}
+      <StatusBar style="light" />
+      <SearchHeader />
 
-      {!isSearching &&
-        !showSuggestions &&
-        !searchValue &&
-        !searchResults.length && (
-          <ScrollView style={{ marginTop: 20, marginHorizontal: 10, gap: 20 }}>
-            <Text>{t("mobileApp.searchScreen.searchByPopular")}</Text>
+      {showDiscovery && (
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={styles.discovery}
+        >
+          <Text
+            accessibilityRole="header"
+            style={[type.label, { color: colors.coverChipText }]}
+          >
+            {t("mobileApp.searchScreen.searchByPopular")}
+          </Text>
+          {isPending ? (
+            <ActivityIndicator
+              size="large"
+              color={colors.accent}
+              style={styles.tagsSpinner}
+            />
+          ) : (
             <TagPillList>{tagPills}</TagPillList>
-            <TypeLinks />
-          </ScrollView>
-        )}
-
-      {isSearching && (
-        <View style={{ marginVertical: 30, flex: 1 }}>
-          <ActivityIndicator
-            size="large"
-            color={colors.accent}
-            style={styles.loadSpinner}
+          )}
+          <TypeLink label="Popular" pathname="/topSold" />
+          <TypeLink
+            label={t("mobileApp.searchScreen.topListened")}
+            pathname="/mostPlayed"
           />
+        </ScrollView>
+      )}
+
+      {showNoResults && (
+        <View style={[styles.card, { backgroundColor: colors.background }]}>
+          <Text
+            style={[
+              type.small,
+              styles.noResults,
+              { color: colors.secondaryText },
+            ]}
+          >
+            {t("headerSearch.noResults")}
+          </Text>
         </View>
       )}
 
-      {searchValue &&
-        showSuggestions &&
-        !isSearching &&
-        searchResults.length < 1 && (
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: colors.background,
-              justifyContent: "flex-start",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ margin: 20, fontSize: 20 }}>
-              Hmmm, couldn't find anything for that search... Try again!
-            </Text>
-          </View>
-        )}
-
-      {!isSearching && showSuggestions && searchResults.length > 0 && (
-        <FlatList
-          style={{
-            backgroundColor: colors.background,
-            flex: 1,
-            width: "100%",
-          }}
-          data={searchResults}
+      {showResults && (
+        <SectionList
+          style={[
+            styles.card,
+            styles.results,
+            { backgroundColor: colors.background },
+          ]}
+          contentContainerStyle={styles.resultsContent}
+          sections={sections}
+          stickySectionHeadersEnabled={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          renderSectionHeader={({ section }) => (
+            <SearchGroupHeading title={section.title} />
+          )}
           renderItem={({ item, index }) => optionDisplay(item, index)}
           keyExtractor={(item, index) => `${index}-${item.id || item.name}`}
         />
@@ -155,38 +191,74 @@ export default function SearchPage() {
   );
 }
 
-function TypeLinks() {
+function TypeLink({
+  label,
+  pathname,
+}: {
+  label: string;
+  pathname: "/topSold" | "/mostPlayed";
+}) {
   const router = useRouter();
-  const { t } = useTranslation("translation");
   const colors = useColors();
   return (
-    <View
-      style={{
-        gap: 20,
-        paddingVertical: 15,
+    <Pressable
+      onPress={() => {
+        router.back();
+        router.navigate(pathname);
       }}
+      accessibilityRole="link"
+      android_ripple={{ color: colors.coverChipBorder }}
+      style={({ pressed }) => [styles.link, pressed && styles.pressed]}
     >
-      <Link
-        href={{ pathname: "/topSold" }}
-        onPress={() => router.back()}
-        style={{ color: colors.text }}
+      <Text
+        style={[type.body, styles.underline, { color: colors.coverChipText }]}
       >
-        Popular{" >"}
-      </Link>
-      <Link
-        href={{ pathname: "/mostPlayed" }}
-        onPress={() => router.back()}
-        style={{ color: colors.text }}
-      >
-        {t("mobileApp.searchScreen.topListened")}
-        {" >"}
-      </Link>
-    </View>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  loadSpinner: {
+  // Web dialog: 90vw wide, 12 px between its parts
+  screen: {
     flex: 1,
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg + spacing.xs,
+    paddingBottom: spacing.lg,
+  },
+  discovery: {
+    paddingTop: spacing.sm,
+  },
+  tagsSpinner: {
+    marginVertical: spacing.lg,
+  },
+  link: {
+    alignSelf: "flex-start",
+    minHeight: touchTarget,
+    justifyContent: "center",
+  },
+  underline: {
+    textDecorationLine: "underline",
+  },
+  card: {
+    borderRadius: radius.sm,
+    overflow: "hidden",
+  },
+  // Sized to its rows until it reaches the bottom of the overlay
+  results: {
+    flexGrow: 0,
+  },
+  resultsContent: {
+    paddingVertical: spacing.xs,
+  },
+  noResults: {
+    textAlign: "center",
+    paddingVertical: spacing.xl,
+    paddingHorizontal: RESULT_INSET,
+  },
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

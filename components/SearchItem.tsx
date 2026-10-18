@@ -1,106 +1,63 @@
-import {
-  View,
-  Pressable,
-  Image,
-  StyleSheet,
-  useColorScheme,
-} from "react-native";
+import { Platform, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { useSearch } from "@/state/SearchContext";
-import { toUpper } from "lodash";
-import { useTranslation } from "react-i18next";
 import Text from "@/components/ThemedText";
+import { Result, useSearch } from "@/state/SearchContext";
 import { useColors } from "@/constants/colors";
+import { spacing, touchTarget } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
-const logoLight = require("@/assets/images/mirlo-logo-logoOnly-light.png");
-const logoDark = require("@/assets/images/mirlo-logo-logoOnly-dark.png");
+// Web px-3.5 on result rows, headings and the empty message
+export const RESULT_INSET = spacing.md + spacing.xxs;
 
-type Result = {
-  result: {
-    id: number | string;
-    name: string;
-    category?: string;
-    artistId?: number | string;
-    trackGroupId?: number | string;
-    artistName?: string;
-    avatar?: {
-      url: string;
-      sizes?: { [key: string]: string };
-      updatedAt: string;
-    };
-    trackGroupCover?: {
-      sizes: {
-        60: string;
-        120: string;
-        300: string;
-        600: string;
-        960: string;
-        1200: string;
-        1500: string;
-      };
-    };
-  };
+type SearchItemProps = {
+  result: Result;
   index: number;
 };
 
-export default function SearchItem({ result, index }: Result) {
-  const { t } = useTranslation();
+export default function SearchItem({ result }: SearchItemProps) {
   const router = useRouter();
   const { setSearchResults, setShowSuggestions } = useSearch();
   const colors = useColors();
-  const isDark = useColorScheme() === "dark";
+  // Releases and tracks read "Artist · Title", like the web
+  const parts = [result.artistName, result.name]
+    .map((part) => part?.trim())
+    .filter(Boolean);
   return (
-    <View style={{ marginVertical: 5 }}>
-      <Pressable
-        onPress={() => {
-          setSearchResults([]);
-          setShowSuggestions(false);
-          router.back();
-          router.navigate(constructUrl(result));
-        }}
-      >
-        <View style={styles.listItem}>
-          <Image
-            source={
-              result.trackGroupCover?.sizes?.[120]
-                ? { uri: result.trackGroupCover.sizes[120] }
-                : result.avatar?.sizes?.[120]
-                  ? { uri: result.avatar.sizes[120] }
-                  : isDark
-                    ? logoDark
-                    : logoLight
-            }
-            style={[styles.image, { backgroundColor: colors.muted }]}
-          />
-          <View style={{ marginLeft: 15, width: 300, gap: 2 }}>
-            <Text
-              ellipsizeMode="tail"
-              numberOfLines={1}
-              style={{ fontSize: 18 }}
-            >
-              {result.name.trim()}
-            </Text>
-            {result.artistName && (
-              <Text
-                ellipsizeMode="tail"
-                numberOfLines={1}
-                style={{ fontSize: 15, color: colors.secondaryText }}
-              >
-                {t("profile.albumLink")
-                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                  .trim()}{" "}
-                {result.artistName.trim()}
-              </Text>
-            )}
-            <Text style={{ fontSize: 12, color: colors.secondaryText }}>
-              {toUpper(result.category)}
-            </Text>
-          </View>
-        </View>
-      </Pressable>
-    </View>
+    <Pressable
+      onPress={() => {
+        setSearchResults([]);
+        setShowSuggestions(false);
+        router.back();
+        router.navigate(constructUrl(result));
+      }}
+      accessibilityRole="link"
+      accessibilityLabel={parts.join(", ")}
+      android_ripple={{ color: colors.tintX }}
+      style={({ pressed }) => [
+        styles.row,
+        pressed && { backgroundColor: colors.tint },
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text numberOfLines={1} style={styles.label}>
+        {parts.join(" · ")}
+      </Text>
+    </Pressable>
   );
 }
+
+export function SearchGroupHeading({ title }: { title: string }) {
+  const colors = useColors();
+  return (
+    <Text
+      accessibilityRole="header"
+      style={[styles.heading, { color: colors.secondaryText }]}
+    >
+      {title}
+    </Text>
+  );
+}
+
 const constructUrl = (r: any) => {
   if (!r) {
     return "/";
@@ -113,20 +70,34 @@ const constructUrl = (r: any) => {
   } else if (r.isArtist) {
     return `/artist/${r.artistId}/artist-page` as const;
   } else {
-    console.log(r.name);
     return `/tags/${r.name}` as const;
   }
 };
 
 const styles = StyleSheet.create({
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 5,
+  row: {
+    minHeight: touchTarget,
+    justifyContent: "center",
+    paddingVertical: spacing.sm,
+    paddingHorizontal: RESULT_INSET,
   },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 1,
+  // Web 0.95rem on a 24 line
+  label: {
+    ...type.body,
+    fontSize: 15.2,
+  },
+  heading: {
+    ...type.xsmall,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    // Web tracking-wider, 0.05em
+    letterSpacing: type.xsmall.fontSize * 0.05,
+    paddingTop: spacing.sm,
+    paddingHorizontal: RESULT_INSET,
+    paddingBottom: spacing.xs,
+  },
+  // Android shows the ripple instead
+  pressed: {
+    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

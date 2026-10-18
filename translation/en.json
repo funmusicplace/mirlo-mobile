@@ -87,7 +87,9 @@
     "artists": "Artists",
     "albums": "Albums",
     "tracks": "Tracks",
-    "labels": "Labels"
+    "labels": "Labels",
+    "tags": "Tags",
+    "searchMusic": "Search music"
   },
   "profile": {
     "resetPasswordLink": "Want to change your password? Use the reset form.",

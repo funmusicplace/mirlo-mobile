@@ -1,56 +1,61 @@
-import { View, Image, StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, View } from "react-native";
+import TrackGroupItem from "@/components/TrackGroupItem";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { radius, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
-type CollectionPurchaseProps = {
+export type CollectionItem = {
+  key: string;
   trackGroup: AlbumProps;
   track?: RNTrack;
 };
 
-const logoLight = require("@/assets/images/mirlo-logo-logoOnly-light.png");
-const logoDark = require("@/assets/images/mirlo-logo-logoOnly-dark.png");
+type CollectionPurchaseProps = Omit<CollectionItem, "key"> & {
+  width: number;
+};
 
+// Grid card for a release, or for a single track with its release cover
 export default function CollectionPurchase({
   trackGroup,
   track,
+  width,
 }: CollectionPurchaseProps) {
-  const colors = useColors();
-  const isDark = useColorScheme() === "dark";
+  if (!track) {
+    return <TrackGroupItem {...trackGroup} width={width} />;
+  }
   return (
-    <View style={styles.listItem}>
-      <Image
-        source={
-          trackGroup.cover?.sizes
-            ? { uri: trackGroup.cover?.sizes[120] }
-            : { uri: isDark ? logoDark : logoLight }
-        }
-        style={[styles.image, { backgroundColor: colors.muted }]}
-      />
-      <View style={{ marginLeft: 15, width: 300 }}>
-        <Text
-          style={{ color: colors.text, fontSize: 15, fontWeight: "bold" }}
-          ellipsizeMode="tail"
-          numberOfLines={1}
-        >
-          {track ? track.title : trackGroup.title}
-        </Text>
-        <Text style={{ color: colors.text, fontSize: 14 }}>
-          {trackGroup.artist.name}
-        </Text>
-      </View>
+    <TrackGroupItem
+      {...trackGroup}
+      title={track.title}
+      width={width}
+      href={{
+        pathname: "/artist/[id]/album/[slug]/tracks/[trackId]",
+        params: {
+          id: trackGroup.artistId,
+          slug: trackGroup.urlSlug,
+          trackId: track.id,
+        },
+      }}
+    />
+  );
+}
+
+// Web Box with a tint-x border, shown when a grid has nothing in it
+export function CollectionEmpty({ children }: { children: string }) {
+  const colors = useColors();
+  return (
+    <View style={[styles.empty, { borderColor: colors.tintX }]}>
+      <Text style={type.body}>{children}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 5,
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 1,
+  empty: {
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
 });
