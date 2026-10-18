@@ -204,7 +204,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `Header/Menu.tsx`, `Header/MenuLink.tsx` | `app/menu.tsx` with `MenuLink` and `Separator` | Matches |
 | `Footer.tsx` link columns ("Mirlo", "Legal", "Connect") | `app/about.tsx` | Matches: 14 / 21 bold headings, 14 pt underlined accent links with brand icons, two columns, 44 pt rows. The web route `/pages/about` redirects to docs.mirlo.space |
 | `common/Input.tsx`, `FormComponent.tsx`, `LogInForm.tsx`, `EmailVerification.tsx` | `LoginForm`, `app/emailVerificationModal.tsx` | Matches, with the login [platform differences](#intentional-platform-differences) |
-| `common/Spinner.tsx`, `LoadingSpinner.tsx`, `Artist/LoadingBlocks.tsx` | `ActivityIndicator` | Native by design, skeletons to build |
+| `common/Spinner.tsx`, `LoadingSpinner.tsx`, `FullPageLoadingSpinner.tsx` | `ActivityIndicator` in `colors.accent` | Matches: the web artist, release and track pages also load behind a centered spinner |
 | `common/Snackbar.tsx` | None | `ErrorNotification` covers request errors |
 | None | `app/now-playing.tsx` with `Player` | Mobile only |
 
@@ -341,7 +341,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | In a button | `LoadingSpinner` (`AiOutlineLoading`, one turn per 0.5 s) replaces the start icon | `Button` `loading`: spinner in the label color over the hidden label. `PlayFeaturedButton`: small spinner in `buttonText` |
 | Search | Spinner at the end of the input | Small `accent` spinner in the input's trailing slot |
 | Next page | Not applicable | Large `ActivityIndicator` in the list footer with `spacing.xxl` above and below |
-| Skeleton | `LoadingBlocks`: tint to tint-x shimmer, radius 5 | To build |
+| Skeleton | `LoadingBlocks`: tint to tint-x shimmer, radius 5, on roster, search and post pages | Not used: no mobile screen maps to those pages |
 
 ## Usage rules
 
@@ -385,7 +385,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 - Screen load: `ActivityIndicator size="large"` in `colors.accent`, centered below the screen header, as `collections.tsx` and `wishlist.tsx` do.
 - Next page: a large `ActivityIndicator` in `ListFooterComponent` with `spacing.xxl` above and below.
 - Buttons: pass `loading` to `Button`. It keeps its size, shows a spinner in the label color and sets `disabled` and `busy`. The web keeps the label and swaps the start icon for a spinner.
-- Skeletons: to build, following `LoadingBlocks` with a `tint` to `tintX` shimmer.
+- Skeletons: none today. A new one follows `LoadingBlocks` with a `tint` to `tintX` shimmer and respects reduced motion.
 
 ### Press feedback
 
@@ -415,6 +415,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Topic | Web | Mobile |
 | --- | --- | --- |
 | Touch targets | 30 px (`--mi-touch-target-min`) | 44 pt (`touchTarget`), with `hitSlop` when the visual is smaller |
+| Refreshing the home feed | "Refresh" button on the recent releases row | Pull to refresh, the row keeps the play-all button |
 | Rows and inputs | Track rows 36, inputs 42 | 44 minimum for track rows, menu links, search rows and inputs |
 | Donate | "Donate now" button in the header | None, to follow App Store rules |
 | Artist colors | Artist and release pages apply each artist's colors (`ArtistColorsProvider`) | Instance palette everywhere |
