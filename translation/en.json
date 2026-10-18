@@ -736,6 +736,7 @@
     "about": "About us",
     "contact": "Contact us",
     "connectHeading": "Connect",
+    "legalHeading": "Legal",
     "terms": "Terms and conditions",
     "privacy": "Privacy"
   },
@@ -910,6 +911,7 @@
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
+    "exploreMusic": "Explore music",
     "support": "<red>Directly support artists.</red> Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "supportTeam": "Support Mirlo",

@@ -1,14 +1,14 @@
 import {
   Linking,
+  Platform,
+  Pressable,
   ScrollView,
-  StyleProp,
   StyleSheet,
   View,
-  ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import Button from "@/components/Button";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import Text from "@/components/ThemedText";
@@ -19,10 +19,8 @@ import { type } from "@/constants/typography";
 type AboutLinkInfo = {
   label: string;
   url: string;
+  icon?: "instagram" | "mastodon" | "bluesky";
 };
-
-// Hit slop the link Button adds above and below its 24 pt line
-const LINK_SLOP = (touchTarget - type.body.lineHeight) / 2;
 
 // Linking.openURL would route mirlo.space links back into the app
 function onLinkPress(url: string) {
@@ -33,23 +31,45 @@ function onLinkPress(url: string) {
   }
 }
 
-type AboutLinksProps = {
+// One column of the web footer: a bold heading over underlined links
+function AboutColumn({
+  heading,
+  links,
+}: {
+  heading?: string;
   links: AboutLinkInfo[];
-  style?: StyleProp<ViewStyle>;
-};
-
-function AboutLinks({ links, style }: AboutLinksProps) {
+}) {
+  const colors = useColors();
   return (
-    <View style={[styles.links, style]}>
+    <View style={styles.column}>
+      {heading ? (
+        <Text style={styles.heading} accessibilityRole="header">
+          {heading}
+        </Text>
+      ) : null}
       {links.map((link) => (
-        <Button
+        <Pressable
           key={link.url}
-          variant="link"
           accessibilityRole="link"
-          title={link.label}
           onPress={() => onLinkPress(link.url)}
-          style={styles.link}
-        />
+          android_ripple={{ color: colors.tintX }}
+          style={({ pressed }) => [
+            styles.link,
+            pressed && Platform.OS === "ios" && styles.pressed,
+          ]}
+        >
+          {link.icon ? (
+            <FontAwesome6
+              name={link.icon}
+              brand
+              size={type.small.fontSize}
+              color={colors.accent}
+            />
+          ) : null}
+          <Text style={[styles.linkText, { color: colors.accent }]}>
+            {link.label}
+          </Text>
+        </Pressable>
       ))}
     </View>
   );
@@ -65,15 +85,27 @@ export default function About() {
     { label: t("footer.contact"), url: "mailto:hi@mirlo.space" },
   ];
 
-  const connectLinks: AboutLinkInfo[] = [
-    { label: "Instagram", url: "https://instagram.com/mirlo.space" },
-    { label: "Mastodon", url: "https://musician.social/@mirlo" },
-    { label: "Bluesky", url: "https://bsky.app/profile/mirlo.space" },
-  ];
-
   const legalLinks: AboutLinkInfo[] = [
     { label: t("footer.terms"), url: "https://mirlo.space/pages/terms" },
     { label: t("footer.privacy"), url: "https://mirlo.space/pages/privacy" },
+  ];
+
+  const connectLinks: AboutLinkInfo[] = [
+    {
+      label: "Instagram",
+      url: "https://instagram.com/mirlo.space",
+      icon: "instagram",
+    },
+    {
+      label: "Mastodon",
+      url: "https://musician.social/@mirlo",
+      icon: "mastodon",
+    },
+    {
+      label: "Bluesky",
+      url: "https://bsky.app/profile/mirlo.space",
+      icon: "bluesky",
+    },
   ];
 
   return (
@@ -82,15 +114,20 @@ export default function About() {
     >
       <ScreenHeader left={<BackButton />} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[type.display, styles.title]} accessibilityRole="header">
-          {t("footer.aboutHeading")}
-        </Text>
-        <AboutLinks links={aboutLinks} />
-        <Text style={[type.heading, styles.heading]} accessibilityRole="header">
-          {t("footer.connectHeading")}
-        </Text>
-        <AboutLinks links={connectLinks} />
-        <AboutLinks links={legalLinks} style={styles.group} />
+        <View style={styles.row}>
+          <AboutColumn heading={t("footer.aboutHeading")} links={aboutLinks} />
+          <AboutColumn
+            heading={t("footer.legalHeading", "Legal")}
+            links={legalLinks}
+          />
+        </View>
+        <View style={styles.row}>
+          <AboutColumn
+            heading={t("footer.connectHeading")}
+            links={connectLinks}
+          />
+          <View style={styles.column} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -100,26 +137,36 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  // Web footer: 2rem side padding, two columns 2rem apart
   content: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.xxl,
     paddingVertical: spacing.xl,
+    gap: spacing.xl,
   },
-  title: {
-    marginBottom: spacing.sm,
+  row: {
+    flexDirection: "row",
+    gap: spacing.xxl,
+  },
+  column: {
+    flex: 1,
   },
   heading: {
-    marginTop: spacing.lg,
+    ...type.small,
+    fontWeight: "700",
     marginBottom: spacing.sm,
   },
-  group: {
-    marginTop: spacing.lg,
-  },
-  // Android drops touches outside the parent, so the slop stays inside
-  links: {
-    paddingVertical: LINK_SLOP,
-    gap: LINK_SLOP * 2,
-  },
+  // Web rows are 28 apart, 44 is the platform touch target
   link: {
-    alignSelf: "flex-start",
+    minHeight: touchTarget,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  linkText: {
+    ...type.small,
+    textDecorationLine: "underline",
+  },
+  pressed: {
+    opacity: 0.6,
   },
 });

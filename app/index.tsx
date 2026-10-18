@@ -21,6 +21,8 @@ import ErrorNotification from "@/components/ErrorNotification";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/constants/colors";
 import { gutter, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
+import Text from "@/components/ThemedText";
 
 const PAGE_SIZE = 20;
 
@@ -150,13 +152,18 @@ export default function Index() {
         }}
         onEndReachedThreshold={0.0}
         ListHeaderComponent={
-          <SectionHeader
-            right={
-              <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
-            }
-          >
-            {t("releases.recentReleases")}
-          </SectionHeader>
+          <>
+            <Text style={styles.explore} accessibilityRole="header">
+              {t("home.exploreMusic", "Explore music")}
+            </Text>
+            <SectionHeader
+              right={
+                <PlayFeaturedButton albums={trackGroups.slice(0, PAGE_SIZE)} />
+              }
+            >
+              {t("releases.recentReleases")}
+            </SectionHeader>
+          </>
         }
         ListFooterComponent={renderLoadingFooter}
       />
@@ -165,6 +172,12 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  // Web SplashTitle as the section h2, 32 above the next label
+  explore: {
+    ...type.display,
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+  },
   loadSpinner: {
     flex: 1,
   },

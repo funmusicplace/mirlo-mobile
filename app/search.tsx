@@ -178,7 +178,7 @@ export default function SearchPage() {
           style={[
             styles.card,
             styles.results,
-            { backgroundColor: colors.background },
+            { backgroundColor: colors.background, borderColor: colors.border },
           ]}
           contentContainerStyle={styles.resultsContent}
           sections={sections}
