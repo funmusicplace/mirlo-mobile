@@ -49,7 +49,7 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `alertBorder` | `--mi-warning-color` | `#f2897a` | `#f2897a` | Notice box left rule |
 | `playerBackground` | `--mi-fixed-bg-color` in `Player` | `#f5f0f0` | `#111111` | `Footer` fill |
 | `playerShadow` | `Player` drop-shadow color: fixed foreground at 30% | `rgba(17, 17, 17, 0.3)` | `rgba(245, 240, 240, 0.3)` | `Footer` top hairline |
-| `tint` | `--mi-tint-color` | `rgba(50, 0, 0, 0.03)` | `rgba(255, 255, 255, 0.08)` | Tag chip fill, cover and avatar placeholders, pressed search row |
+| `tint` | `--mi-tint-color` | `rgba(50, 0, 0, 0.03)` | `rgba(255, 255, 255, 0.08)` | Tag chip and selected filter pill fill, cover and avatar placeholders, pressed search row |
 | `tintX` | `--mi-tint-x-color` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Chip border, pressed fill, ripples, menu separators, Collection empty state border, slider track |
 | `inputBackground` | `--mi-background-color` on `Input` | `#ffffff` | `#111111` | Text input fill |
 | `inputText` | `--mi-text-color` on `Input` | `#000000` | `#f5f0f0` | Text input text, search icon |
@@ -85,7 +85,7 @@ Values are points on mobile and CSS pixels on the web (16 px root).
 
 | Mobile token | Web variable or value | Light | Dark | Use |
 | --- | --- | --- | --- | --- |
-| `spacing.xxs` | `0.125rem` | 2 | same | Fine offsets between stacked lines |
+| `spacing.xxs` | `0.125rem` | 2 | same | Fine offsets between stacked lines, filter pill side padding |
 | `spacing.xs` | `0.25rem` | 4 | same | Chip vertical padding, compact button padding, cover to artist line |
 | `spacing.sm` | `0.5rem` | 8 | same | Chip horizontal padding, chip gap, input and button vertical padding, row gaps, cover to title |
 | `spacing.md` | `0.75rem` | 12 | same | Grid column gap, input and button horizontal padding, header button gap, page title margins |
@@ -101,7 +101,7 @@ Values are points on mobile and CSS pixels on the web (16 px root).
 | `radius.sm` | `--mi-border-radius` | 3 | same | Buttons, inputs, notice and empty state boxes, search cards, menu links |
 | `radius.md` | `--mi-border-radius-focus` | 8 | same | Album purchase dialog card. Web: focused inputs, `rounded` buttons, phone-width modal sheet corners |
 | `radius.lg` | `--mi-border-radius-x` | 15 | same | Tag chips, top padding of the modal title bar |
-| `radius.pill` | `9999px` | 9999 | same | `rounded` and icon-only buttons, play circles, avatars |
+| `radius.pill` | `9999px` | 9999 | same | `rounded` and icon-only buttons, play circles, avatars, filter pills |
 
 ### Touch target
 
@@ -123,7 +123,7 @@ Body text uses the system font on both apps. The web stack (`--mi-font-family-st
 | `type.body` | 16 / 24 | 400 | Body text and paragraphs | Body copy, inputs, button labels, menu links, empty states |
 | `type.small` | 14 / 21 | 400 | `--mi-font-size-small`, artist links | Track titles and index, artist bylines, inline errors, notice messages |
 | `type.caption` | 12.8 / 19.2 | 400 | `<small>` | Release dates, compact button labels |
-| `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Track durations and contributors, player times, search group headings |
+| `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Track durations and contributors, player times, search group headings, filter pills |
 | `type.cardTitle` | 14 / 19.25 | 400 | `ReleaseCard` title | Release grid titles |
 | `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent`. The footer title line |
 | `type.chip` | 12.8 / 16 | 400 | `Pill` (0.8rem) | Tag chips |
@@ -193,6 +193,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | --- | --- | --- |
 | `common/Button.tsx` | `components/Button.tsx` | Matches, with the differences below |
 | `common/Pill.tsx` in `TrackGroup/TrackGroupPills.tsx` | `TagPill` (`tint`, `cover`), `TagPillList` | Matches |
+| `Profile/UserNotificationFeed/FilterGroup.tsx` | `FilterGroup`, used by `app/wishlist.tsx` | Matches, without the `overlay` variant, `compact` size and `noMargin` |
 | `Player/index.tsx`, `PlayingTrackDetails.tsx`, `PlayerActions.tsx` | `Footer` | Matches, with the [platform differences](#intentional-platform-differences) |
 | `Header/Header.tsx`, `common/Logo.tsx` | `ScreenHeader`, `HeaderButton`, `BackButton`, `MirloLogo`, `SearchButton`, `MenuButton` | Matches, without the Donate button |
 | `common/SectionHeader.tsx` | `SectionHeader` in `components/ScreenHeader.tsx` | Matches |
@@ -233,6 +234,17 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `cover` | 80% black fill, white text, 25% white border | `coverChip`, `coverChipText`, `coverChipBorder`. Popular tags on the search overlay |
 | List | Wrapping row, gap 8, margin 16 above and below | `TagPillList`: gap 8, 9 padding plus 7 margin above and below, so Android keeps the slop inside the parent |
 | States | Hover: tint-x fill. Links to `/releases?tag=` | Pressed: `tintX` fill on iOS, `tintX` ripple on Android. `link` role, opens `/tags/[tag]` |
+
+### Filter group
+
+| | Web `FilterGroup` on the wishlist page | Mobile `FilterGroup` in `app/wishlist.tsx` |
+| --- | --- | --- |
+| Options | Radios "All", "Albums" and "Tracks" under the h1, in a fieldset with a screen-reader legend "Filter wishlist" | Same strings from `profile.wishlistFilter*`. `radiogroup` role labeled with the legend, `radio` pills with the `checked` state |
+| Size | 26 tall, padding 4 by 10, text 12 / 16, 1 px border, full radius, gap 4 | `type.xsmall`, `spacing.xs` by `spacing.sm` + `spacing.xxs` padding, 1 pt border, `radius.pill`, `spacing.xs` gap, plus `hitSlop` of 9 above and below and 2 at the sides (44 tall) |
+| Selected | `--mi-button-color` border and text, weight 600, `--mi-button-tint-color` fill | `accent` border and text, weight 600, `tint` fill |
+| Not selected | `--mi-tint-x-color` border, `--mi-secondary-text-color` text (the text color by default) at weight 400, no fill | `tintX` border, `text` at weight 400, no fill |
+| Spacing | 12 under the h1, 16 below the pills | Same. The group pads by the slop and takes it back in margin, so Android keeps the slop inside the parent |
+| States | Hover: border and text in the text color on pills that aren't selected | Pressed: `tintX` fill on iOS, `tintX` ripple on Android |
 
 ### Player bar
 
@@ -375,7 +387,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 ### Empty states
 
-- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's `Box` with `radius.sm`, 8 by 12 padding and `type.body`. Collection passes `bordered` for the web's 1 pt `tintX` border and Wishlist stays plain, like the web. The header and footer stay in place.
+- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's `Box` with `radius.sm`, 8 by 12 padding and `type.body`. Collection passes `bordered` for the web's 1 pt `tintX` border. Wishlist stays plain like the web and shows the same text under every filter. The header and footer stay in place.
 - Search shows its no-results message as a card, matching the web's centered message.
 - Other lists show one plain sentence in `type.body` and `colors.secondaryText`, with `gutter` side padding and `spacing.lg` above, as the artist page does.
 - Use text only, as the web does.
@@ -405,9 +417,9 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 ### Accessibility
 
 - Give every icon-only control an `accessibilityLabel`, plus an `accessibilityHint` when the label doesn't make the result clear.
-- Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels.
-- Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
-- Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` does.
+- Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels, `radiogroup` with `radio` pills for filters.
+- Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `checked` on the selected filter pill, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
+- Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` and `FilterGroup` do.
 - Text needs 4.5:1 against its background and icons need 3:1. `inactive` is 3.8:1 on white, so it's for icons and inactive states only.
 - Measured pairs, light / dark: `text` on `background` 21 / 16.7, `secondaryText` 9.6 / 9.2, `accent` 5.5 / 5.5, `buttonText` on `button` 5.5, `danger` 11.6 / 7.8, chip `accent` on its `tint` fill 5.2 / 4.5, `inactive` 3.8 / 5.0. Recheck these when a token changes.
 
