@@ -58,8 +58,9 @@ jest.mock("@/state/AuthContext", () => ({
 }));
 
 const track = {
-  title: "Song",
-  artist: "Band",
+  // API titles can end in a space
+  title: "Song ",
+  artist: "Band ",
   artwork: "https://example.com/a.jpg",
   trackGroup: { artistId: 7, urlSlug: "album" },
 };

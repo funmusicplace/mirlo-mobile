@@ -34,6 +34,8 @@ const ROW_HEIGHT = 56;
 const ART_SIZE = 48;
 // The seek layer overlays the content, only the visible line takes layout space
 const PROGRESS_HEIGHT = 6.4;
+// The web's 1rem slider
+const SEEK_HEIGHT = 16;
 const SEEK_STEP_SECONDS = 10;
 // Below this the skip buttons go, Now playing still has them
 const SKIP_MIN_WINDOW_WIDTH = 360;
@@ -68,6 +70,9 @@ export default function Footer({ style }: ViewProps) {
   const { user } = useAuthContext();
   const { width } = useWindowDimensions();
   const colors = useColors();
+  // Titles from the API can end in a space or be missing
+  const title = activeTrack?.title?.trim();
+  const artist = activeTrack?.artist?.trim();
 
   function navigate(route: (typeof NAV_ITEMS)[number]["route"]) {
     if (route === "/") {
@@ -128,9 +133,8 @@ export default function Footer({ style }: ViewProps) {
         style,
       ]}
     >
-      {showPlayer && <ProgressBar />}
       {showPlayer && activeTrack ? (
-        <View style={styles.player} pointerEvents="box-none">
+        <View style={styles.player}>
           {activeTrack.artwork ? (
             <Pressable
               onPress={openNowPlaying}
@@ -151,16 +155,16 @@ export default function Footer({ style }: ViewProps) {
             <Pressable
               onPress={openNowPlaying}
               accessibilityRole="button"
-              accessibilityLabel={`${activeTrack.title}, ${activeTrack.artist}`}
+              accessibilityLabel={`${title}, ${artist}`}
               android_ripple={{ color: colors.border }}
               style={({ pressed }) => pressed && styles.pressed}
             >
               <MarqueeText style={type.cardMeta}>
                 <Text style={[styles.title, { color: colors.text }]}>
-                  {activeTrack.title}
+                  {title}
                 </Text>
                 <Text style={{ color: colors.secondaryText }}>
-                  {` · ${activeTrack.artist}`}
+                  {` · ${artist}`}
                 </Text>
               </MarqueeText>
             </Pressable>
@@ -181,6 +185,7 @@ export default function Footer({ style }: ViewProps) {
       ) : (
         <View style={styles.idle}>{nav}</View>
       )}
+      {showPlayer && <ProgressBar />}
     </View>
   );
 }
@@ -361,7 +366,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 24,
+    height: SEEK_HEIGHT,
   },
   progress: {
     height: PROGRESS_HEIGHT,
