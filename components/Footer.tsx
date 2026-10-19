@@ -26,6 +26,8 @@ import { skipTrack } from "@/scripts/trackPlayUtils";
 import { gutter, radius } from "@/constants/spacing";
 
 const HIT_SIZE = 44;
+// The seek layer overlays the row, only the visible line takes layout space
+const PROGRESS_HEIGHT = 6.4;
 const SEEK_STEP_SECONDS = 10;
 // Below this the skip buttons go, Now playing still has them
 const SKIP_MIN_WINDOW_WIDTH = 360;
@@ -80,13 +82,14 @@ export default function Footer({ style }: ViewProps) {
         {
           backgroundColor: colors.playerBackground,
           borderTopColor: colors.playerShadow,
+          paddingTop: showPlayer ? PROGRESS_HEIGHT : 0,
           paddingBottom: insets.bottom,
         },
         style,
       ]}
     >
       {showPlayer && <ProgressBar />}
-      <View style={styles.row}>
+      <View style={styles.row} pointerEvents="box-none">
         <View style={styles.group}>
           {NAV_ITEMS.map(({ route, icon, label, hint }) => {
             const active = pathname === route;
@@ -317,10 +320,14 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   seekArea: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
     height: 24,
   },
   progress: {
-    height: 6.4,
+    height: PROGRESS_HEIGHT,
   },
   row: {
     minHeight: 56,
