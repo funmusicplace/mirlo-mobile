@@ -120,7 +120,6 @@ export default function Menu() {
         </View>
         <View style={styles.actions}>
           <Button
-            variant={user ? "outlined" : "solid"}
             title={user ? t("headerMenu.logOut") : t("headerMenu.logIn")}
             loading={isPending}
             fullWidth

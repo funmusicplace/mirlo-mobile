@@ -18,14 +18,24 @@ import TrackPlayer, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Link, router, usePathname } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
+import MarqueeText from "@/components/MarqueeText";
+import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
-import { gutter, radius } from "@/constants/spacing";
+import { gutter, radius, spacing } from "@/constants/spacing";
+import { type } from "@/constants/typography";
 
 const HIT_SIZE = 44;
+const ROW_HEIGHT = 56;
+// The web player art size
+const ART_SIZE = 48;
+// The seek layer overlays the content, only the visible line takes layout space
+const PROGRESS_HEIGHT = 6.4;
+// The web's 1rem slider
+const SEEK_HEIGHT = 16;
 const SEEK_STEP_SECONDS = 10;
 // Below this the skip buttons go, Now playing still has them
 const SKIP_MIN_WINDOW_WIDTH = 360;
@@ -60,6 +70,9 @@ export default function Footer({ style }: ViewProps) {
   const { user } = useAuthContext();
   const { width } = useWindowDimensions();
   const colors = useColors();
+  // Titles from the API can end in a space or be missing
+  const title = activeTrack?.title?.trim();
+  const artist = activeTrack?.artist?.trim();
 
   function navigate(route: (typeof NAV_ITEMS)[number]["route"]) {
     if (route === "/") {
@@ -73,6 +86,40 @@ export default function Footer({ style }: ViewProps) {
     }
   }
 
+  function openNowPlaying() {
+    if (!activeTrack) return;
+    router.navigate({
+      pathname: "/now-playing",
+      params: {
+        id: activeTrack.trackGroup.artistId,
+        slug: activeTrack.trackGroup.urlSlug,
+      },
+    });
+  }
+
+  const nav = (
+    <View style={styles.group}>
+      {NAV_ITEMS.map(({ route, icon, label, hint }) => {
+        const active = pathname === route;
+        return (
+          <FooterButton
+            key={route}
+            onPress={() => navigate(route)}
+            accessibilityLabel={label}
+            accessibilityHint={hint}
+            accessibilityState={{ selected: active }}
+          >
+            <Ionicons
+              name={active ? icon : `${icon}-outline`}
+              size={26}
+              color={active ? colors.accent : colors.inactive}
+            />
+          </FooterButton>
+        );
+      })}
+    </View>
+  );
+
   return (
     <View
       style={[
@@ -80,67 +127,65 @@ export default function Footer({ style }: ViewProps) {
         {
           backgroundColor: colors.playerBackground,
           borderTopColor: colors.playerShadow,
+          paddingTop: showPlayer ? PROGRESS_HEIGHT : 0,
           paddingBottom: insets.bottom,
         },
         style,
       ]}
     >
-      {showPlayer && <ProgressBar />}
-      <View style={styles.row}>
-        <View style={styles.group}>
-          {NAV_ITEMS.map(({ route, icon, label, hint }) => {
-            const active = pathname === route;
-            return (
-              <FooterButton
-                key={route}
-                onPress={() => navigate(route)}
-                accessibilityLabel={label}
-                accessibilityHint={hint}
-                accessibilityState={{ selected: active }}
-              >
-                <Ionicons
-                  name={active ? icon : `${icon}-outline`}
-                  size={26}
-                  color={active ? colors.accent : colors.inactive}
-                />
-              </FooterButton>
-            );
-          })}
-        </View>
-        {showPlayer && activeTrack && (
-          <View style={styles.group}>
-            {activeTrack.artwork ? (
-              <Link
-                href={{
-                  pathname: "/now-playing",
-                  params: {
-                    id: activeTrack.trackGroup.artistId,
-                    slug: activeTrack.trackGroup.urlSlug,
-                  },
-                }}
-                asChild
-              >
-                <FooterButton
-                  // Link asChild injects role="link"
-                  role="button"
-                  accessibilityLabel="Now playing"
-                >
-                  <Image
-                    source={{ uri: activeTrack.artwork }}
-                    resizeMode="cover"
-                    style={styles.art}
-                  />
-                </FooterButton>
-              </Link>
-            ) : null}
-            {width >= SKIP_MIN_WINDOW_WIDTH && (
-              <SkipButton direction="previous" />
-            )}
-            <FooterPlayButton />
-            {width >= SKIP_MIN_WINDOW_WIDTH && <SkipButton direction="next" />}
+      {showPlayer && activeTrack ? (
+        <View style={styles.player}>
+          {activeTrack.artwork ? (
+            <Pressable
+              onPress={openNowPlaying}
+              accessibilityRole="button"
+              accessibilityLabel="Now playing"
+              // Foreground so the ripple draws over the cover
+              android_ripple={{ color: colors.border, foreground: true }}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <Image
+                source={{ uri: activeTrack.artwork }}
+                resizeMode="cover"
+                style={styles.art}
+              />
+            </Pressable>
+          ) : null}
+          <View style={styles.details}>
+            <Pressable
+              onPress={openNowPlaying}
+              accessibilityRole="button"
+              accessibilityLabel={`${title}, ${artist}`}
+              android_ripple={{ color: colors.border }}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <MarqueeText style={type.cardMeta}>
+                <Text style={[styles.title, { color: colors.text }]}>
+                  {title}
+                </Text>
+                <Text style={{ color: colors.secondaryText }}>
+                  {` · ${artist}`}
+                </Text>
+              </MarqueeText>
+            </Pressable>
+            <View style={styles.group}>
+              <View style={styles.transport}>
+                {width >= SKIP_MIN_WINDOW_WIDTH && (
+                  <SkipButton direction="previous" />
+                )}
+                <FooterPlayButton />
+                {width >= SKIP_MIN_WINDOW_WIDTH && (
+                  <SkipButton direction="next" />
+                )}
+              </View>
+              {nav}
+            </View>
           </View>
-        )}
-      </View>
+        </View>
+      ) : (
+        <View style={styles.idle}>{nav}</View>
+      )}
+      {showPlayer && <ProgressBar />}
     </View>
   );
 }
@@ -317,17 +362,38 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   seekArea: {
-    height: 24,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: SEEK_HEIGHT,
   },
   progress: {
-    height: 6.4,
+    height: PROGRESS_HEIGHT,
   },
-  row: {
-    minHeight: 56,
+  idle: {
+    minHeight: ROW_HEIGHT,
     paddingHorizontal: gutter,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
+  },
+  player: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingHorizontal: gutter,
+    paddingTop: spacing.xs,
+    // Puts the button line where the idle row puts its buttons
+    paddingBottom: (ROW_HEIGHT - HIT_SIZE) / 2,
+  },
+  details: {
+    flex: 1,
+  },
+  transport: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
   },
   group: {
     flexDirection: "row",
@@ -344,8 +410,11 @@ const styles = StyleSheet.create({
     opacity: Platform.OS === "android" ? 1 : 0.6,
   },
   art: {
-    width: 40,
-    height: 40,
+    width: ART_SIZE,
+    height: ART_SIZE,
+  },
+  title: {
+    fontWeight: "600",
   },
   playCircle: {
     width: 40,

@@ -86,7 +86,8 @@ test("signed out, collection and wishlist show the empty box and redirect", () =
   expect(mockRouter.push).toHaveBeenCalledWith("/login");
 });
 
-test("wishlist puts the newest first and tracks open the track page", () => {
+// A favorited track newer than a wishlisted album
+const mixedWishlist = () => {
   const track = createMockRNTrack({ title: "Newer track", id: 5 });
   mockUser = createMockUser({
     trackFavorites: [
@@ -103,6 +104,11 @@ test("wishlist puts the newest first and tracks open the track page", () => {
       },
     ],
   });
+  return track;
+};
+
+test("wishlist puts the newest first and tracks open the track page", () => {
+  const track = mixedWishlist();
   const Wishlist = require("@/app/wishlist").default;
   render(<Wishlist />);
   const titles = screen
@@ -118,6 +124,24 @@ test("wishlist puts the newest first and tracks open the track page", () => {
       trackId: 5,
     },
   });
+});
+
+test("wishlist filter narrows the grid to albums, then tracks", () => {
+  mixedWishlist();
+  const Wishlist = require("@/app/wishlist").default;
+  render(<Wishlist />);
+  const titles = () =>
+    screen
+      .queryAllByText(/Newer track|Older album/)
+      .map((node) => node.props.children);
+  expect(titles()).toEqual(["Newer track", "Older album"]);
+  fireEvent.press(screen.getByRole("radio", { name: "Albums" }));
+  expect(titles()).toEqual(["Older album"]);
+  fireEvent.press(screen.getByRole("radio", { name: "Tracks" }));
+  expect(titles()).toEqual(["Newer track"]);
+  expect(
+    screen.getByRole("radio", { name: "Tracks", checked: true }),
+  ).toBeTruthy();
 });
 
 test("search groups results in the web order", async () => {

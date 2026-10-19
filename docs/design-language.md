@@ -38,7 +38,7 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `header` | `--mi-background-color` (the web header uses the page background) | `#ffffff` | `#111111` | Screen header fill |
 | `border` | `--mi-tint-x-color`, as used by `--mi-border` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Borders, hairlines, input and search card outlines, modal title rule, footer button ripple |
 | `text` | `--mi-text-color` | `#000000` | `#f5f0f0` | Primary text, close icons, `ThemedText` default |
-| `secondaryText` | `--mi-light-foreground-color` (73% mix) | `#454545` | `#b7b4b4` | Contributors, release dates, player times, byline prefixes, search group headings and empty messages |
+| `secondaryText` | `--mi-light-foreground-color` (73% mix) | `#454545` | `#b7b4b4` | Contributors, release dates, player times, the footer artist, byline prefixes, search group headings and empty messages |
 | `inactive` | `--mi-neutral-500` | `#8b8083` | `#8b8083` | Unselected nav icons, shuffle and repeat when off, disabled solid button label |
 | `disabled` | `--mi-disabled-color` (13.3% mix) | `#dddddd` | `#2f2f2f` | Disabled button fill, label and border |
 | `accent` | `--mi-button-color` used as text | `#BE3455` | `#e0607e` | Links, section labels, header, player and favorite icons, active nav icons, logo circle, progress fill, chip text, playing track title, search input border, spinners |
@@ -49,8 +49,8 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `alertBorder` | `--mi-warning-color` | `#f2897a` | `#f2897a` | Notice box left rule |
 | `playerBackground` | `--mi-fixed-bg-color` in `Player` | `#f5f0f0` | `#111111` | `Footer` fill |
 | `playerShadow` | `Player` drop-shadow color: fixed foreground at 30% | `rgba(17, 17, 17, 0.3)` | `rgba(245, 240, 240, 0.3)` | `Footer` top hairline |
-| `tint` | `--mi-tint-color` | `rgba(50, 0, 0, 0.03)` | `rgba(255, 255, 255, 0.08)` | Tag chip fill, cover and avatar placeholders, pressed search row |
-| `tintX` | `--mi-tint-x-color` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Chip border, pressed fill, ripples, menu separators, empty state border, slider track |
+| `tint` | `--mi-tint-color` | `rgba(50, 0, 0, 0.03)` | `rgba(255, 255, 255, 0.08)` | Tag chip and selected filter pill fill, cover and avatar placeholders, pressed search row |
+| `tintX` | `--mi-tint-x-color` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Chip border, pressed fill, ripples, menu separators, Collection empty state border, slider track |
 | `inputBackground` | `--mi-background-color` on `Input` | `#ffffff` | `#111111` | Text input fill |
 | `inputText` | `--mi-text-color` on `Input` | `#000000` | `#f5f0f0` | Text input text, search icon |
 | `inputPlaceholder` | none (browser default) | `#757575` | `#8b8083` | Placeholder text |
@@ -71,7 +71,7 @@ Add a token before using one of these on mobile.
 | `--mi-lighter-foreground-color` (68.2% mix) | `#515151` | Spinner rings, disabled input text |
 | `--mi-alternate-background-color` (6% mix) | `#f0f0f0` (dark mix `#1f1e1e`) | Alternate rows and surfaces |
 | `--mi-tint-xx-color` | `rgba(50, 0, 0, 0.2)` (dark `rgba(255, 255, 255, 0.35)`) | Strongest tint |
-| `--mi-fixed-fg-color` in `Player` | `#111111` / `#f5f0f0` | Text on the player fill, the app footer shows no text |
+| `--mi-fixed-fg-color` in `Player` | `#111111` / `#f5f0f0` | Text on the player fill, the app footer's title line uses `text` and `secondaryText` instead |
 | `--mi-lighten-background-color`, `--mi-lighten-x-background-color` | `rgba(255, 255, 255, 0.35)`, `rgba(255, 255, 255, 0.5)` | Modal title bar and inputs inside `Box`, default `Pill` fill |
 | `--mi-red-100`, `--mi-red-800` | `#ffe5ea`, `#43141e` | Notification badges, destructive button text and hover |
 | `--mi-blue-100`, `--mi-blue-700` | `#e1f4fc`, `#34515c` | Notification badges |
@@ -85,7 +85,7 @@ Values are points on mobile and CSS pixels on the web (16 px root).
 
 | Mobile token | Web variable or value | Light | Dark | Use |
 | --- | --- | --- | --- | --- |
-| `spacing.xxs` | `0.125rem` | 2 | same | Fine offsets between stacked lines |
+| `spacing.xxs` | `0.125rem` | 2 | same | Fine offsets between stacked lines, filter pill side padding |
 | `spacing.xs` | `0.25rem` | 4 | same | Chip vertical padding, compact button padding, cover to artist line |
 | `spacing.sm` | `0.5rem` | 8 | same | Chip horizontal padding, chip gap, input and button vertical padding, row gaps, cover to title |
 | `spacing.md` | `0.75rem` | 12 | same | Grid column gap, input and button horizontal padding, header button gap, page title margins |
@@ -101,7 +101,7 @@ Values are points on mobile and CSS pixels on the web (16 px root).
 | `radius.sm` | `--mi-border-radius` | 3 | same | Buttons, inputs, notice and empty state boxes, search cards, menu links |
 | `radius.md` | `--mi-border-radius-focus` | 8 | same | Album purchase dialog card. Web: focused inputs, `rounded` buttons, phone-width modal sheet corners |
 | `radius.lg` | `--mi-border-radius-x` | 15 | same | Tag chips, top padding of the modal title bar |
-| `radius.pill` | `9999px` | 9999 | same | `rounded` and icon-only buttons, play circles, avatars |
+| `radius.pill` | `9999px` | 9999 | same | `rounded` and icon-only buttons, play circles, avatars, filter pills |
 
 ### Touch target
 
@@ -123,9 +123,9 @@ Body text uses the system font on both apps. The web stack (`--mi-font-family-st
 | `type.body` | 16 / 24 | 400 | Body text and paragraphs | Body copy, inputs, button labels, menu links, empty states |
 | `type.small` | 14 / 21 | 400 | `--mi-font-size-small`, artist links | Track titles and index, artist bylines, inline errors, notice messages |
 | `type.caption` | 12.8 / 19.2 | 400 | `<small>` | Release dates, compact button labels |
-| `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Track durations and contributors, player times, search group headings |
+| `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Track durations and contributors, player times, search group headings, filter pills |
 | `type.cardTitle` | 14 / 19.25 | 400 | `ReleaseCard` title | Release grid titles |
-| `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent` |
+| `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent`. The footer title line |
 | `type.chip` | 12.8 / 16 | 400 | `Pill` (0.8rem) | Tag chips |
 | `type.formLabel` | 17.6 / 26.4 | 600 | Login form labels | Form labels |
 | `type.large` | 19.2 / 22.4 | 400 | Artist name `h1`, big buttons (1.2rem) | Artist name (with weight 600), "Releases" tab, `Button` size big |
@@ -176,7 +176,7 @@ Borders are 1 pt in `colors.border`, which holds the same value as `tintX` (the 
 | Release play button | `radius.pill` | 1 pt `button` (`disabled` without playable tracks) |
 | Input | `radius.sm` | 1 pt `border`, 1 pt `accent` on the search input |
 | Notice box | `radius.sm` | 4 pt left rule in `alertBorder` |
-| Empty state box | `radius.sm` | 1 pt `tintX` |
+| Empty state box | `radius.sm` | 1 pt `tintX` on Collection, none on Wishlist |
 | Search card | `radius.sm` | 1 pt `border` |
 | Tag chip | `radius.lg` | 1 pt `tintX`, `coverChipBorder` on the search overlay |
 | Avatar | `radius.pill` | None |
@@ -193,12 +193,13 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | --- | --- | --- |
 | `common/Button.tsx` | `components/Button.tsx` | Matches, with the differences below |
 | `common/Pill.tsx` in `TrackGroup/TrackGroupPills.tsx` | `TagPill` (`tint`, `cover`), `TagPillList` | Matches |
+| `Profile/UserNotificationFeed/FilterGroup.tsx` | `FilterGroup`, used by `app/wishlist.tsx` | Matches, without the `overlay` variant, `compact` size and `noMargin` |
 | `Player/index.tsx`, `PlayingTrackDetails.tsx`, `PlayerActions.tsx` | `Footer` | Matches, with the [platform differences](#intentional-platform-differences) |
 | `Header/Header.tsx`, `common/Logo.tsx` | `ScreenHeader`, `HeaderButton`, `BackButton`, `MirloLogo`, `SearchButton`, `MenuButton` | Matches, without the Donate button |
 | `common/SectionHeader.tsx` | `SectionHeader` in `components/ScreenHeader.tsx` | Matches |
 | `common/TrackList/TrackRow.tsx` | `TrackItem` in `PlayPauseWrapper`, `FavoriteTrackButton` | Matches, with 44 pt rows |
 | `common/ReleaseCard.tsx` in `TrackgroupGrid` | `TrackGroupItem`, `useGridColumnWidth()`, `CollectionPurchase` | Matches |
-| `common/Box.tsx` | `ErrorNotification` (warning), `CollectionEmpty` (bordered empty state) | Matches |
+| `common/Box.tsx` | `ErrorNotification` (warning), `CollectionEmpty` (empty state, `bordered` on Collection only) | Matches |
 | `common/Modal.tsx`, `ConfirmDialog.tsx` | Modal routes with `DismissModalBar`, the `deleteAccount.tsx` button row | Matches, with native presentation |
 | `common/CommandSearch/CommandSearch.tsx` via `Header/HeaderSearch.tsx` | `app/search.tsx`, `SearchHeader`, `SearchInput`, `SearchItem`, `SearchGroupHeading` | Matches, without filters or "More results" |
 | `Header/Menu.tsx`, `Header/MenuLink.tsx` | `app/menu.tsx` with `MenuLink` and `Separator` | Matches |
@@ -214,8 +215,8 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | Variant | Web look and use | Mobile `Button` and use |
 | --- | --- | --- |
-| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in", "Verify email", "Play album", purchase modal actions, "Delete account" |
-| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", "Log out", wishlist and add-to-collection circles |
+| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in", "Log out", "Verify email", "Play album", purchase modal actions, "Delete account" |
+| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", wishlist and add-to-collection circles |
 | `link` | Button color text, underlined, no padding | `accent` label, underlined, no padding. "Sign up" under the login form |
 | `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page "About" strip button |
 | `dashed`, `pill`, `chip` | Artist management, embed widgets, artist header chips (`ArtistButton`) | Not used on mobile |
@@ -234,19 +235,30 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | List | Wrapping row, gap 8, margin 16 above and below | `TagPillList`: gap 8, 9 padding plus 7 margin above and below, so Android keeps the slop inside the parent |
 | States | Hover: tint-x fill. Links to `/releases?tag=` | Pressed: `tintX` fill on iOS, `tintX` ripple on Android. `link` role, opens `/tags/[tag]` |
 
+### Filter group
+
+| | Web `FilterGroup` on the wishlist page | Mobile `FilterGroup` in `app/wishlist.tsx` |
+| --- | --- | --- |
+| Options | Radios "All", "Albums" and "Tracks" under the h1, in a fieldset with a screen-reader legend "Filter wishlist" | Same strings from `profile.wishlistFilter*`. `radiogroup` role labeled with the legend, `radio` pills with the `checked` state |
+| Size | 26 tall, padding 4 by 10, text 12 / 16, 1 px border, full radius, gap 4 | `type.xsmall`, `spacing.xs` by `spacing.sm` + `spacing.xxs` padding, 1 pt border, `radius.pill`, `spacing.xs` gap, plus `hitSlop` of 9 above and below and 2 at the sides (44 tall) |
+| Selected | `--mi-button-color` border and text, weight 600, `--mi-button-tint-color` fill | `accent` border and text, weight 600, `tint` fill |
+| Not selected | `--mi-tint-x-color` border, `--mi-secondary-text-color` text (the text color by default) at weight 400, no fill | `tintX` border, `text` at weight 400, no fill |
+| Spacing | 12 under the h1, 16 below the pills | Same. The group pads by the slop and takes it back in margin, so Android keeps the slop inside the parent |
+| States | Hover: border and text in the text color on pills that aren't selected | Pressed: `tintX` fill on iOS, `tintX` ripple on Android |
+
 ### Player bar
 
 | | Web `Player` | Mobile `Footer` |
 | --- | --- | --- |
-| Size | 59 tall | 56 minimum row with `gutter` padding, plus the seek area and the bottom inset |
+| Size | 59 tall | Idle: one 56 row with `gutter` padding. Playing: 6.4 progress line, `spacing.xs` padding, 18 title line, 44 button line and 6 padding, 78.4 in all. The bottom inset comes on top of both |
 | Colors | `--mi-fixed-bg-color` and `--mi-fixed-fg-color` by page tone: off-white on light pages, `#111` on dark | `playerBackground` by system theme |
 | Edge | Drop shadow, 1.6 px blur, foreground at 30% | Hairline top border in `playerShadow` |
-| Progress | 6.4 accent fill on the top edge, 16 px hit area, `slider` role, 5 s and 30 s keyboard steps | 6.4 accent fill, 24 pt hit area, drag to seek, `adjustable` role with 10 s steps |
-| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 40 pt art in a 44 pt button at every width, opens now playing, no title text. Below 360 pt the skip buttons hide instead, Now playing still has them |
-| Controls | Skip: 30 px buttons with 22 px `MdSkipPrevious` and `MdSkipNext`. Play/pause: 40 circle, 1 px accent border, 17.6 glyph (`VscPlay`, `TfiControlPause`) | Skip: `MaterialIcons` at 22 in 44 pt buttons. Play/pause: 40 circle, 1 pt `accent` border, Ionicons `play-outline` and `pause-outline` at 18 |
-| Navigation | None | Recent Releases, Your Collection, Your Wishlist: Ionicons at 26, filled in `accent` when active, outlined in `inactive` otherwise |
-| Visibility | Shown while a track is loaded | Player part shows while a track is loaded, except on `/now-playing`. The nav row always shows |
-| Pressed | Hover only | Opacity 0.6 on iOS, borderless ripple (radius 22, `border` color) on Android |
+| Progress | 6.4 accent fill on the top edge, 16 px hit area, `slider` role, 5 s and 30 s keyboard steps | 6.4 accent fill, 16 pt hit area on top of the content's top edge. The title line gives up the top of its tap area, the art and buttons keep theirs. Drag to seek, `adjustable` role with 10 s steps |
+| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 48 pt art at every width, centered against the title and controls, opens now playing. The title line is `type.cardMeta`: the title in `text` at weight 600, then `·` and the artist in `secondaryText`. `MarqueeText` scrolls it when it overflows, and it opens now playing too, also when the track has no art. Below 360 pt the skip buttons hide, Now playing still has them |
+| Controls | Skip: 30 px buttons with 22 px `MdSkipPrevious` and `MdSkipNext`. Play/pause: 40 circle, 1 px accent border, 17.6 glyph (`VscPlay`, `TfiControlPause`) | Skip: `MaterialIcons` at 22 in 44 pt buttons. Play/pause: 40 circle, 1 pt `accent` border, Ionicons `play-outline` and `pause-outline` at 18. Previous, play/pause and next sit centered between the art and the navigation buttons |
+| Navigation | None | Recent Releases, Your Collection, Your Wishlist: Ionicons at 26, filled in `accent` when active, outlined in `inactive` otherwise. On the right of the button line, and of the single row while idle |
+| Visibility | Shown while a track is loaded | Player part shows while a track is loaded, except on `/now-playing`. The nav buttons always show, alone in the 56 row while idle |
+| Pressed | Hover only | Opacity 0.6 on iOS. On Android a ripple in `border`: borderless (radius 22) on the buttons, bounded on the art and title |
 | Extras | `PlayerActions`: floating wishlist, support and buy buttons. Loop and shuffle hide at <= 576 px | None |
 
 `app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the cover at window width minus 2 x `gutter`, a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28.
@@ -319,7 +331,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Frame | Full-width dialog at phone width, 16 padding, close button at the top right, backdrop `rgba(0,0,0,.5)` | Modal route, `ScreenHeader` with a close X (FontAwesome5 `times` at 20 in `text`), `spacing.lg` padding |
 | Links | `MenuLink`: padding 0.5em, radius 3, hover inverts to a text-color fill with an underlined background-color label | `MenuLink`: `type.body`, 44 tall, `radius.sm`, inverts the same way while pressed |
 | Groups | 1 px tint-x separators, 8 above and below | 1 pt `tintX` separators, `spacing.sm` above and below, user name in `type.heading` |
-| Actions | Solid "Log out" at the bottom | Outlined "Log out" (solid "Log in" when signed out), `fullWidth`, and a "Delete account" link in `danger` |
+| Actions | Solid "Log out" at the bottom | Solid "Log out" (and "Log in" when signed out), `fullWidth`, and a "Delete account" link in `danger` |
 
 ### Login form
 
@@ -375,7 +387,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 ### Empty states
 
-- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's bordered `Box` with a 1 pt `tintX` border, `radius.sm`, 8 by 12 padding and `type.body`. The header and footer stay in place.
+- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's `Box` with `radius.sm`, 8 by 12 padding and `type.body`. Collection passes `bordered` for the web's 1 pt `tintX` border. Wishlist stays plain like the web and shows the same text under every filter. The header and footer stay in place.
 - Search shows its no-results message as a card, matching the web's centered message.
 - Other lists show one plain sentence in `type.body` and `colors.secondaryText`, with `gutter` side padding and `spacing.lg` above, as the artist page does.
 - Use text only, as the web does.
@@ -405,9 +417,9 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 ### Accessibility
 
 - Give every icon-only control an `accessibilityLabel`, plus an `accessibilityHint` when the label doesn't make the result clear.
-- Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels.
-- Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
-- Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` does.
+- Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels, `radiogroup` with `radio` pills for filters.
+- Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `checked` on the selected filter pill, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
+- Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` and `FilterGroup` do.
 - Text needs 4.5:1 against its background and icons need 3:1. `inactive` is 3.8:1 on white, so it's for icons and inactive states only.
 - Measured pairs, light / dark: `text` on `background` 21 / 16.7, `secondaryText` 9.6 / 9.2, `accent` 5.5 / 5.5, `buttonText` on `button` 5.5, `danger` 11.6 / 7.8, chip `accent` on its `tint` fill 5.2 / 4.5, `inactive` 3.8 / 5.0. Recheck these when a token changes.
 
@@ -422,7 +434,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Artist colors | Artist and release pages apply each artist's colors (`ArtistColorsProvider`) | Instance palette everywhere |
 | Release tags | The web source renders `TrackGroupPills` after the about text, the live World Wore page showed none | The album screen renders its tag chips in the same place |
 | Player and navigation | Player bar, navigation in the header and menu | `Footer` combines three nav buttons (Recent Releases, Your Collection, Your Wishlist) with the player, and hides the player part on now playing |
-| Now playing | None | Full-screen `now-playing` modal opened from the footer art |
+| Now playing | None | Full-screen `now-playing` modal opened from the footer art or title |
 | Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags, two list links and grouped results, without type filters or "More results" |
 | Login | Email and password, an "or" divider, the email code form and the password reset link | Email, password and the sign up link. The email code form lives in `emailVerificationModal.tsx` for purchase and wishlist flows, and there's no password reset link |
 | Dark mode | None | Follows the system setting through `useColorScheme()`, with the derived dark tokens |

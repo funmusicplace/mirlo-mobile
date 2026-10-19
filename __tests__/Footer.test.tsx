@@ -44,7 +44,6 @@ const mockRouter = {
   navigate: jest.fn(),
 };
 jest.mock("expo-router", () => ({
-  Link: jest.requireActual("expo-router").Link,
   router: {
     dismissTo: (...a: unknown[]) => mockRouter.dismissTo(...a),
     push: (...a: unknown[]) => mockRouter.push(...a),
@@ -59,6 +58,9 @@ jest.mock("@/state/AuthContext", () => ({
 }));
 
 const track = {
+  // API titles can end in a space
+  title: "Song ",
+  artist: "Band ",
   artwork: "https://example.com/a.jpg",
   trackGroup: { artistId: 7, urlSlug: "album" },
 };
@@ -66,6 +68,17 @@ let mockPlayer: Record<string, unknown> = {};
 jest.mock("@/state/PlayerContext", () => ({
   usePlayer: () => mockPlayer,
 }));
+
+// No native Worklets module under jest
+jest.mock("@/components/MarqueeText", () => {
+  const { createElement } = require("react");
+  const { Text } = require("react-native");
+  return {
+    __esModule: true,
+    default: ({ children }: { children: React.ReactNode }) =>
+      createElement(Text, null, children),
+  };
+});
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 34, left: 0, right: 0 }),
@@ -154,4 +167,13 @@ test("screen reader increment and decrement seek 10 s, clamped", async () => {
     });
   });
   expect(mockSeekTo).toHaveBeenLastCalledWith(120);
+});
+
+test("the title opens now playing", () => {
+  render(<Footer />);
+  fireEvent.press(screen.getByLabelText("Song, Band"));
+  expect(mockRouter.navigate).toHaveBeenCalledWith({
+    pathname: "/now-playing",
+    params: { id: 7, slug: "album" },
+  });
 });

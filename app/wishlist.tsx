@@ -10,6 +10,7 @@ import SearchButton from "@/components/SearchButton";
 import ScreenHeader, { HeaderButton } from "@/components/ScreenHeader";
 import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
 import { useGridColumnWidth } from "@/components/TrackGroupItem";
+import FilterGroup from "@/components/FilterGroup";
 import CollectionPurchase, {
   CollectionEmpty,
   CollectionItem,
@@ -22,6 +23,7 @@ import { type } from "@/constants/typography";
 import Text from "@/components/ThemedText";
 
 type WishlistItem = CollectionItem & { createdAt: Date };
+type Filter = "all" | "albums" | "tracks";
 
 export default function Wishlist() {
   const { user } = useAuthContext();
@@ -30,6 +32,7 @@ export default function Wishlist() {
   const { isPending, isError, data, error } = useQuery(queryWishlist(userId));
   const { t } = useTranslation();
   const [showError, setShowError] = useState<boolean>(true);
+  const [filter, setFilter] = useState<Filter>("all");
   const colors = useColors();
   const columnWidth = useGridColumnWidth();
   const listRef = useRef<FlatList<WishlistItem>>(null);
@@ -42,7 +45,7 @@ export default function Wishlist() {
     }
   }, [user]);
 
-  // Releases and favorited tracks in one grid, newest first like the web
+  // Releases and favorited tracks together, newest first like the web
   const items = useMemo(() => {
     const releases: WishlistItem[] = (wishlist ?? [])
       .filter((item) => item.trackGroup)
@@ -62,6 +65,18 @@ export default function Wishlist() {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }, [wishlist, trackFavorites]);
+
+  const filtered = useMemo(() => {
+    if (filter === "albums") return items.filter((item) => !item.track);
+    if (filter === "tracks") return items.filter((item) => item.track);
+    return items;
+  }, [items, filter]);
+
+  const filterOptions: { value: Filter; label: string }[] = [
+    { value: "all", label: t("profile.wishlistFilterAll") },
+    { value: "albums", label: t("profile.wishlistFilterAlbums") },
+    { value: "tracks", label: t("profile.wishlistFilterTracks") },
+  ];
 
   let content: ReactNode;
   // The query is disabled while signed out, so it stays pending
@@ -89,7 +104,7 @@ export default function Wishlist() {
         numColumns={2}
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
-        data={items}
+        data={filtered}
         keyExtractor={(item) => item.key}
         renderItem={({ item }) => (
           <CollectionPurchase
@@ -99,9 +114,17 @@ export default function Wishlist() {
           />
         )}
         ListHeaderComponent={
-          <Text accessibilityRole="header" style={styles.title}>
-            {t("profile.yourWishlist")}
-          </Text>
+          <>
+            <Text accessibilityRole="header" style={styles.title}>
+              {t("profile.yourWishlist")}
+            </Text>
+            <FilterGroup
+              legend={t("profile.wishlistFilterLegend")}
+              options={filterOptions}
+              value={filter}
+              onChange={setFilter}
+            />
+          </>
         }
         ListEmptyComponent={
           <CollectionEmpty>{t("profile.wishlistEmpty")}</CollectionEmpty>

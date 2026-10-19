@@ -42,11 +42,22 @@ export default function CollectionPurchase({
   );
 }
 
-// Web Box with a tint-x border, shown when a grid has nothing in it
-export function CollectionEmpty({ children }: { children: ReactNode }) {
+// Web Box for an empty grid, bordered where the web page adds a border
+export function CollectionEmpty({
+  children,
+  bordered,
+}: {
+  children: ReactNode;
+  bordered?: boolean;
+}) {
   const colors = useColors();
   return (
-    <View style={[styles.empty, { borderColor: colors.tintX }]}>
+    <View
+      style={[
+        styles.empty,
+        bordered && [styles.bordered, { borderColor: colors.tintX }],
+      ]}
+    >
       <Text style={type.body}>{children}</Text>
     </View>
   );
@@ -54,9 +65,11 @@ export function CollectionEmpty({ children }: { children: ReactNode }) {
 
 const styles = StyleSheet.create({
   empty: {
-    borderWidth: 1,
     borderRadius: radius.sm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
+  },
+  bordered: {
+    borderWidth: 1,
   },
 });
