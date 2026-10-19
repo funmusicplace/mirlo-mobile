@@ -50,7 +50,7 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `playerBackground` | `--mi-fixed-bg-color` in `Player` | `#f5f0f0` | `#111111` | `Footer` fill |
 | `playerShadow` | `Player` drop-shadow color: fixed foreground at 30% | `rgba(17, 17, 17, 0.3)` | `rgba(245, 240, 240, 0.3)` | `Footer` top hairline |
 | `tint` | `--mi-tint-color` | `rgba(50, 0, 0, 0.03)` | `rgba(255, 255, 255, 0.08)` | Tag chip fill, cover and avatar placeholders, pressed search row |
-| `tintX` | `--mi-tint-x-color` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Chip border, pressed fill, ripples, menu separators, empty state border, slider track |
+| `tintX` | `--mi-tint-x-color` | `rgba(50, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.18)` | Chip border, pressed fill, ripples, menu separators, Collection empty state border, slider track |
 | `inputBackground` | `--mi-background-color` on `Input` | `#ffffff` | `#111111` | Text input fill |
 | `inputText` | `--mi-text-color` on `Input` | `#000000` | `#f5f0f0` | Text input text, search icon |
 | `inputPlaceholder` | none (browser default) | `#757575` | `#8b8083` | Placeholder text |
@@ -176,7 +176,7 @@ Borders are 1 pt in `colors.border`, which holds the same value as `tintX` (the 
 | Release play button | `radius.pill` | 1 pt `button` (`disabled` without playable tracks) |
 | Input | `radius.sm` | 1 pt `border`, 1 pt `accent` on the search input |
 | Notice box | `radius.sm` | 4 pt left rule in `alertBorder` |
-| Empty state box | `radius.sm` | 1 pt `tintX` |
+| Empty state box | `radius.sm` | 1 pt `tintX` on Collection, none on Wishlist |
 | Search card | `radius.sm` | 1 pt `border` |
 | Tag chip | `radius.lg` | 1 pt `tintX`, `coverChipBorder` on the search overlay |
 | Avatar | `radius.pill` | None |
@@ -198,7 +198,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `common/SectionHeader.tsx` | `SectionHeader` in `components/ScreenHeader.tsx` | Matches |
 | `common/TrackList/TrackRow.tsx` | `TrackItem` in `PlayPauseWrapper`, `FavoriteTrackButton` | Matches, with 44 pt rows |
 | `common/ReleaseCard.tsx` in `TrackgroupGrid` | `TrackGroupItem`, `useGridColumnWidth()`, `CollectionPurchase` | Matches |
-| `common/Box.tsx` | `ErrorNotification` (warning), `CollectionEmpty` (bordered empty state) | Matches |
+| `common/Box.tsx` | `ErrorNotification` (warning), `CollectionEmpty` (empty state, `bordered` on Collection only) | Matches |
 | `common/Modal.tsx`, `ConfirmDialog.tsx` | Modal routes with `DismissModalBar`, the `deleteAccount.tsx` button row | Matches, with native presentation |
 | `common/CommandSearch/CommandSearch.tsx` via `Header/HeaderSearch.tsx` | `app/search.tsx`, `SearchHeader`, `SearchInput`, `SearchItem`, `SearchGroupHeading` | Matches, without filters or "More results" |
 | `Header/Menu.tsx`, `Header/MenuLink.tsx` | `app/menu.tsx` with `MenuLink` and `Separator` | Matches |
@@ -214,8 +214,8 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | Variant | Web look and use | Mobile `Button` and use |
 | --- | --- | --- |
-| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in", "Verify email", "Play album", purchase modal actions, "Delete account" |
-| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", "Log out", wishlist and add-to-collection circles |
+| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in", "Log out", "Verify email", "Play album", purchase modal actions, "Delete account" |
+| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", wishlist and add-to-collection circles |
 | `link` | Button color text, underlined, no padding | `accent` label, underlined, no padding. "Sign up" under the login form |
 | `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page "About" strip button |
 | `dashed`, `pill`, `chip` | Artist management, embed widgets, artist header chips (`ArtistButton`) | Not used on mobile |
@@ -319,7 +319,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Frame | Full-width dialog at phone width, 16 padding, close button at the top right, backdrop `rgba(0,0,0,.5)` | Modal route, `ScreenHeader` with a close X (FontAwesome5 `times` at 20 in `text`), `spacing.lg` padding |
 | Links | `MenuLink`: padding 0.5em, radius 3, hover inverts to a text-color fill with an underlined background-color label | `MenuLink`: `type.body`, 44 tall, `radius.sm`, inverts the same way while pressed |
 | Groups | 1 px tint-x separators, 8 above and below | 1 pt `tintX` separators, `spacing.sm` above and below, user name in `type.heading` |
-| Actions | Solid "Log out" at the bottom | Outlined "Log out" (solid "Log in" when signed out), `fullWidth`, and a "Delete account" link in `danger` |
+| Actions | Solid "Log out" at the bottom | Solid "Log out" (and "Log in" when signed out), `fullWidth`, and a "Delete account" link in `danger` |
 
 ### Login form
 
@@ -375,7 +375,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 ### Empty states
 
-- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's bordered `Box` with a 1 pt `tintX` border, `radius.sm`, 8 by 12 padding and `type.body`. The header and footer stay in place.
+- Grids use `CollectionEmpty` as `ListEmptyComponent`: the web's `Box` with `radius.sm`, 8 by 12 padding and `type.body`. Collection passes `bordered` for the web's 1 pt `tintX` border and Wishlist stays plain, like the web. The header and footer stay in place.
 - Search shows its no-results message as a card, matching the web's centered message.
 - Other lists show one plain sentence in `type.body` and `colors.secondaryText`, with `gutter` side padding and `spacing.lg` above, as the artist page does.
 - Use text only, as the web does.

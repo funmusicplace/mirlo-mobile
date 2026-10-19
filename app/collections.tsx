@@ -100,7 +100,7 @@ export default function Collections() {
           </Text>
         }
         ListEmptyComponent={
-          <CollectionEmpty>
+          <CollectionEmpty bordered>
             {/* The string carries the web's link tags, mobile shows them as text */}
             <Trans
               t={t}
