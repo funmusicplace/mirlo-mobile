@@ -5,10 +5,11 @@ import {
   Platform,
   Pressable,
   PressableProps,
+  StyleProp,
   StyleSheet,
   View,
   ViewProps,
-  useWindowDimensions,
+  ViewStyle,
 } from "react-native";
 import TrackPlayer, {
   PlaybackState,
@@ -22,7 +23,6 @@ import { router, usePathname } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import MarqueeText from "@/components/MarqueeText";
-import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
 import { gutter, radius, spacing } from "@/constants/spacing";
@@ -37,8 +37,6 @@ const PROGRESS_HEIGHT = 6.4;
 // The web's 1rem slider
 const SEEK_HEIGHT = 16;
 const SEEK_STEP_SECONDS = 10;
-// Below this the skip buttons go, Now playing still has them
-const SKIP_MIN_WINDOW_WIDTH = 360;
 
 const NAV_ITEMS = [
   {
@@ -68,7 +66,6 @@ export default function Footer({ style }: ViewProps) {
   // Now playing shows these controls full size
   const showPlayer = !!activeTrack && pathname !== "/now-playing";
   const { user } = useAuthContext();
-  const { width } = useWindowDimensions();
   const colors = useColors();
   // Titles from the API can end in a space or be missing
   const title = activeTrack?.title?.trim();
@@ -98,12 +95,21 @@ export default function Footer({ style }: ViewProps) {
   }
 
   const nav = (
-    <View style={styles.group}>
+    <View
+      style={[
+        styles.nav,
+        showPlayer && {
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.playerShadow,
+        },
+      ]}
+    >
       {NAV_ITEMS.map(({ route, icon, label, hint }) => {
         const active = pathname === route;
         return (
           <FooterButton
             key={route}
+            style={styles.navButton}
             onPress={() => navigate(route)}
             accessibilityLabel={label}
             accessibilityHint={hint}
@@ -135,62 +141,52 @@ export default function Footer({ style }: ViewProps) {
     >
       {showPlayer && activeTrack ? (
         <View style={styles.player}>
-          {activeTrack.artwork ? (
-            <Pressable
-              onPress={openNowPlaying}
-              accessibilityRole="button"
-              accessibilityLabel="Now playing"
-              // Foreground so the ripple draws over the cover
-              android_ripple={{ color: colors.border, foreground: true }}
-              style={({ pressed }) => pressed && styles.pressed}
-            >
+          <Pressable
+            onPress={openNowPlaying}
+            accessibilityRole="button"
+            accessibilityLabel={`${title}, ${artist}`}
+            accessibilityHint="Opens now playing"
+            // Foreground so the ripple draws over the cover
+            android_ripple={{ color: colors.border, foreground: true }}
+            style={({ pressed }) => [styles.info, pressed && styles.pressed]}
+          >
+            {activeTrack.artwork ? (
               <Image
                 source={{ uri: activeTrack.artwork }}
                 resizeMode="cover"
                 style={styles.art}
               />
-            </Pressable>
-          ) : null}
-          <View style={styles.details}>
-            <Pressable
-              onPress={openNowPlaying}
-              accessibilityRole="button"
-              accessibilityLabel={`${title}, ${artist}`}
-              android_ripple={{ color: colors.border }}
-              style={({ pressed }) => pressed && styles.pressed}
-            >
-              <MarqueeText style={type.cardMeta}>
-                <Text style={[styles.title, { color: colors.text }]}>
-                  {title}
-                </Text>
-                <Text style={{ color: colors.secondaryText }}>
-                  {` · ${artist}`}
-                </Text>
+            ) : null}
+            <View style={styles.details}>
+              <MarqueeText
+                style={[type.cardMeta, styles.title, { color: colors.text }]}
+              >
+                {title}
               </MarqueeText>
-            </Pressable>
-            <View style={styles.group}>
-              <View style={styles.transport}>
-                {width >= SKIP_MIN_WINDOW_WIDTH && (
-                  <SkipButton direction="previous" />
-                )}
-                <FooterPlayButton />
-                {width >= SKIP_MIN_WINDOW_WIDTH && (
-                  <SkipButton direction="next" />
-                )}
-              </View>
-              {nav}
+              <MarqueeText
+                style={[type.cardMeta, { color: colors.secondaryText }]}
+              >
+                {artist}
+              </MarqueeText>
             </View>
+          </Pressable>
+          <View style={styles.group}>
+            <SkipButton direction="previous" />
+            <FooterPlayButton />
+            <SkipButton direction="next" />
           </View>
         </View>
-      ) : (
-        <View style={styles.idle}>{nav}</View>
-      )}
+      ) : null}
+      {nav}
       {showPlayer && <ProgressBar />}
     </View>
   );
 }
 
-function FooterButton(props: Omit<PressableProps, "style">) {
+function FooterButton({
+  style,
+  ...props
+}: Omit<PressableProps, "style"> & { style?: StyleProp<ViewStyle> }) {
   const colors = useColors();
   return (
     <Pressable
@@ -201,7 +197,7 @@ function FooterButton(props: Omit<PressableProps, "style">) {
         radius: HIT_SIZE / 2,
       }}
       {...props}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.button, style, pressed && styles.pressed]}
     />
   );
 }
@@ -371,29 +367,28 @@ const styles = StyleSheet.create({
   progress: {
     height: PROGRESS_HEIGHT,
   },
-  idle: {
-    minHeight: ROW_HEIGHT,
-    paddingHorizontal: gutter,
+  nav: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
+    paddingHorizontal: gutter,
   },
   player: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
     paddingHorizontal: gutter,
-    paddingTop: spacing.xs,
-    // Puts the button line where the idle row puts its buttons
-    paddingBottom: (ROW_HEIGHT - HIT_SIZE) / 2,
+    // Buttons start at PROGRESS_HEIGHT + 8 + 2 = 16.4, clear of the seek layer
+    paddingVertical: spacing.sm,
+  },
+  info: {
+    flex: 1,
+    // Keeps the row height when the track has no art
+    minHeight: ART_SIZE,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   details: {
     flex: 1,
-  },
-  transport: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
   },
   group: {
     flexDirection: "row",
@@ -404,6 +399,10 @@ const styles = StyleSheet.create({
     height: HIT_SIZE,
     alignItems: "center",
     justifyContent: "center",
+  },
+  navButton: {
+    flex: 1,
+    height: ROW_HEIGHT,
   },
   // Android shows the ripple instead
   pressed: {

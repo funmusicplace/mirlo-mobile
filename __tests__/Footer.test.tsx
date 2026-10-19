@@ -84,12 +84,6 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 34, left: 0, right: 0 }),
 }));
 
-let mockWidth = 390;
-jest.mock("react-native/Libraries/Utilities/useWindowDimensions", () => ({
-  __esModule: true,
-  default: () => ({ width: mockWidth, height: 800, scale: 3, fontScale: 1 }),
-}));
-
 const flat = (el: { props: { style?: unknown } }) =>
   StyleSheet.flatten(el.props.style as never) as Record<string, unknown>;
 // RNTL skips every event while onStartShouldSetResponder is false, so lay out directly
@@ -106,7 +100,6 @@ beforeEach(() => {
   mockIndex = 0;
   mockPathname = "/";
   mockUser = null;
-  mockWidth = 390;
   mockPlayer = {
     activeTrack: track,
     playbackState: { state: "paused" },
