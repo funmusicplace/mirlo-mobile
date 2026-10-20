@@ -71,7 +71,7 @@ Add a token before using one of these on mobile.
 | `--mi-lighter-foreground-color` (68.2% mix) | `#515151` | Spinner rings, disabled input text |
 | `--mi-alternate-background-color` (6% mix) | `#f0f0f0` (dark mix `#1f1e1e`) | Alternate rows and surfaces |
 | `--mi-tint-xx-color` | `rgba(50, 0, 0, 0.2)` (dark `rgba(255, 255, 255, 0.35)`) | Strongest tint |
-| `--mi-fixed-fg-color` in `Player` | `#111111` / `#f5f0f0` | Text on the player fill, the app footer's title line uses `text` and `secondaryText` instead |
+| `--mi-fixed-fg-color` in `Player` | `#111111` / `#f5f0f0` | Text on the player fill, the app footer's title and artist lines use `text` and `secondaryText` instead |
 | `--mi-lighten-background-color`, `--mi-lighten-x-background-color` | `rgba(255, 255, 255, 0.35)`, `rgba(255, 255, 255, 0.5)` | Modal title bar and inputs inside `Box`, default `Pill` fill |
 | `--mi-red-100`, `--mi-red-800` | `#ffe5ea`, `#43141e` | Notification badges, destructive button text and hover |
 | `--mi-blue-100`, `--mi-blue-700` | `#e1f4fc`, `#34515c` | Notification badges |
@@ -125,7 +125,7 @@ Body text uses the system font on both apps. The web stack (`--mi-font-family-st
 | `type.caption` | 12.8 / 19.2 | 400 | `<small>` | Release dates, compact button labels |
 | `type.xsmall` | 12 / 16 | 400 | `--mi-font-size-xsmall` | Track durations and contributors, player times, search group headings, filter pills |
 | `type.cardTitle` | 14 / 19.25 | 400 | `ReleaseCard` title | Release grid titles |
-| `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent`. The footer title line |
+| `type.cardMeta` | 12 / 18 | 400 | `ReleaseCard` artist link | Release grid artist names, in `colors.accent`. The footer title and artist lines |
 | `type.chip` | 12.8 / 16 | 400 | `Pill` (0.8rem) | Tag chips |
 | `type.formLabel` | 17.6 / 26.4 | 600 | Login form labels | Form labels |
 | `type.large` | 19.2 / 22.4 | 400 | Artist name `h1`, big buttons (1.2rem) | Artist name (with weight 600), "Releases" tab, `Button` size big |
@@ -183,7 +183,7 @@ Borders are 1 pt in `colors.border`, which holds the same value as `tintX` (the 
 | Covers and artwork | 0 | None |
 | Screen header | 0 | Hairline bottom edge in `border` |
 | Modal title bar | 0 | 1 pt `border` under a titled bar |
-| Footer | 0 | Hairline top edge in `playerShadow` |
+| Footer | 0 | Hairline top edge in `playerShadow`, and the same hairline above the nav row while a track shows |
 
 ## Component inventory
 
@@ -250,15 +250,15 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | | Web `Player` | Mobile `Footer` |
 | --- | --- | --- |
-| Size | 59 tall | Idle: one 56 row with `gutter` padding. Playing: 6.4 progress line, `spacing.xs` padding, 18 title line, 44 button line and 6 padding, 78.4 in all. The bottom inset comes on top of both |
+| Size | 59 tall | Idle: the 56 nav row. Playing: 6.4 progress line, a 64 player row (48 art, `spacing.sm` padding above and below), a hairline divider and the 56 nav row, 126.4 plus one hairline in all. The bottom inset comes on top of both |
 | Colors | `--mi-fixed-bg-color` and `--mi-fixed-fg-color` by page tone: off-white on light pages, `#111` on dark | `playerBackground` by system theme |
-| Edge | Drop shadow, 1.6 px blur, foreground at 30% | Hairline top border in `playerShadow` |
-| Progress | 6.4 accent fill on the top edge, 16 px hit area, `slider` role, 5 s and 30 s keyboard steps | 6.4 accent fill, 16 pt hit area on top of the content's top edge. The title line gives up the top of its tap area, the art and buttons keep theirs. Drag to seek, `adjustable` role with 10 s steps |
-| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 48 pt art at every width, centered against the title and controls, opens now playing. The title line is `type.cardMeta`: the title in `text` at weight 600, then `·` and the artist in `secondaryText`. `MarqueeText` scrolls it when it overflows, and it opens now playing too, also when the track has no art. Below 360 pt the skip buttons hide, Now playing still has them |
-| Controls | Skip: 30 px buttons with 22 px `MdSkipPrevious` and `MdSkipNext`. Play/pause: 40 circle, 1 px accent border, 17.6 glyph (`VscPlay`, `TfiControlPause`) | Skip: `MaterialIcons` at 22 in 44 pt buttons. Play/pause: 40 circle, 1 pt `accent` border, Ionicons `play-outline` and `pause-outline` at 18. Previous, play/pause and next sit centered between the art and the navigation buttons |
-| Navigation | None | Recent Releases, Your Collection, Your Wishlist: Ionicons at 26, filled in `accent` when active, outlined in `inactive` otherwise. On the right of the button line, and of the single row while idle |
-| Visibility | Shown while a track is loaded | Player part shows while a track is loaded, except on `/now-playing`. The nav buttons always show, alone in the 56 row while idle |
-| Pressed | Hover only | Opacity 0.6 on iOS. On Android a ripple in `border`: borderless (radius 22) on the buttons, bounded on the art and title |
+| Edge | Drop shadow, 1.6 px blur, foreground at 30% | Hairline top border in `playerShadow`, and the same hairline between the player row and the nav row |
+| Progress | 6.4 accent fill on the top edge, 16 px hit area, `slider` role, 5 s and 30 s keyboard steps | 6.4 accent fill, 16 pt hit area on top of the content's top edge. The art and title button gives up its top 1.6 pt, the transport buttons keep their full area. Drag to seek, `adjustable` role with 10 s steps |
+| Track info | 48 px art, title 12 / 18 weight 600, meta 10.4 | 48 pt art on the left, then the title over the artist, both `type.cardMeta`: the title in `text` at weight 600, the artist in `secondaryText`. Each line is a `MarqueeText` and scrolls on its own when it overflows. The art and both lines form one button that opens now playing, also when the track has no art |
+| Controls | Skip: 30 px buttons with 22 px `MdSkipPrevious` and `MdSkipNext`. Play/pause: 40 circle, 1 px accent border, 17.6 glyph (`VscPlay`, `TfiControlPause`) | Skip: `MaterialIcons` at 22 in 44 pt buttons. Play/pause: 40 circle, 1 pt `accent` border, Ionicons `play-outline` and `pause-outline` at 18. Previous, play/pause and next sit on the right of the player row at every width |
+| Navigation | None | Recent Releases, Your Collection, Your Wishlist: Ionicons at 26, filled in `accent` when active, outlined in `inactive` otherwise. The 56 nav row sits below the player row with `gutter` side padding. Each button takes a third of the row and the full 56 height, with the icon centered |
+| Visibility | Shown while a track is loaded | The player row and the divider show while a track is loaded, except on `/now-playing`. The nav row always shows, alone while idle |
+| Pressed | Hover only | Opacity 0.6 on iOS. On Android a ripple in `border`: borderless (radius 22) on the buttons, bounded over the art and title, which are one button |
 | Extras | `PlayerActions`: floating wishlist, support and buy buttons. Loop and shuffle hide at <= 576 px | None |
 
 `app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the cover at window width minus 2 x `gutter`, a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28.
@@ -433,7 +433,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Donate | "Donate now" button in the header | None, to follow App Store rules |
 | Artist colors | Artist and release pages apply each artist's colors (`ArtistColorsProvider`) | Instance palette everywhere |
 | Release tags | The web source renders `TrackGroupPills` after the about text, the live World Wore page showed none | The album screen renders its tag chips in the same place |
-| Player and navigation | Player bar, navigation in the header and menu | `Footer` combines three nav buttons (Recent Releases, Your Collection, Your Wishlist) with the player, and hides the player part on now playing |
+| Player and navigation | Player bar, navigation in the header and menu | `Footer` stacks a player row, like the web player strip, over a nav row of three buttons (Recent Releases, Your Collection, Your Wishlist) spread across the width. The nav row is mobile only on purpose, for quick access to the collection and the wishlist. The player row hides on now playing |
 | Now playing | None | Full-screen `now-playing` modal opened from the footer art or title |
 | Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags, two list links and grouped results, without type filters or "More results" |
 | Login | Email and password, an "or" divider, the email code form and the password reset link | Email, password and the sign up link. The email code form lives in `emailVerificationModal.tsx` for purchase and wishlist flows, and there's no password reset link |
