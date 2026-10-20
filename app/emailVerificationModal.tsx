@@ -12,6 +12,7 @@ import Button from "@/components/Button";
 import Text from "@/components/ThemedText";
 import { storeTokens } from "@/queries/authQueries";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -118,6 +119,7 @@ export default function EmailVerificationModal() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar title={t("logIn")} />
       <ScrollView

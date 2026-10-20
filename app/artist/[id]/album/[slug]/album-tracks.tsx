@@ -37,6 +37,7 @@ import SearchButton from "@/components/SearchButton";
 import MenuButton from "@/components/MenuButton";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 import TagPill, { TagPillList } from "@/components/TagPill";
@@ -269,6 +270,7 @@ export default function AlbumTracks() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <ScreenHeader
         left={<BackButton />}

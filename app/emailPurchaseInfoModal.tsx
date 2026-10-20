@@ -9,6 +9,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Button from "@/components/Button";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -38,6 +39,7 @@ export default function EmailPurchaseInfoModal() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar />
       <ScrollView contentContainerStyle={styles.content}>

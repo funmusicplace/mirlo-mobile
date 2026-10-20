@@ -19,6 +19,7 @@ import MarqueeText from "@/components/MarqueeText";
 import Text from "@/components/ThemedText";
 import { formatTime } from "@/components/TrackItem";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -36,6 +37,7 @@ export default function NowPlaying() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar />
       <ScrollView contentContainerStyle={styles.content}>

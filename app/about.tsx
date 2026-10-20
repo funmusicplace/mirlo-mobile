@@ -13,6 +13,7 @@ import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -111,6 +112,7 @@ export default function About() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <ScreenHeader left={<BackButton />} />
       <ScrollView contentContainerStyle={styles.content}>

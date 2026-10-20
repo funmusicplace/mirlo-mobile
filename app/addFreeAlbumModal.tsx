@@ -10,6 +10,7 @@ import { useAuthContext } from "@/state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import Button from "@/components/Button";
 import Text from "@/components/ThemedText";
+import { screenEdges } from "@/constants/safe-area";
 import { spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -49,6 +50,7 @@ export default function AddFreeAlbumModal() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar
         title={`Add ${trackGroupTitle ?? ""} to your collection.`}

@@ -24,6 +24,7 @@ import TrackGroupItem, {
   useGridColumnWidth,
 } from "@/components/TrackGroupItem";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -80,6 +81,7 @@ export default function ArtistPage() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <ScreenHeader
         left={<BackButton />}

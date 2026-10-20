@@ -9,6 +9,7 @@ import Text from "@/components/ThemedText";
 import Button from "@/components/Button";
 import ScreenHeader, { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -69,6 +70,7 @@ export default function Menu() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <ScreenHeader
         right={
