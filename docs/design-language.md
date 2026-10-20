@@ -438,7 +438,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags, two list links and grouped results, without type filters or "More results" |
 | Login | Email and password, an "or" divider, the email code form and the password reset link | Email, password and the sign up link. The email code form lives in `emailVerificationModal.tsx` for purchase and wishlist flows, and there's no password reset link |
 | Dark mode | None | Follows the system setting through `useColorScheme()`, with the derived dark tokens |
-| Safe areas | Not applicable | Screen headers pad by the top inset, `Footer` by the bottom inset |
+| Safe areas | Not applicable | Screen headers pad by the top inset, `Footer` by the bottom inset. Screen `SafeAreaView`s skip the bottom edge on Android through `screenEdges`, because `Footer` already pads it |
 | Body font | `--mi-font-family-stack` (`system-ui`, `sans-serif`, emoji fonts) | Platform default, Cubano only through `fonts.display` |
 | Press states | Hover and focus styles | Android ripple, iOS opacity 0.6 or a tinted fill |
 | Header edge | `box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1)` | Hairline bottom border in `colors.border` |

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { spacing } from "@/constants/spacing";
 
 export default function Login() {
@@ -14,6 +15,7 @@ export default function Login() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <ScreenHeader left={<BackButton />} />
       <ScrollView

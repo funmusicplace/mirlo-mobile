@@ -9,6 +9,7 @@ import { useState } from "react";
 import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
 import Text from "@/components/ThemedText";
+import { screenEdges } from "@/constants/safe-area";
 import { spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -37,6 +38,7 @@ export default function MaxPlaysReached() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar
         title={`You are out of free plays for the track "${activeTrack?.title ?? ""}"`}

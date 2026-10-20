@@ -14,6 +14,7 @@ import * as api from "@/queries/fetch/fetchWrapper";
 import { useAuthContext } from "@/state/AuthContext";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
+import { screenEdges } from "@/constants/safe-area";
 import { radius, spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
@@ -116,6 +117,7 @@ export default function DeleteAccountScreen() {
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}
+      edges={screenEdges}
     >
       <DismissModalBar />
       <ScrollView contentContainerStyle={styles.content}>
