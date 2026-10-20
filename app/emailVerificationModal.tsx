@@ -140,7 +140,11 @@ export default function EmailVerificationModal() {
               variant="outlined"
               accessibilityRole="link"
               title="Login or Sign Up to View!"
-              onPress={() => router.push("/login")}
+              onPress={() => {
+                // Close this sheet first so sign-in returns to the screen below
+                router.dismiss();
+                router.push("/login");
+              }}
               fullWidth
             />
             <View style={styles.divider}>
