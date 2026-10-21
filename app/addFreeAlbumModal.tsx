@@ -75,14 +75,20 @@ export default function AddFreeAlbumModal() {
       edges={screenEdges}
     >
       <DismissModalBar
-        title={`Add ${trackGroupTitle ?? ""} to your collection.`}
+        title={t("trackGroupCard.addAlbumToCollection", {
+          title: trackGroupTitle ?? "",
+        })}
       />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={type.body}>
-          You'll add this free album to your collection.
+          {t("trackGroupCard.addToCollectionDescription")}
         </Text>
         <Button
-          title={!isAdded ? "Add to Collection" : "Added!"}
+          title={
+            !isAdded
+              ? t("trackGroupCard.addToCollection")
+              : t("trackGroupCard.added")
+          }
           startIcon={
             <Ionicons name={!isAdded ? "add-sharp" : "checkmark-sharp"} />
           }
@@ -92,6 +98,7 @@ export default function AddFreeAlbumModal() {
             }
           }}
           disabled={isAdded}
+          loading={adding}
           fullWidth
           style={styles.action}
         />

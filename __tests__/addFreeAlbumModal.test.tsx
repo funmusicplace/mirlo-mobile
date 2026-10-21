@@ -39,18 +39,28 @@ jest.mock("@/state/AuthContext", () => ({
 }));
 
 jest.mock("@/components/DismissModalBar", () => {
-  const { View } = require("react-native");
+  const { Text } = require("react-native");
   return {
     __esModule: true,
-    default: () => <View testID="dismiss-modal-bar" />,
+    default: ({ title }: { title?: string }) => (
+      <Text testID="dismiss-modal-bar">{title}</Text>
+    ),
   };
 });
+
+// The real icon sets state after its font loads, outside act
+jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
 // Local strings, so a Transifex token in the env can't change them
 jest.mock("react-i18next", () => {
   const en = jest.requireActual("@/translation/en.json");
-  const t = (key: string) =>
-    key.split(".").reduce((node, part) => node?.[part], en) ?? key;
+  const t = (key: string, vars: Record<string, string> = {}) => {
+    const text = key.split(".").reduce((node, part) => node?.[part], en) ?? key;
+    return text.replace(
+      /\{\{\s*(\w+)\s*\}\}/g,
+      (_: string, name: string) => vars[name],
+    );
+  };
   return { useTranslation: () => ({ t }) };
 });
 
@@ -61,15 +71,31 @@ describe("<AddFreeAlbumModal />", () => {
     jest.clearAllMocks();
   });
 
-  test("Add to Collection posts the free purchase and then reads Added!", async () => {
+  test("shows the translated title and description", () => {
+    const Screen = importScreen();
+    render(<Screen />);
+
+    expect(screen.getByText("Add Demo to your collection")).toBeTruthy();
+    expect(
+      screen.getByText("You'll add this free album to your collection."),
+    ).toBeTruthy();
+  });
+
+  test("Add to collection posts the free purchase and then reads Added", async () => {
     mockPost.mockResolvedValue({ redirectUrl: "/x" });
     const Screen = importScreen();
     render(<Screen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Add to Collection" }));
+    fireEvent.press(screen.getByRole("button", { name: "Add to collection" }));
 
+    // The post has not settled yet, so the button is busy
+    expect(
+      screen.getByRole("button", { name: "Add to collection", busy: true }),
+    ).toBeTruthy();
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Added!" })).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: "Added", busy: false }),
+      ).toBeTruthy();
     });
     expect(mockPost).toHaveBeenCalledTimes(1);
     expect(mockPost).toHaveBeenCalledWith("/v1/purchase", {
@@ -91,13 +117,13 @@ describe("<AddFreeAlbumModal />", () => {
     const Screen = importScreen();
     render(<Screen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Add to Collection" }));
+    fireEvent.press(screen.getByRole("button", { name: "Add to collection" }));
 
     await waitFor(() => {
       expect(screen.getByText("Something went wrong")).toBeTruthy();
     });
     expect(
-      screen.getByRole("button", { name: "Add to Collection" }),
+      screen.getByRole("button", { name: "Add to collection", busy: false }),
     ).toBeTruthy();
     expect(mockRefreshLoggedInUser).not.toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(
