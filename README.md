@@ -284,6 +284,17 @@ eas build -p ios --profile development-testflight --submit
 eas build -p android --profile development # then update the APK link above
 ```
 
+### API contract check
+
+`api-endpoints.json` lists every Mirlo API route the app calls, including the `/auth` routes. `scripts/api-endpoints.mjs` generates it from the `api.*` calls in the source.
+
+```bash
+npm run api:endpoints # regenerate the list after you add or change an API call
+npm run api:contract # check that the live API still serves every listed route
+```
+
+The `api-contract` workflow runs both checks on every pull request and push to `main`, and again each night. For now, a failure on a pull request only warns.
+
 ### What Happens Next
 
 - Your PR gets reviewed against the preview branch

@@ -1,0 +1,35 @@
+name: api-contract
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  schedule:
+    # 07:00 US Eastern during daylight time
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  contract:
+    name: API contract
+    runs-on: ubuntu-latest
+    # Pull requests only warn for now, pushes to main and the nightly run fail
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Registry matches the code
+        run: node scripts/api-endpoints.mjs --check
+
+      - name: Live API serves every registered route
+        # A stale registry must not hide API drift
+        if: ${{ !cancelled() }}
+        run: node scripts/check-api-contract.mjs
