@@ -173,6 +173,7 @@
     "getDownloadLink": "Get download link in email",
     "email": "Email",
     "success": "Success",
+    "added": "Added",
     "nameYourPrice": "Name your price in {{ currency }}:",
     "buyingTrackGroup": "Buying {{title}}",
     "preOrderingTrackGroup": "Pre-ordering {{title}}",

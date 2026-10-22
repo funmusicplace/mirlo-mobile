@@ -25,6 +25,7 @@ const showModal = (
     params: {
       trackGroupTitle: trackGroup.title,
       trackGroupId: trackGroup.id,
+      artistId: trackGroup.artistId,
       artist: trackGroup.artist.name,
     },
   });
@@ -44,10 +45,15 @@ export default function AddAlbumButton({
 
   const onPress = useCallback(() => {
     const region = getAppStoreRegion();
+    const isFree = trackGroup.minPrice === 0 || trackGroup.minPrice === null;
 
     // We can just add free albums without worrying about Apple purchase guidelines
-    if (user && (trackGroup.minPrice === 0 || trackGroup.minPrice === null)) {
-      showModal("/addFreeAlbumModal", router, trackGroup);
+    if (isFree) {
+      if (user) {
+        showModal("/addFreeAlbumModal", router, trackGroup);
+      } else {
+        router.push("/login");
+      }
       return;
     }
 

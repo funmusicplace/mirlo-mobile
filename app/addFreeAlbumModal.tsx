@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useColors } from "@/constants/colors";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import * as api from "../queries/fetch/fetchWrapper";
 import { useAuthContext } from "@/state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,13 +15,27 @@ import { screenEdges } from "@/constants/safe-area";
 import { spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
+type PurchaseBody = {
+  artistId: number;
+  items: { type: "trackGroup"; id: number; price: string }[];
+  deferred: true;
+};
+
+type PurchaseResponse = {
+  redirectUrl?: string;
+  success?: boolean;
+  deferred?: unknown;
+};
+
 export default function AddFreeAlbumModal() {
   const colors = useColors();
+  const { t } = useTranslation("translation");
   const { user, refreshLoggedInUser } = useAuthContext();
   const queryClient = useQueryClient();
-  const { trackGroupTitle, trackGroupId } = useLocalSearchParams();
+  const { trackGroupTitle, trackGroupId, artistId } = useLocalSearchParams();
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [adding, setAdding] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const getFreeAlbum = useCallback(async () => {
     try {
@@ -28,24 +43,31 @@ export default function AddFreeAlbumModal() {
         return;
       }
       setAdding(true);
-      const response = await api.post(
-        `/v1/trackGroups/${trackGroupId}/purchase`,
+      setFailed(false);
+      const response = await api.post<PurchaseBody, PurchaseResponse>(
+        "/v1/purchase",
         {
-          price: 0,
+          artistId: Number(artistId),
+          items: [{ type: "trackGroup", id: Number(trackGroupId), price: "0" }],
+          deferred: true,
         },
       );
+      // A deferred quote means the release is not free
+      if (!response.redirectUrl && !response.success) {
+        throw new Error("Unexpected purchase response");
+      }
       queryClient.invalidateQueries({
         queryKey: ["fetchUserPurchases", { userId: user.id }],
       });
       refreshLoggedInUser();
-      setAdding(false);
       setIsAdded(true);
-      console.log(response);
     } catch (err) {
       console.error("Issue purchasing free album", err);
+      setFailed(true);
+    } finally {
       setAdding(false);
     }
-  }, [trackGroupId, user, queryClient, refreshLoggedInUser]);
+  }, [artistId, trackGroupId, user, queryClient, refreshLoggedInUser]);
 
   return (
     <SafeAreaView
@@ -53,29 +75,41 @@ export default function AddFreeAlbumModal() {
       edges={screenEdges}
     >
       <DismissModalBar
-        title={`Add ${trackGroupTitle ?? ""} to your collection.`}
+        title={t("trackGroupCard.addAlbumToCollection", {
+          title: trackGroupTitle ?? "",
+        })}
       />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={type.body}>
-          You'll add this free album to your collection.
+          {t("trackGroupCard.addToCollectionDescription")}
         </Text>
         <Button
-          title={!isAdded ? "Add to Collection" : "Added!"}
+          title={
+            !isAdded
+              ? t("trackGroupCard.addToCollection")
+              : t("trackGroupCard.added")
+          }
           startIcon={
             <Ionicons name={!isAdded ? "add-sharp" : "checkmark-sharp"} />
           }
           onPress={() => {
             if (!adding && !isAdded) {
               getFreeAlbum();
-            } else {
-              console.log("already processed");
-              return;
             }
           }}
           disabled={isAdded}
+          loading={adding}
           fullWidth
           style={styles.action}
         />
+        {failed ? (
+          <Text
+            accessibilityRole="alert"
+            style={[type.body, styles.error, { color: colors.danger }]}
+          >
+            {t("trackGroupCard.error")}
+          </Text>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -90,5 +124,8 @@ const styles = StyleSheet.create({
   },
   action: {
     marginTop: spacing.xl,
+  },
+  error: {
+    marginTop: spacing.md,
   },
 });
