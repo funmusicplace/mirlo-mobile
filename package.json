@@ -10,6 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "test:ci": "jest --ci --watchAll=false",
+    "api:endpoints": "node scripts/api-endpoints.mjs --write",
+    "api:contract": "node scripts/check-api-contract.mjs",
     "lint": "expo lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

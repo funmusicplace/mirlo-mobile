@@ -1,0 +1,111 @@
+{
+  "generatedBy": "scripts/api-endpoints.mjs",
+  "apiRoot": "https://api.mirlo.space",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "sources": ["queries/authQueries.ts"]
+    },
+    {
+      "method": "GET",
+      "path": "/auth/logout",
+      "sources": ["queries/authQueries.ts"]
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh",
+      "sources": ["queries/authQueries.ts"]
+    },
+    {
+      "method": "POST",
+      "path": "/auth/verify-email",
+      "sources": ["app/emailVerificationModal.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/artists",
+      "sources": ["state/SearchContext.tsx"]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/purchase",
+      "sources": ["app/addFreeAlbumModal.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tags",
+      "sources": ["queries/queries.ts", "state/SearchContext.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/trackGroups",
+      "sources": [
+        "app/index.tsx",
+        "app/tags/[tag].tsx",
+        "queries/queries.ts",
+        "state/SearchContext.tsx"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/trackGroups/mostPlayed",
+      "sources": ["queries/queries.ts"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/trackGroups/topSold",
+      "sources": ["queries/queries.ts"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/trackGroups/{param}",
+      "sources": ["queries/queries.ts"]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/trackGroups/{param}/emailPurchaseLink",
+      "sources": ["app/emailPurchaseInfoModal.tsx", "app/maxPlaysReached.tsx"]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/trackGroups/{param}/wishlist",
+      "sources": ["components/WishlistButton.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tracks",
+      "sources": ["state/SearchContext.tsx"]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/tracks/{param}/favorite",
+      "sources": ["components/FavoriteTrackButton.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tracks/{param}/trackPlay",
+      "sources": ["state/PlayerContext.tsx"]
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/users/{param}",
+      "sources": ["app/deleteAccount.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/users/{param}/collection",
+      "sources": ["queries/queries.ts"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/users/{param}/purchases",
+      "sources": ["queries/queries.ts"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/users/{param}/wishlist",
+      "sources": ["queries/queries.ts"]
+    }
+  ]
+}
