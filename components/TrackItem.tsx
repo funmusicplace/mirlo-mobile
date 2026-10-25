@@ -40,17 +40,11 @@ export const TrackItem = ({
   const canPlayTrack = isTrackOwnedOrPreview(track, user, album);
   const active = canPlayTrack && thisSongSelected;
 
-  let contributors = "";
-
-  if (track.trackArtists) {
-    for (let i = 0; i < track.trackArtists.length; i++) {
-      if (i === track.trackArtists.length - 1) {
-        contributors += track.trackArtists[i].artistName;
-      } else {
-        contributors += track.trackArtists[i].artistName + ", ";
-      }
-    }
-  }
+  // Artists sometimes leave a name blank and type it into the role field
+  const names = (track.trackArtists ?? [])
+    .map((artist) => artist.artistName?.trim())
+    .filter(Boolean);
+  const contributors = names.join(", ");
   return (
     // The favorite sits beside the row button so screen readers reach it
     <View style={styles.row}>
@@ -83,10 +77,7 @@ export const TrackItem = ({
           >
             {track.title}
           </Text>
-          {track.trackArtists &&
-          contributors &&
-          track.trackArtists.length &&
-          track.trackArtists[0].artistName !== track.artist ? (
+          {contributors && names[0] !== track.artist ? (
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"

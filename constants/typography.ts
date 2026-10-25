@@ -23,3 +23,38 @@ export const type = {
   large: { fontSize: 19.2, lineHeight: 22.4 },
   listItem: { fontSize: 15.2, lineHeight: 24 },
 } satisfies Record<string, TextStyle>;
+
+// Web Markdown headings at phone width, with line heights so they don't inherit the body's
+export const markdownHeadings = {
+  heading1: {
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  heading2: {
+    fontSize: 22.4,
+    lineHeight: 28.8,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  heading3: { fontSize: 19.2, lineHeight: 24, marginBottom: 16 },
+  heading4: {
+    fontSize: 20.8,
+    lineHeight: 26,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  heading5: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  heading6: {
+    fontSize: 17.6,
+    lineHeight: 22,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+} satisfies Record<string, TextStyle>;

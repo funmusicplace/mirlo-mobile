@@ -33,7 +33,7 @@ import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
-import { type } from "@/constants/typography";
+import { markdownHeadings, type } from "@/constants/typography";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -131,6 +131,7 @@ export default function TrackView() {
     textDecorationLine: "underline" as const,
   };
   const markdownStyles = {
+    ...markdownHeadings,
     body: { ...type.body, color: colors.text },
     paragraph: { marginTop: 0, marginBottom: spacing.md },
     link: linkStyle,

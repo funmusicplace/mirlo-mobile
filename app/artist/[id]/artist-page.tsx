@@ -26,7 +26,7 @@ import TrackGroupItem, {
 import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
-import { type } from "@/constants/typography";
+import { markdownHeadings, type } from "@/constants/typography";
 
 const BANNER_HEIGHT = 100;
 const AVATAR_SIZE = 56;
@@ -186,6 +186,7 @@ export default function ArtistPage() {
             {artistInfo.bio ? (
               <Markdown
                 style={{
+                  ...markdownHeadings,
                   body: { ...type.body, color: colors.text },
                   paragraph: { marginTop: 0, marginBottom: spacing.md },
                   link: {

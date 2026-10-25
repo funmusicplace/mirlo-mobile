@@ -60,4 +60,21 @@ describe("<TrackItem />", () => {
     expect(onPress).not.toHaveBeenCalled();
     expect(row).toBeDisabled();
   });
+
+  test("skips blank contributor names instead of leaving a stray comma", () => {
+    render(
+      <TrackItem
+        track={createMockRNTrack({
+          artist: "KAN3KI~CHAN",
+          trackArtists: [
+            { artistName: "Tha303", role: "Vocals", isCoAuthor: true },
+            { artistName: "", role: "Lil Blurr Q", isCoAuthor: true },
+          ],
+        })}
+        thisSongSelected={false}
+      />,
+    );
+
+    expect(screen.getByText("Tha303")).toBeTruthy();
+  });
 });
