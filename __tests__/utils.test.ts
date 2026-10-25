@@ -29,6 +29,11 @@ describe("audioTrackType", () => {
     expect(audioTrackType("")).toBe("default");
   });
 
+  test("returns 'default' for a track whose audio has no URL yet", () => {
+    expect(audioTrackType(null)).toBe("default");
+    expect(audioTrackType(undefined)).toBe("default");
+  });
+
   test("is case-sensitive on the extension (matches what the server actually sends)", () => {
     // server sends lowercase; uppercase shouldn't trigger HLS
     expect(audioTrackType("https://example.com/PLAYLIST.M3U8")).toBe("default");
@@ -103,6 +108,14 @@ describe("isTrackOwnedOrPreview", () => {
     expect(isTrackOwnedOrPreview(track, undefined)).toBe(true);
     expect(isTrackOwnedOrPreview(track, null)).toBe(true);
     expect(isTrackOwnedOrPreview(track, createMockUser())).toBe(true);
+  });
+
+  test("a track with no audio URL isn't playable, even as a preview", () => {
+    const track = createMockRNTrack({
+      isPreview: true,
+      audio: { url: null, duration: 0 } as unknown as RNTrack["audio"],
+    });
+    expect(isTrackOwnedOrPreview(track, createMockUser())).toBe(false);
   });
 
   test("non-preview unreleased track is never playable", () => {

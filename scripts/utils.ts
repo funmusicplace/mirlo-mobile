@@ -2,9 +2,12 @@ import { openInBrowser } from "@/scripts/openInBrowser";
 import { API_ROOT } from "@/constants/api-root";
 import { API_KEY } from "@/constants/api-key";
 
-export function audioTrackType(url: string): "default" | "hls" | "dash" {
-  if (url.endsWith(".m3u8")) return "hls";
-  if (url.endsWith(".mpd")) return "dash";
+// A track has no audio, or no URL, until its upload finishes processing
+export function audioTrackType(
+  url?: string | null,
+): "default" | "hls" | "dash" {
+  if (url?.endsWith(".m3u8")) return "hls";
+  if (url?.endsWith(".mpd")) return "dash";
   return "default";
 }
 
@@ -13,7 +16,7 @@ export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
     title: track.title,
     artist: album.artist.name,
     artwork: album.cover.sizes[600],
-    url: `${API_ROOT}${track.audio.url}`,
+    url: `${API_ROOT}${track.audio?.url}`,
     allowIndividualSale: track.allowIndividualSale,
     id: track.id,
     trackArtists: track.trackArtists,
@@ -31,8 +34,8 @@ export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
       trackGroupId: album.trackGroupId,
     },
     audio: {
-      url: track.audio.url,
-      duration: track.audio.duration,
+      url: track.audio?.url,
+      duration: track.audio?.duration,
     },
     isPreview: track.isPreview,
     isFeatured: track.isFeatured,
@@ -40,7 +43,7 @@ export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
     headers: {
       "mirlo-api-key": API_KEY,
     },
-    type: audioTrackType(track.audio.url),
+    type: audioTrackType(track.audio?.url),
   };
 }
 
@@ -49,6 +52,9 @@ export const isTrackOwnedOrPreview = (
   user?: LoggedInUser | null,
   trackGroup?: AlbumProps,
 ): boolean => {
+  if (!track.audio?.url) {
+    return false;
+  }
   if (track.isPreview) {
     return true;
   }
