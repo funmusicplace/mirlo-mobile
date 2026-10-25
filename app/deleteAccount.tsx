@@ -1,16 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AppState, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
 
 import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
-import {
-  AUTH_PROFILE_QUERY_KEY,
-  clearLocalAuthSession,
-} from "@/queries/authQueries";
-import * as api from "@/queries/fetch/fetchWrapper";
+import { openInBrowser } from "@/scripts/openInBrowser";
 import { useAuthContext } from "@/state/AuthContext";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
@@ -18,11 +13,13 @@ import { screenEdges } from "@/constants/safe-area";
 import { radius, spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
+// Apps can't call DELETE /v1/users/:id, so the site asks for the confirmation
+const ACCOUNT_URL = "https://mirlo.space/account";
+
 export default function DeleteAccountScreen() {
   const router = useRouter();
   const { user, refreshLoggedInUser } = useAuthContext();
-  const queryClient = useQueryClient();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [openedAccountPage, setOpenedAccountPage] = useState(false);
   const colors = useColors();
 
   const artistCount = user?.artists?.length ?? 0;
@@ -72,47 +69,26 @@ export default function DeleteAccountScreen() {
     trackPurchaseCount,
   ]);
 
-  const deleteAccount = useCallback(async () => {
-    if (!user?.id || isDeleting) {
-      return;
-    }
+  const openAccountPage = useCallback(async () => {
+    await openInBrowser(ACCOUNT_URL);
+    setOpenedAccountPage(true);
+    refreshLoggedInUser();
+  }, [refreshLoggedInUser]);
 
-    setIsDeleting(true);
+  // Android resolves openInBrowser as soon as the tab opens, so look again
+  // when the app comes back to the foreground
+  useEffect(() => {
+    if (!openedAccountPage) return;
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") refreshLoggedInUser();
+    });
+    return () => subscription.remove();
+  }, [openedAccountPage, refreshLoggedInUser]);
 
-    try {
-      await api.del(`/v1/users/${user.id}`);
-      await clearLocalAuthSession();
-      queryClient.setQueryData(AUTH_PROFILE_QUERY_KEY, null);
-      refreshLoggedInUser();
-      router.dismissTo("/");
-    } catch (err) {
-      console.error("failed to delete account", err);
-      Alert.alert("Couldn't delete account", "Please try again in a moment.");
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [isDeleting, queryClient, refreshLoggedInUser, router, user?.id]);
-
-  const confirmDelete = useCallback(() => {
-    if (!user?.id || isDeleting) {
-      return;
-    }
-
-    Alert.alert(
-      "Delete account?",
-      "This permanently deletes your Mirlo account. This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete account",
-          style: "destructive",
-          onPress: () => {
-            deleteAccount();
-          },
-        },
-      ],
-    );
-  }, [deleteAccount, isDeleting, user?.id]);
+  // Deleting the account on the site ends the session here
+  useEffect(() => {
+    if (openedAccountPage && !user) router.dismissTo("/");
+  }, [openedAccountPage, user, router]);
 
   return (
     <SafeAreaView
@@ -126,8 +102,8 @@ export default function DeleteAccountScreen() {
             Delete account
           </Text>
           <Text style={[type.body, { color: colors.secondaryText }]}>
-            Review the impact below. You'll get a confirmation popup before the
-            account is permanently deleted.
+            Review the impact below. You'll finish on mirlo.space, which asks
+            you to confirm before it deletes the account.
           </Text>
         </View>
 
@@ -190,12 +166,10 @@ export default function DeleteAccountScreen() {
             variant="outlined"
             title="Cancel"
             onPress={() => router.dismiss()}
-            disabled={isDeleting}
           />
           <Button
             title="Delete account"
-            onPress={confirmDelete}
-            loading={isDeleting}
+            onPress={openAccountPage}
             disabled={!user}
           />
         </View>

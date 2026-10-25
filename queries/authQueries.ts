@@ -6,102 +6,43 @@ import {
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { MirloFetchError } from "./fetch/MirloFetchError";
+import { authorize, revokeRefreshToken } from "./fetch/oauth";
+import {
+  SessionEndedError,
+  clearStoredSession,
+  getStoredTokens,
+  startSession,
+  toStoredTokens,
+} from "./fetch/session";
 import CookieManager from "@preeternal/react-native-cookie-manager";
 import * as SecureStore from "expo-secure-store";
-import { API_ROOT } from "@/constants/api-root";
-
-type LoginBody = {
-  email: string;
-  password: string;
-};
 
 export const AUTH_PROFILE_QUERY_KEY: ["fetchProfile", "auth"] = [
   "fetchProfile",
   "auth",
 ];
 
-export async function storeTokens(): Promise<boolean> {
-  try {
-    // CookieManager.getAll() is web-only in the @preeternal fork (and was
-    // never reliable on Android in the original); use get(url) to read
-    // cookies scoped to our API origin
-    const cookies = await CookieManager.get(API_ROOT);
-
-    const jwtToken = cookies.jwt?.value;
-    const refreshToken = cookies.refresh?.value;
-
-    if (!jwtToken || !refreshToken) {
-      console.error(
-        "storeTokens: missing jwt or refresh cookie after login",
-        Object.keys(cookies),
-      );
-      return false;
-    }
-
-    await SecureStore.setItemAsync("jwt", jwtToken);
-    await SecureStore.setItemAsync("refresh", refreshToken);
-
-    return true;
-  } catch (err) {
-    console.error("failed to store tokens", err);
-    return false;
-  }
+// Signing in happens on mirlo.space in the system browser, so the app never sees a password
+export async function signIn() {
+  await startSession(toStoredTokens(await authorize()));
 }
 
-async function clearCookies() {
+// The cookie login left a jwt and a refresh token in SecureStore and the
+// cookies in the native jar, which fetch would keep sending
+export async function clearLegacySession() {
+  await SecureStore.deleteItemAsync("jwt").catch(() => undefined);
+  await SecureStore.deleteItemAsync("refresh").catch(() => undefined);
   await CookieManager.clearAll().catch(() => undefined);
   await CookieManager.clearAll(true).catch(() => undefined);
 }
 
-async function clearStoredTokens() {
-  await SecureStore.deleteItemAsync("jwt").catch(() => undefined);
-  await SecureStore.deleteItemAsync("refresh").catch(() => undefined);
-}
-
-export async function clearLocalAuthSession() {
-  await clearCookies();
-  await clearStoredTokens();
-}
-
-async function login(body: LoginBody) {
-  const res: Response = await api.post("/auth/login", body);
-
-  await storeTokens();
-
-  return res;
-}
-
-export function useLoginMutation() {
-  const client = useQueryClient();
-  return useMutation({
-    mutationFn: login,
-    async onSuccess() {
-      await client.invalidateQueries({
-        queryKey: AUTH_PROFILE_QUERY_KEY,
-      });
-      await client.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("auth"),
-      });
-    },
-  });
-}
-
 async function logout() {
-  // Clear stored tokens regardless of response
-
-  try {
-    await api.get("/auth/logout", {});
-  } catch (err) {
-    const isAlreadyLoggedOut =
-      err instanceof MirloFetchError &&
-      (err.status === 401 || err.message === "Invalid jwt");
-
-    if (!isAlreadyLoggedOut) {
-      console.error("issue logging out", err);
-    }
+  const refreshToken = (await getStoredTokens())?.refreshToken;
+  await clearStoredSession();
+  if (refreshToken) {
+    // Best effort and not awaited, the user is signed out here either way
+    revokeRefreshToken(refreshToken).catch(() => undefined);
   }
-
-  await clearLocalAuthSession();
 }
 
 export function useLogoutMutation() {
@@ -117,48 +58,23 @@ export function useLogoutMutation() {
   });
 }
 
-export async function authRefresh() {
-  try {
-    await clearCookies();
-    await api.post("/auth/refresh", {});
-    await clearStoredTokens();
-    await storeTokens();
-
-    return false;
-  } catch (err) {
-    console.error("Token refresh failed", err);
-    return false;
-  }
-}
-
-export function useAuthRefreshMutation() {
-  const client = useQueryClient();
-  const { mutate } = useMutation({
-    mutationFn: authRefresh,
-    async onSuccess() {
-      await client.invalidateQueries({
-        queryKey: AUTH_PROFILE_QUERY_KEY,
-      });
-      await client.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("auth"),
-      });
-    },
-  });
-
-  return { authRefresh: mutate };
-}
-
 const fetchProfile: QueryFunction<
   LoggedInUser | null,
   ["fetchProfile", ...string[]]
-> = ({ signal }) => {
-  return api
-    .get<{ result: LoggedInUser }>(`/auth/profile`, { signal })
-    .then((r) => r.result)
-    .catch((e) => {
-      if (e instanceof MirloFetchError && e.status === 401) return null;
-      else throw e;
+> = async ({ signal }) => {
+  // Nothing is stored while signed out, so there is nothing to ask the API
+  if (!(await getStoredTokens())) return null;
+
+  try {
+    const r = await api.get<{ result: LoggedInUser }>(`/auth/profile`, {
+      signal,
     });
+    return r.result;
+  } catch (e) {
+    const unauthorized = e instanceof MirloFetchError && e.status === 401;
+    if (unauthorized || e instanceof SessionEndedError) return null;
+    throw e;
+  }
 };
 
 export function queryAuthProfile() {

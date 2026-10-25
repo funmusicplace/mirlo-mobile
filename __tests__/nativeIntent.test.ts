@@ -4,10 +4,6 @@ import { queryClient } from "@/queries/QueryClientWrapper";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 
-jest.mock("@preeternal/react-native-cookie-manager", () => ({
-  __esModule: true,
-  default: { get: jest.fn(), getAll: jest.fn(), clearAll: jest.fn() },
-}));
 jest.mock("expo-web-browser", () => ({
   openBrowserAsync: jest.fn(),
   getCustomTabsSupportingBrowsersAsync: jest.fn(async () => ({
@@ -80,6 +76,14 @@ describe("redirectSystemPath", () => {
       browserPackage: "com.android.chrome",
     });
     Platform.OS = "ios";
+  });
+
+  test("leaves navigation alone for the sign-in redirect", async () => {
+    expect(
+      await redirect(
+        "mirlo://oauth/callback?code=abc&state=xyz&iss=https%3A%2F%2Fmirlo.space",
+      ),
+    ).toBe("");
   });
 
   test("leaves other URLs untouched", async () => {

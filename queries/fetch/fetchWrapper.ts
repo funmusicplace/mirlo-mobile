@@ -1,13 +1,14 @@
 import { API_ROOT } from "@/constants/api-root";
 import { API_KEY } from "@/constants/api-key";
 import { MirloFetchError } from "./MirloFetchError";
-import * as SecureStorage from "expo-secure-store";
+import { endSession, getAccessToken, refreshAccessToken } from "./session";
 
 /**
  * Wraps fetch() calls to Mirlo's API with error handling.
  *
  * @param endpoint The API request path (appended to API_ROOT)
  * @param init Fetch request options
+ * @param isRetry True on the single retry after a token refresh
  * @returns The resolved JSON response
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
@@ -15,18 +16,14 @@ import * as SecureStorage from "expo-secure-store";
 async function fetchWrapper<R>(
   endpoint: string,
   init: RequestInit,
+  isRetry = false,
 ): Promise<R> {
-  const jwtToken = await SecureStorage.getItemAsync("jwt");
-  const refreshToken = await SecureStorage.getItemAsync("refresh");
-
-  let cookieHeader = "";
-  if (jwtToken) cookieHeader += `jwt=${jwtToken}; `;
-  if (refreshToken) cookieHeader += `refresh=${refreshToken}`;
+  const accessToken = await getAccessToken();
 
   const headers = new Headers(init.headers);
 
-  if (cookieHeader) {
-    headers.append("Cookie", cookieHeader);
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   if (API_KEY) {
@@ -37,6 +34,15 @@ async function fetchWrapper<R>(
     ...init,
     headers,
   });
+
+  // An expired or revoked token (RFC 6750). Other 401s come from a route's own
+  // permission check and fall through to the error below
+  if (accessToken && res.status === 401 && isInvalidToken(res)) {
+    // A token straight from a refresh being rejected means the grant is dead
+    if (isRetry) return endSession();
+    await refreshAccessToken(accessToken);
+    return fetchWrapper(endpoint, init, true);
+  }
 
   if (!res.ok) {
     // Read the body once as text, then opportunistically JSON-parse it.
@@ -61,6 +67,10 @@ async function fetchWrapper<R>(
     // or wrap it in an object
     return text as any;
   }
+}
+
+function isInvalidToken(res: Response) {
+  return (res.headers.get("www-authenticate") ?? "").includes("invalid_token");
 }
 
 /**

@@ -38,6 +38,12 @@ This gif displays the most recent versions of the home, search, menu, album, and
 
    `npm install` runs `patch-package` via the `postinstall` script — see [Patched dependencies (Android)](#patched-dependencies-android) below.
 
+   `.env` holds three values, and EAS builds read the same names from the EAS environment:
+
+   - `EXPO_PUBLIC_API_ROOT` is the API the app talks to.
+   - `EXPO_PUBLIC_API_KEY` is sent in the `mirlo-api-key` header on every request.
+   - `EXPO_PUBLIC_OAUTH_CLIENT_ID` is the id of the public OAuth client registered for the app on that API, with the redirect URI `mirlo://oauth/callback`. Logging in fails without it.
+
 3. Build and run the native app
 
    For iOS:
@@ -304,11 +310,11 @@ The `api-contract` workflow runs both checks on every pull request and push to `
 
 
 Tap the hamburger (top right) → menu opens.
-Tap Log in and sign in with whatever test/throwaway account you want to delete (the Delete Account button only appears when logged in).
+Tap Log in. Mirlo's sign-in page opens in the browser sheet. Sign in with whatever test/throwaway account you want to delete and approve the app (the Delete Account button only appears when logged in).
 After login: hamburger → menu → scroll to bottom → Delete account (red text).
-You should see the new screen with the account-summary card (only nonzero rows shown, hidden entirely if zero).
-Tap the Delete account button → native confirmation Alert appears.
-Tap Cancel to verify the dialog dismisses cleanly. (Or Delete account to actually nuke the test account — this is the destructive irreversible step.)
+You should see the new screen with the account-summary card (only nonzero rows shown, hidden entirely if zero) and a line saying you'll finish on mirlo.space.
+Tap the Delete account button. https://mirlo.space/account opens in the browser sheet, and you may have to log in there too.
+Close the sheet to verify the app stays on the screen. (Or delete the account on the site, which is the destructive irreversible step. When you close the sheet the app logs you out and returns to the home screen.)
 
 
 listener@admin.example

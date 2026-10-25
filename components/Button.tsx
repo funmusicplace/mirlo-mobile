@@ -131,7 +131,12 @@ export default function Button({
         style,
       ]}
     >
-      <View style={[styles.content, loading && styles.hidden]}>
+      {/* Never flattened: toggling opacity would move the label between native
+          parents, which crashes Fabric on Android when a screen closes in the same frame */}
+      <View
+        collapsable={false}
+        style={[styles.content, loading && styles.hidden]}
+      >
         {startIcon ? icon(startIcon) : null}
         {!onlyIcon && label != null ? (
           typeof label === "string" || typeof label === "number" ? (

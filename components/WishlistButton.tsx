@@ -32,7 +32,7 @@ export default function WishlistButton({ trackGroup }: WishlistButtonProps) {
   const onPress = useCallback(async () => {
     if (!user) {
       router.push({
-        pathname: "/emailVerificationModal",
+        pathname: "/login",
       });
       return null;
     }

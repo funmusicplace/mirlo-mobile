@@ -204,7 +204,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `common/CommandSearch/CommandSearch.tsx` via `Header/HeaderSearch.tsx` | `app/search.tsx`, `SearchHeader`, `SearchInput`, `SearchItem`, `SearchGroupHeading` | Matches, without filters or "More results" |
 | `Header/Menu.tsx`, `Header/MenuLink.tsx` | `app/menu.tsx` with `MenuLink` and `Separator` | Matches |
 | `Footer.tsx` link columns ("Mirlo", "Legal", "Connect") | `app/about.tsx` | Matches: 14 / 21 bold headings, 14 pt underlined accent links with brand icons, two columns, 44 pt rows. The web route `/pages/about` redirects to docs.mirlo.space |
-| `common/Input.tsx`, `FormComponent.tsx`, `LogInForm.tsx`, `EmailVerification.tsx` | `LoginForm`, `app/emailVerificationModal.tsx` | Matches, with the login [platform differences](#intentional-platform-differences) |
+| `common/Input.tsx`, `FormComponent.tsx`, `LogInForm.tsx`, `EmailVerification.tsx` | `app/login.tsx` | Sign-in happens on mirlo.space, see the login [platform differences](#intentional-platform-differences) |
 | `common/Spinner.tsx`, `LoadingSpinner.tsx`, `FullPageLoadingSpinner.tsx` | `ActivityIndicator` in `colors.accent` | Matches: the web artist, release and track pages also load behind a centered spinner |
 | `common/Snackbar.tsx` | None | `ErrorNotification` covers request errors |
 | None | `app/now-playing.tsx` with `Player` | Mobile only |
@@ -215,7 +215,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | Variant | Web look and use | Mobile `Button` and use |
 | --- | --- | --- |
-| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in", "Log out", "Verify email", "Play album", purchase modal actions, "Delete account" |
+| Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in with Mirlo", "Log out", "Play album", purchase modal actions, "Delete account" |
 | `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", wishlist and add-to-collection circles |
 | `link` | Button color text, underlined, no padding | `accent` label, underlined, no padding. "Sign up" under the login form |
 | `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page "About" strip button |
@@ -333,17 +333,14 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Groups | 1 px tint-x separators, 8 above and below | 1 pt `tintX` separators, `spacing.sm` above and below, user name in `type.heading` |
 | Actions | Solid "Log out" at the bottom | Solid "Log out" (and "Log in" when signed out), `fullWidth`, and a "Delete account" link in `danger` |
 
-### Login form
+### Login
 
-| | Web `LogInForm` | Mobile `LoginForm` in `app/login.tsx` |
+| | Web `LogInForm` | Mobile `app/login.tsx` |
 | --- | --- | --- |
 | Layout | 300 column on the page background | 300 column, centered, on `background`, below a `ScreenHeader` with `BackButton`, title in `type.pageTitle` |
-| Label | Above the input, 17.6, weight 600, text color, 8 gap | `type.formLabel`, `spacing.sm` below |
-| Input | 300 by 42, white fill, black 16 px text, padding 8 by 12, 1 px tint-x border, radius 3, radius 8 while focused | 44 minimum height, `inputBackground`, `inputText` at 16, padding 8 by 12, 1 pt `border`, `radius.sm` |
-| Submit | Solid, 40 tall, spinner while pending | Solid `Button`, `fullWidth`, `loading` while pending |
+| Fields | Email and password inputs | None. A `secondaryText` line says the login happens on mirlo.space |
+| Submit | Solid, 40 tall, spinner while pending | Solid "Log in with Mirlo" `Button`, `fullWidth`, `loading` while the browser sign-in runs. Errors show in an `ErrorNotification` above it, and closing the browser shows none |
 | More | "or" divider, the email code form, password reset and sign up links | Sign up `link` button with the `link` role, `spacing.xxl` above |
-
-`app/emailVerificationModal.tsx` carries the email code flow: `DismissModalBar` titled "Log in", an outlined `fullWidth` "Login or Sign Up to View!" button, the web's "or" divider (1 pt `border` rules, `spacing.lg` around them), then the email and code fields with the `LoginForm` metrics and a solid `fullWidth` submit.
 
 ### Loading
 
@@ -359,18 +356,18 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 ### Buttons
 
-- One solid `Button` carries the primary action of a screen or form, such as "Log in", "Verify email" or "Play album".
+- One solid `Button` carries the primary action of a screen or form, such as "Log in with Mirlo" or "Play album".
 - `outlined` buttons carry secondary actions beside a solid one, such as "Cancel" next to "Delete account". Album actions (wishlist, add to collection) are outlined `onlyIcon` circles, and share is a solid one.
 - `link` buttons sit inside running text or below a form. `transparent` buttons label a strip or toolbar, and header icons use `HeaderButton`.
 - The release play button is a solid `rounded` button, 70% wide, with a 1 pt `button` border, as "Play album" is on the web.
-- Confirmations follow the web `ConfirmDialog`: a right-aligned row with the outlined cancel first and the solid confirm second, `spacing.sm` apart and 24 above. A destructive action then confirms with `Alert.alert` (`style: "destructive"`), as `deleteAccount.tsx` does. Destructive links use `colors.danger`.
+- Confirmations follow the web `ConfirmDialog`: a right-aligned row with the outlined cancel first and the solid confirm second, `spacing.sm` apart and 24 above. A destructive action then confirms with `Alert.alert` (`style: "destructive"`). Deleting the account is the exception: `deleteAccount.tsx` opens mirlo.space, which asks for the confirmation. Destructive links use `colors.danger`.
 
 ### Forms
 
 - Labels sit above inputs in `type.formLabel` and `colors.text`, with `spacing.sm` below.
 - Inputs have a 44 pt minimum height (web 42), an `inputBackground` fill, `inputText` at 16, `spacing.sm` by `spacing.md` padding, a 1 pt `colors.border` border and `radius.sm`, with `inputPlaceholder` placeholders.
 - `spacing.xl` separates fields. The submit button is a `fullWidth` solid `Button` below the last field.
-- Chain fields with `returnKeyType="next"` and submit from the last one with `returnKeyType="go"`, as `LoginForm` does.
+- Chain fields with `returnKeyType="next"` and submit from the last one with `returnKeyType="go"`.
 
 | Field | Props |
 | --- | --- |
@@ -436,7 +433,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Player and navigation | Player bar, navigation in the header and menu | `Footer` stacks a player row, like the web player strip, over a nav row of three buttons (Recent Releases, Your Collection, Your Wishlist) spread across the width. The nav row is mobile only on purpose, for quick access to the collection and the wishlist. The player row hides on now playing |
 | Now playing | None | Full-screen `now-playing` modal opened from the footer art or title |
 | Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags, two list links and grouped results, without type filters or "More results" |
-| Login | Email and password, an "or" divider, the email code form and the password reset link | Email, password and the sign up link. The email code form lives in `emailVerificationModal.tsx` for purchase and wishlist flows, and there's no password reset link |
+| Login | Email and password, an "or" divider, the email code form and the password reset link | One "Log in with Mirlo" button that signs in on mirlo.space in the system browser, and the sign up link. Purchase and wishlist flows open the same screen |
 | Dark mode | None | Follows the system setting through `useColorScheme()`, with the derived dark tokens |
 | Safe areas | Not applicable | Screen headers pad by the top inset, `Footer` by the bottom inset. Screen `SafeAreaView`s skip the bottom edge on Android through `screenEdges`, because `Footer` already pads it |
 | Body font | `--mi-font-family-stack` (`system-ui`, `sans-serif`, emoji fonts) | Platform default, Cubano only through `fonts.display` |

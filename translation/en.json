@@ -52,9 +52,8 @@
   },
   "logIn": {
     "logIn": "Log in",
-    "email": "Email",
-    "password": "Password",
-    "passwordReset": "Forgot your password?",
+    "logInWithMirlo": "Log in with Mirlo",
+    "description": "You'll log in on mirlo.space, then return to the app.",
     "signUp": "Don't have an account yet? Sign up"
   },
   "passwordReset": {
