@@ -65,9 +65,6 @@ export async function authorize(): Promise<TokenResponse> {
 
   const result = await request.promptAsync(discovery);
 
-  if (result.type !== "success" && result.type !== "error") {
-    throw new SignInCancelledError();
-  }
   if (result.type === "error") {
     throw new Error(
       describeAuthError(
@@ -75,6 +72,9 @@ export async function authorize(): Promise<TokenResponse> {
         result.params.error_description,
       ),
     );
+  }
+  if (result.type !== "success") {
+    throw new SignInCancelledError();
   }
 
   // RFC 9207: the code has to come from the server we sent the user to

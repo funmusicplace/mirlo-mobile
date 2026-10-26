@@ -2,7 +2,6 @@ import {
   QueryFunction,
   queryOptions,
   useMutation,
-  useQueryClient,
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { MirloFetchError } from "./fetch/MirloFetchError";
@@ -46,16 +45,7 @@ async function logout() {
 }
 
 export function useLogoutMutation() {
-  const client = useQueryClient();
-  return useMutation({
-    mutationFn: logout,
-    async onSuccess() {
-      client.setQueryData(AUTH_PROFILE_QUERY_KEY, null);
-      await client.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("auth"),
-      });
-    },
-  });
+  return useMutation({ mutationFn: logout });
 }
 
 const fetchProfile: QueryFunction<

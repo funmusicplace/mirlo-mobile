@@ -77,11 +77,12 @@ export async function startSession(tokens: StoredTokens): Promise<void> {
 export async function clearStoredSession(): Promise<void> {
   generation++;
   cached = null;
+  sessionEndedListeners.forEach((listener) => listener());
   await SecureStore.deleteItemAsync(TOKENS_KEY);
 }
 
-// Lets the auth state drop to signed out when the server ends the session
-// underneath us, for example a refresh token that expired or was revoked
+// Lets the auth state drop to signed out on Log out and when the server ends
+// the session underneath us, for example a refresh token that expired or was revoked
 export function onSessionEnded(listener: () => void): () => void {
   sessionEndedListeners.add(listener);
   return () => sessionEndedListeners.delete(listener);
@@ -89,7 +90,6 @@ export function onSessionEnded(listener: () => void): () => void {
 
 export async function endSession(): Promise<never> {
   await clearStoredSession();
-  sessionEndedListeners.forEach((listener) => listener());
   throw new SessionEndedError();
 }
 

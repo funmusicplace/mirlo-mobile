@@ -23,6 +23,7 @@ type AuthContextValue = {
   signIn: () => Promise<boolean>;
   signingIn: boolean;
   signInError: Error | null;
+  refreshLoggedInUser: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue>({
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextValue>({
   signIn: async () => false,
   signingIn: false,
   signInError: null,
+  refreshLoggedInUser: () => undefined,
 });
 
 function invalidateAuthQueries(client: QueryClient) {
@@ -80,9 +82,13 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
     }
   }, [queryClient]);
 
+  const refreshLoggedInUser = useCallback(() => {
+    invalidateAuthQueries(queryClient);
+  }, [queryClient]);
+
   const context = useMemo(
-    () => ({ user, signIn, signingIn, signInError }),
-    [user, signIn, signingIn, signInError],
+    () => ({ user, signIn, signingIn, signInError, refreshLoggedInUser }),
+    [user, signIn, signingIn, signInError, refreshLoggedInUser],
   );
 
   return (
@@ -91,12 +97,5 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
 }
 
 export function useAuthContext() {
-  const { user, signIn, signingIn, signInError } = useContext(AuthContext);
-
-  const queryClient = useQueryClient();
-  const refreshLoggedInUser = useCallback(() => {
-    invalidateAuthQueries(queryClient);
-  }, [queryClient]);
-
-  return { user, refreshLoggedInUser, signIn, signingIn, signInError };
+  return useContext(AuthContext);
 }

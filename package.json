@@ -78,7 +78,6 @@
     "lucide-react": "^0.468.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-hook-form": "^7.54.2",
     "react-i18next": "^15.5.3",
     "react-native": "0.83.2",
     "react-native-gesture-handler": "~2.30.0",
