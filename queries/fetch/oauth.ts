@@ -18,10 +18,19 @@ const SCOPES = ["openid", "api", "offline_access"];
 
 let discoveryPromise: Promise<DiscoveryDocument> | null = null;
 
-// The endpoints come from the discovery document, whose issuer (not API_ROOT)
-// is what the redirect's iss parameter must equal
+// Endpoints come from the issuer's own discovery document. API_ROOT's lists
+// api.mirlo.space, and the sign-in page on mirlo.space can't see the interaction
+// cookie set there. The issuer is also what the redirect's iss must equal
+async function discover(): Promise<DiscoveryDocument> {
+  const fromApiRoot = await fetchDiscoveryAsync(API_ROOT);
+  const issuer = fromApiRoot.discoveryDocument?.issuer;
+  return issuer && issuer !== API_ROOT
+    ? fetchDiscoveryAsync(issuer)
+    : fromApiRoot;
+}
+
 function getDiscovery(): Promise<DiscoveryDocument> {
-  discoveryPromise ??= fetchDiscoveryAsync(API_ROOT).catch((error) => {
+  discoveryPromise ??= discover().catch((error) => {
     discoveryPromise = null;
     throw error;
   });
