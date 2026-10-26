@@ -62,7 +62,11 @@ export async function getStoredTokens(): Promise<StoredTokens | null> {
 
 async function writeTokens(tokens: StoredTokens): Promise<void> {
   cached = tokens;
-  await SecureStore.setItemAsync(TOKENS_KEY, JSON.stringify(tokens));
+  // Refreshes run during locked background playback, and a backup restored on
+  // another phone would replay a rotated refresh token
+  await SecureStore.setItemAsync(TOKENS_KEY, JSON.stringify(tokens), {
+    keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
+  });
 }
 
 export async function startSession(tokens: StoredTokens): Promise<void> {
