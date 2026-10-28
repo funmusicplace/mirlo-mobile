@@ -23,6 +23,7 @@ async function isArtist(slug: string) {
 // can't show opens in an in-app browser tab and leaves navigation alone
 export async function redirectSystemPath({
   path,
+  initial,
 }: {
   path: string;
   initial: boolean;
@@ -33,6 +34,9 @@ export async function redirectSystemPath({
   } catch {
     return path;
   }
+  // Android's player notification opens trackplayer://notification.click,
+  // and after a cold start the player is empty until the next track
+  if (path.startsWith("trackplayer://")) return initial ? "" : "/now-playing";
   if (url.hostname !== "mirlo.space") return path;
 
   const [artist, section, album, tracks, trackId] = url.pathname
