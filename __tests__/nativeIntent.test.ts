@@ -88,4 +88,10 @@ describe("redirectSystemPath", () => {
     );
     expect(await redirect("not a url")).toBe("not a url");
   });
+
+  test("opens Now Playing from the player notification", async () => {
+    const path = "trackplayer://notification.click";
+    expect(await redirect(path)).toBe("/now-playing");
+    expect(await redirectSystemPath({ path, initial: true })).toBe("");
+  });
 });
