@@ -18,6 +18,7 @@ import TrackPlayer, {
 } from "react-native-track-player";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, usePathname } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
@@ -47,7 +48,7 @@ const NAV_ITEMS = [
   },
   {
     route: "/collections",
-    icon: "library",
+    icon: "archive-music",
     label: "Your Collection",
     hint: "Navigates to your collection page",
   },
@@ -106,6 +107,10 @@ export default function Footer({ style }: ViewProps) {
     >
       {NAV_ITEMS.map(({ route, icon, label, hint }) => {
         const active = pathname === route;
+        const iconProps = {
+          size: 26,
+          color: active ? colors.accent : colors.inactive,
+        };
         return (
           <FooterButton
             key={route}
@@ -115,11 +120,17 @@ export default function Footer({ style }: ViewProps) {
             accessibilityHint={hint}
             accessibilityState={{ selected: active }}
           >
-            <Ionicons
-              name={active ? icon : `${icon}-outline`}
-              size={26}
-              color={active ? colors.accent : colors.inactive}
-            />
+            {icon === "archive-music" ? (
+              <MaterialCommunityIcons
+                name={active ? icon : `${icon}-outline`}
+                {...iconProps}
+              />
+            ) : (
+              <Ionicons
+                name={active ? icon : `${icon}-outline`}
+                {...iconProps}
+              />
+            )}
           </FooterButton>
         );
       })}
