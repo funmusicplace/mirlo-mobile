@@ -30,6 +30,7 @@ const config: StorybookConfig = {
         // relative API calls, for MSW
         "process.env.EXPO_PUBLIC_API_ROOT": JSON.stringify(""),
         "process.env.EXPO_PUBLIC_API_KEY": JSON.stringify(""),
+        "process.env.EXPO_PUBLIC_OAUTH_CLIENT_ID": JSON.stringify(""),
         "process.env.EXPO_PUBLIC_TRANSIFEX_TOKEN": JSON.stringify(""),
       },
     });

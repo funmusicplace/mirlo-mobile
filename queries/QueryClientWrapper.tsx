@@ -1,10 +1,5 @@
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MirloFetchError } from "./fetch/MirloFetchError";
-import { authRefresh } from "./authQueries";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,24 +18,10 @@ export const queryClient = new QueryClient({
       },
     },
   },
-  queryCache: new QueryCache({
-    onError: async (error) => {
-      if (
-        error instanceof MirloFetchError &&
-        (error.status === 400 || error.status === 401)
-      ) {
-        console.error(`Received a ${error.status} response - refreshing auth`);
-        await authRefresh();
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes("auth"),
-        });
-      }
-    },
-  }),
 });
 
 export function QueryClientWrapper(
-  props: React.PropsWithChildren<{ devTools?: boolean }>
+  props: React.PropsWithChildren<{ devTools?: boolean }>,
 ) {
   return (
     <QueryClientProvider client={queryClient}>

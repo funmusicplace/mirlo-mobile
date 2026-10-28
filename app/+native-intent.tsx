@@ -1,3 +1,4 @@
+import { OAUTH_REDIRECT_URI } from "@/constants/oauth";
 import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient } from "@/queries/QueryClientWrapper";
 import { queryArtist } from "@/queries/queries";
@@ -28,6 +29,10 @@ export async function redirectSystemPath({
   path: string;
   initial: boolean;
 }) {
+  // On Android the sign-in redirect also arrives as a deep link. The auth
+  // session already has it, so leave navigation alone
+  if (path.startsWith(OAUTH_REDIRECT_URI)) return "";
+
   let url: URL;
   try {
     url = new URL(path);

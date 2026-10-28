@@ -76,7 +76,8 @@ export default function Footer({ style }: ViewProps) {
     if (route === "/") {
       router.dismissTo("/");
     } else if (!user) {
-      router.push({ pathname: "/emailVerificationModal" });
+      // The footer stays visible on the login screen, a second push would stack another
+      if (pathname !== "/login") router.push({ pathname: "/login" });
     } else if (pathname === "/") {
       router.navigate(route);
     } else if (pathname !== route) {

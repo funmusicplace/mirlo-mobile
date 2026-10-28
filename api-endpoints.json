@@ -3,24 +3,9 @@
   "apiRoot": "https://api.mirlo.space",
   "endpoints": [
     {
-      "method": "POST",
-      "path": "/auth/login",
-      "sources": ["queries/authQueries.ts"]
-    },
-    {
       "method": "GET",
-      "path": "/auth/logout",
+      "path": "/auth/profile",
       "sources": ["queries/authQueries.ts"]
-    },
-    {
-      "method": "POST",
-      "path": "/auth/refresh",
-      "sources": ["queries/authQueries.ts"]
-    },
-    {
-      "method": "POST",
-      "path": "/auth/verify-email",
-      "sources": ["app/emailVerificationModal.tsx"]
     },
     {
       "method": "GET",
@@ -86,11 +71,6 @@
       "method": "GET",
       "path": "/v1/tracks/{param}/trackPlay",
       "sources": ["state/PlayerContext.tsx"]
-    },
-    {
-      "method": "DELETE",
-      "path": "/v1/users/{param}",
-      "sources": ["app/deleteAccount.tsx"]
     },
     {
       "method": "GET",

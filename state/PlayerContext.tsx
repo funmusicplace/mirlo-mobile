@@ -17,11 +17,13 @@ import TrackPlayer, {
   useTrackPlayerEvents,
   PlaybackState,
   State,
+  Track,
 } from "react-native-track-player";
 import { useAuthContext } from "./AuthContext";
 import { isTrackOwned } from "@/scripts/utils";
 import { useRouter } from "expo-router";
 import * as api from "../queries/fetch/fetchWrapper";
+import { getAccessToken, SessionEndedError } from "@/queries/fetch/session";
 
 const setupPlayerOptions = {
   autoHandleInterruptions: true,
@@ -94,6 +96,86 @@ async function ensureTrackPlayerInitialized(): Promise<void> {
   await playerSetupPromise;
 }
 
+// Full tracks need the bearer token on the HLS playlist and on every segment.
+// null means signed out, undefined means the token can't be read right now
+// (offline) and tracks stay as they are
+async function currentAuthorization(): Promise<string | null | undefined> {
+  try {
+    const token = await getAccessToken();
+    return token ? `Bearer ${token}` : null;
+  } catch (error) {
+    return error instanceof SessionEndedError ? null : undefined;
+  }
+}
+
+function withAuthorization<T extends { headers?: object }>(
+  track: T,
+  authorization: string | null,
+): T {
+  const headers: Record<string, string> = { ...track.headers };
+  delete headers.Authorization;
+  if (authorization) headers.Authorization = authorization;
+  return { ...track, headers };
+}
+
+async function withCurrentAuthorization(args: unknown[]): Promise<unknown[]> {
+  const [tracks, ...rest] = args;
+  const authorization = await currentAuthorization();
+  if (authorization === undefined || !tracks || typeof tracks !== "object") {
+    return args;
+  }
+  const stamp = (track: RNTrack) => withAuthorization(track, authorization);
+  return [
+    Array.isArray(tracks) ? tracks.map(stamp) : stamp(tracks as RNTrack),
+    ...rest,
+  ];
+}
+
+let reloadingTrack = false;
+let lastReload: { trackId: number; authorization: string | null } | undefined;
+
+// A queued track keeps the header it was added with while a token lasts an hour,
+// so the active one is swapped for a copy with the current header
+async function reloadTrackWithCurrentAuthorization(restorePlayback: boolean) {
+  // load() emits PlaybackActiveTrackChanged, which lands back here
+  if (reloadingTrack) return;
+  reloadingTrack = true;
+  try {
+    const track = (await TrackPlayer.getActiveTrack()) as RNTrack | undefined;
+    const authorization = await currentAuthorization();
+    if (!track || authorization === undefined) return;
+
+    const queued = (track.headers as Record<string, string> | undefined)
+      ?.Authorization;
+    if ((queued ?? null) === authorization) {
+      lastReload = undefined;
+      return;
+    }
+    // A reload that left the header unchanged must not repeat on every event
+    if (
+      lastReload?.trackId === track.id &&
+      lastReload.authorization === authorization
+    ) {
+      return;
+    }
+    lastReload = { trackId: track.id, authorization };
+
+    const { position } = await TrackPlayer.getProgress();
+    const playWhenReady = await TrackPlayer.getPlayWhenReady();
+    // Replaces the active track in place, restarting it from the beginning
+    await TrackPlayer.load(withAuthorization(track, authorization) as Track);
+    if (restorePlayback) {
+      if (position > 0) await TrackPlayer.seekTo(position);
+      if (playWhenReady) await TrackPlayer.play();
+    }
+  } catch (error) {
+    lastReload = undefined;
+    console.error("issue reloading the track with a fresh token", error);
+  } finally {
+    reloadingTrack = false;
+  }
+}
+
 function patchTrackPlayerMethodsForInitialization() {
   if (trackPlayerMethodsPatched) return;
 
@@ -112,6 +194,8 @@ function patchTrackPlayerMethodsForInitialization() {
     "setRepeatMode",
   ];
 
+  const methodsTakingTracks = ["setQueue", "add"];
+
   const trackPlayerAny = TrackPlayer as unknown as Record<
     string,
     (...args: unknown[]) => Promise<unknown>
@@ -123,7 +207,11 @@ function patchTrackPlayerMethodsForInitialization() {
 
     trackPlayerAny[methodName] = async (...args: unknown[]) => {
       await ensureTrackPlayerInitialized();
-      return originalMethod(...args);
+      return originalMethod(
+        ...(methodsTakingTracks.includes(methodName)
+          ? await withCurrentAuthorization(args)
+          : args),
+      );
     };
   }
 
@@ -190,7 +278,8 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
     async (event) => {
       if (
         event.type === Event.PlaybackError &&
-        event.message.includes("Track play limit exceeded")
+        // Android sends HTTP errors without a message
+        event.message?.includes("Track play limit exceeded")
       ) {
         router.push("/maxPlaysReached");
         return;
@@ -216,13 +305,20 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
       if (event.type === Event.PlaybackQueueEnded) {
         await TrackPlayer.skip(0);
       }
+      if (
+        event.type === Event.PlaybackActiveTrackChanged ||
+        event.type === Event.PlaybackError
+      ) {
+        // After an error the position is the failing track's, resume from it
+        await reloadTrackWithCurrentAuthorization(
+          event.type === Event.PlaybackError,
+        );
+      }
 
       // Several events fire before the queue has an active track (cold-start
       // PlaybackState/PlaybackError, non-"limit exceeded" PlaybackErrors).
       // Bail out before touching track.trackGroup so we don't crash.
-      const track = (await TrackPlayer.getActiveTrack()) as
-        | RNTrack
-        | undefined;
+      const track = (await TrackPlayer.getActiveTrack()) as RNTrack | undefined;
       if (!track) return;
 
       // Handle playback progress

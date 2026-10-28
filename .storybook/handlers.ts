@@ -12,7 +12,8 @@ const tags = ["lofi", "ambient", "synthwave", "folk", "jazz", "indie"].map(
 
 /**
  * Handlers every story gets, keyed so a story can replace one group without
- * dropping the rest, e.g. a logged-in story:
+ * dropping the rest, e.g. a logged-in story (it also needs a stored session,
+ * see LoggedIn in stories/screens/Menu.stories.tsx):
  *
  *   parameters: {
  *     msw: {
@@ -25,7 +26,6 @@ const tags = ["lofi", "ambient", "synthwave", "folk", "jazz", "indie"].map(
 export const defaultHandlers = {
   auth: [
     http.get("*/auth/profile", () => new HttpResponse(null, { status: 401 })),
-    http.post("*/auth/refresh", () => HttpResponse.json({})),
   ],
   trackGroups: [
     http.get("*/v1/trackGroups", () =>

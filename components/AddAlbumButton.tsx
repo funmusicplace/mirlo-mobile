@@ -63,7 +63,7 @@ export default function AddAlbumButton({
     } else {
       // If not in US, we need to follow the email flow to keep within Apple guidelines
       if (!user) {
-        showModal("/emailVerificationModal", router, trackGroup);
+        router.push("/login");
       } else {
         showModal("/emailPurchaseInfoModal", router, trackGroup);
       }
