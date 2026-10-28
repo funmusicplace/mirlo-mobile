@@ -48,7 +48,7 @@ const NAV_ITEMS = [
   },
   {
     route: "/collections",
-    icon: "archive-music",
+    icon: "music-box-multiple",
     label: "Your Collection",
     hint: "Navigates to your collection page",
   },
@@ -121,7 +121,7 @@ export default function Footer({ style }: ViewProps) {
             accessibilityHint={hint}
             accessibilityState={{ selected: active }}
           >
-            {icon === "archive-music" ? (
+            {icon === "music-box-multiple" ? (
               <MaterialCommunityIcons
                 name={active ? icon : `${icon}-outline`}
                 {...iconProps}
