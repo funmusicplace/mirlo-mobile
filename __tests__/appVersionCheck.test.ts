@@ -1,7 +1,40 @@
+import { Alert } from "react-native";
 import {
+  checkForUpdates,
   compareVersions,
   isVersionGreater,
 } from "@/scripts/appVersionCheck";
+
+jest.mock("expo-application", () => ({
+  applicationId: "space.mirlo.mobile",
+  nativeApplicationVersion: "1.0.4",
+  nativeBuildVersion: "1",
+}));
+
+describe("checkForUpdates", () => {
+  const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+  const storeVersion = (version: string) => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: [{ version, trackViewUrl: "https://apps.apple.com/app" }],
+      }),
+    });
+  };
+  afterEach(() => alert.mockClear());
+
+  test("compares the app version, not the build number", async () => {
+    storeVersion("1.0.3");
+    expect(await checkForUpdates()).toBe(false);
+    expect(alert).not.toHaveBeenCalled();
+  });
+
+  test("asks for an update when the store is ahead", async () => {
+    storeVersion("1.0.5");
+    expect(await checkForUpdates()).toBe(true);
+    expect(alert.mock.calls[0][1]).toContain("This version (1.0.4)");
+  });
+});
 
 describe("compareVersions", () => {
   test("returns 0 for equal versions", () => {

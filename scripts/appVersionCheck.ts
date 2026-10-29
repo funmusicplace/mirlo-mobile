@@ -3,7 +3,7 @@ import { Alert, Linking, Platform } from "react-native";
 
 export async function checkForUpdates() {
   try {
-    const currentVersion = Application.nativeBuildVersion;
+    const currentVersion = Application.nativeApplicationVersion;
     const bundleId = Application.applicationId;
 
     if (!bundleId) {
