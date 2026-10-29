@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Pressable,
   Platform,
-  useWindowDimensions,
   ScrollView,
 } from "react-native";
 import { usePlayer } from "@/state/PlayerContext";
@@ -28,9 +27,7 @@ export default function NowPlaying() {
   const progress = useProgress();
   const router = useRouter();
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
   const colors = useColors();
-  const coverSize = width - 2 * gutter;
   const trackGroup = activeTrack?.trackGroup;
   const linkStyle = [type.small, { color: colors.accent }];
 
@@ -46,8 +43,8 @@ export default function NowPlaying() {
             uri: trackGroup?.cover.sizes[1200] ?? trackGroup?.cover.sizes[600],
           }}
           style={{
-            width: coverSize,
-            height: coverSize,
+            width: "100%",
+            aspectRatio: 1,
             backgroundColor: colors.tint,
           }}
           resizeMode="cover"
