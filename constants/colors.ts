@@ -71,6 +71,10 @@ export const colors = {
   },
 };
 
+export function useColorSchemeName() {
+  return useColorScheme() === "dark" ? "dark" : "light";
+}
+
 export function useColors() {
-  return colors[useColorScheme() === "dark" ? "dark" : "light"];
+  return colors[useColorSchemeName()];
 }

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Markdown from "react-native-markdown-display";
+import Markdown from "@/components/Markdown";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";

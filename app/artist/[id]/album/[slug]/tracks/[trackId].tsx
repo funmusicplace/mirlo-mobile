@@ -22,7 +22,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import Markdown from "react-native-markdown-display";
+import Markdown from "@/components/Markdown";
 import ErrorNotification from "@/components/ErrorNotification";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
