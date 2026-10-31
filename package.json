@@ -51,7 +51,7 @@
     "@ronradtke/react-native-markdown-display": "^9.0.3",
     "@tanstack/react-query": "^5.62.11",
     "@transifex/i18next": "^7.1.4",
-    "expo": "^55.0.4",
+    "expo": "^58.0.22",
     "expo-application": "~55.0.19",
     "expo-asset": "~55.0.8",
     "expo-auth-session": "~55.0.19",
@@ -65,7 +65,7 @@
     "expo-linking": "~55.0.7",
     "expo-localization": "~55.0.8",
     "expo-notifications": "~55.0.10",
-    "expo-router": "~55.0.3",
+    "expo-router": "~58.0.29",
     "expo-secure-store": "~55.0.8",
     "expo-splash-screen": "^55.0.19",
     "expo-status-bar": "~55.0.4",
@@ -75,7 +75,7 @@
     "expo-web-browser": "~55.0.20",
     "i18next": "^25.3.0",
     "jest-expo": "~55.0.9",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "lucide-react": "^0.468.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -96,8 +96,8 @@
     "react-native-worklets": "0.7.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@faker-js/faker": "^9.8.0",
+    "@babel/core": "^7.29.7",
+    "@faker-js/faker": "^10.5.0",
     "@storybook/react-native-web-vite": "^10.6.0",
     "@tanstack/eslint-plugin-query": "^5.62.9",
     "@testing-library/react-native": "^13.2.0",
@@ -117,10 +117,10 @@
     "patch-package": "^8.0.1",
     "prettier": "^3.6.2",
     "react-test-renderer": "19.2.0",
-    "storybook": "^10.6.0",
+    "storybook": "^10.6.5",
     "ts-jest": "^29.3.3",
     "typescript": "^5.3.3",
-    "vite": "^7.3.6"
+    "vite": "^7.3.7"
   },
   "private": true
 }
