@@ -25,7 +25,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import PlayPauseWrapper from "@/components/PlayPauseWrapper";
 import { Trans, useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import Markdown from "react-native-markdown-display";
+import Markdown from "@/components/Markdown";
 import { linkifyUrls } from "@/scripts/utils";
 import WishlistButton from "@/components/WishlistButton";
 import ErrorNotification from "@/components/ErrorNotification";
