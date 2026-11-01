@@ -33,6 +33,8 @@ export const colors = {
     playerShadow: "rgba(17, 17, 17, 0.3)",
     tint: "rgba(50, 0, 0, 0.03)",
     tintX: "rgba(50, 0, 0, 0.2)",
+    // The unfilled part of a slider or progress bar, 3:1 on the background
+    track: "rgba(50, 0, 0, 0.5)",
     inputBackground: palette.white,
     inputText: "#000000",
     inputPlaceholder: "#757575",
@@ -60,6 +62,7 @@ export const colors = {
     playerShadow: "rgba(245, 240, 240, 0.3)",
     tint: "rgba(255, 255, 255, 0.08)",
     tintX: "rgba(255, 255, 255, 0.18)",
+    track: "rgba(255, 255, 255, 0.4)",
     inputBackground: palette.black,
     inputText: palette.offWhite,
     inputPlaceholder: palette.neutral500,
