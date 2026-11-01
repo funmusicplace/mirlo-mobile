@@ -112,6 +112,8 @@ export default function SearchPage() {
 
   return (
     <View
+      // VoiceOver stays inside the overlay instead of reaching the screen beneath
+      accessibilityViewIsModal
       style={[
         styles.screen,
         {
