@@ -143,6 +143,7 @@ export default function Button({
             <Text
               style={[
                 text,
+                styles.label,
                 { color },
                 !isSolid && !isLink && styles.bold,
                 isLink ? styles.underline : styles.centered,
@@ -191,9 +192,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.sm,
+    flexShrink: 1,
   },
   hidden: {
     opacity: 0,
+  },
+  // Long labels wrap inside the button instead of being clipped
+  label: {
+    flexShrink: 1,
   },
   bold: {
     fontWeight: "700",

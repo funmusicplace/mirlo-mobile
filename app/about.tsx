@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -79,6 +80,8 @@ function AboutColumn({
 export default function About() {
   const { t } = useTranslation("translation");
   const colors = useColors();
+  // At accessibility text sizes a column can't fit one link, so stack them
+  const stacked = useWindowDimensions().fontScale > 1.5;
 
   const aboutLinks: AboutLinkInfo[] = [
     { label: "mirlo.space", url: "https://mirlo.space" },
@@ -116,14 +119,14 @@ export default function About() {
     >
       <ScreenHeader left={<BackButton />} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.row}>
+        <View style={[styles.row, stacked && styles.stacked]}>
           <AboutColumn heading={t("footer.aboutHeading")} links={aboutLinks} />
           <AboutColumn
             heading={t("footer.legalHeading", "Legal")}
             links={legalLinks}
           />
         </View>
-        <View style={styles.row}>
+        <View style={[styles.row, stacked && styles.stacked]}>
           <AboutColumn
             heading={t("footer.connectHeading")}
             links={connectLinks}
@@ -148,6 +151,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: spacing.xxl,
+  },
+  stacked: {
+    flexDirection: "column",
   },
   column: {
     flex: 1,
