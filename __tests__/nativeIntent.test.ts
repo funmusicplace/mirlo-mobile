@@ -2,7 +2,7 @@ import { redirectSystemPath } from "@/app/+native-intent";
 import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient } from "@/queries/QueryClientWrapper";
 import * as WebBrowser from "expo-web-browser";
-import { Platform } from "react-native";
+import { Linking, Platform } from "react-native";
 
 jest.mock("expo-web-browser", () => ({
   openBrowserAsync: jest.fn(),
@@ -46,7 +46,8 @@ describe("redirectSystemPath", () => {
     expect(await redirect("https://mirlo.space/")).toBe("/");
   });
 
-  test("opens web-only links in the browser without navigating", async () => {
+  test("hands web-only links to Safari without navigating", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     for (const p of [
       "https://mirlo.space/login",
       "https://mirlo.space/manage/artists/4",
@@ -55,8 +56,9 @@ describe("redirectSystemPath", () => {
     ]) {
       expect(await redirect(p)).toBe("");
       await flush();
-      expect(openBrowserAsync.mock.calls.at(-1)[0]).toBe(p);
+      expect(openURL).toHaveBeenLastCalledWith(p);
     }
+    expect(openBrowserAsync).not.toHaveBeenCalled();
   });
 
   test("still opens the artist page when the API check fails for another reason", async () => {

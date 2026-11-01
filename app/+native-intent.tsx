@@ -2,7 +2,7 @@ import { OAUTH_REDIRECT_URI } from "@/constants/oauth";
 import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient } from "@/queries/QueryClientWrapper";
 import { queryArtist } from "@/queries/queries";
-import { openInBrowser } from "@/scripts/openInBrowser";
+import { openOnWeb } from "@/scripts/openInBrowser";
 
 // Artist pages share the site root with routes like /login, so a single
 // segment is an artist only if the API says so. Fetching through the query
@@ -21,7 +21,7 @@ async function isArtist(slug: string) {
 }
 
 // Maps a mirlo.space link to the app route that shows it. Anything the app
-// can't show opens in an in-app browser tab and leaves navigation alone
+// can't show opens on the web and leaves navigation alone
 export async function redirectSystemPath({
   path,
   initial,
@@ -56,6 +56,6 @@ export async function redirectSystemPath({
       return `/artist/${artist}/album/${album}/tracks/${trackId}`;
     }
   }
-  openInBrowser(path);
+  openOnWeb(path);
   return "";
 }
