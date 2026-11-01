@@ -56,7 +56,7 @@ export default function NowPlaying() {
           maximumValue={progress.duration}
           thumbTintColor="transparent"
           minimumTrackTintColor={colors.accent}
-          maximumTrackTintColor={colors.tintX}
+          maximumTrackTintColor={colors.track}
           onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
           accessibilityLabel="Track progress"
         />
