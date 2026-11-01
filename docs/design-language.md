@@ -417,8 +417,11 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 - Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels, `radiogroup` with `radio` pills for filters.
 - Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `checked` on the selected filter pill, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
 - Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` and `FilterGroup` do.
-- Text needs 4.5:1 against its background and icons need 3:1. `inactive` is 3.8:1 on white, so it's for icons and inactive states only.
-- Measured pairs, light / dark: `text` on `background` 21 / 16.7, `secondaryText` 9.6 / 9.2, `accent` 5.5 / 5.5, `buttonText` on `button` 5.5, `danger` 11.6 / 7.8, chip `accent` on its `tint` fill 5.2 / 4.5, `inactive` 3.8 / 5.0. Recheck these when a token changes.
+- Text needs 4.5:1 against its background and icons need 3:1. `inactive` is 3.8:1 on white, so it's for icons and inactive states only. `border` and `tintX` are decorative and sit under 3:1, so the unfilled part of a slider or progress bar uses `track`, which reaches it.
+- `__tests__/colors.test.ts` computes the ratio of every pair in both themes and fails under 4.5:1 for text and 3:1 for icons, tracks and meaningful borders. Add a pair there when a token gets a new job.
+- `eslint-plugin-react-native-a11y` runs with the rest of lint (the `all` preset, hints excepted), so a pressable without a role or an image without a label fails `npx eslint .`.
+- Layouts hold up to the accessibility text sizes, 3.1x on iOS and 2x on Android: button labels wrap inside the button, and About stacks its columns above a 1.5 font scale. Check a new screen at the largest size with `xcrun simctl ui <udid> content_size accessibility-extra-extra-extra-large` and `adb shell settings put system font_scale 2.0`.
+- Overlays that cover the screen, such as search, set `accessibilityViewIsModal` so VoiceOver can't reach what's beneath. Sliders report their position through `accessibilityValue`.
 
 ## Intentional platform differences
 
@@ -448,4 +451,4 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Web | `client/src/components/common/Button.tsx`, `Button.stories.tsx` | One component whose `variant`, `size` and `buttonRole` props cover every look, with colors from CSS variables and the hover, disabled and loading states built in. |
 | Mobile | `components/Button.tsx`, `components/TagPill.tsx`, `components/Footer.tsx` | Colors and sizes from tokens only, 44 pt targets through computed `hitSlop` or a fixed 44 pt wrapper, an Android ripple with an iOS fallback, and labels, roles and states on every control. |
 
-Before committing UI changes, run `npx eslint . --ext .ts,.tsx`. The baseline is 2 errors, both unresolved `msw` imports in `stories/screens/`, and UI changes add none.
+Before committing UI changes, run `npx eslint . --ext .ts,.tsx`. The baseline is 0 errors, and UI changes add none.
