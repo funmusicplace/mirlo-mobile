@@ -8,7 +8,12 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, Link, useFocusEffect } from "expo-router";
+import {
+  useLocalSearchParams,
+  Link,
+  useFocusEffect,
+  router,
+} from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
 import {
   handleExternalPurchase,
@@ -395,6 +400,19 @@ export default function AlbumTracks() {
               </View>
             ) : null}
             {tagPills?.length ? <TagPillList>{tagPills}</TagPillList> : null}
+            <Button
+              variant="link"
+              size="compact"
+              accessibilityRole="link"
+              title={t("artist.flagContent")}
+              onPress={() =>
+                router.push({
+                  pathname: "/reportAlbumModal",
+                  params: { trackGroupId: selectedAlbum.id },
+                })
+              }
+              style={styles.flag}
+            />
           </View>
         }
       />
@@ -474,6 +492,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: spacing.sm,
+  },
+  flag: {
+    alignSelf: "flex-end",
   },
   modalBackdrop: {
     flex: 1,

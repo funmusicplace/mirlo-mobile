@@ -286,9 +286,13 @@
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
     "flagContent": "Flag content",
     "whyAreYouFlaggingIt": "Why are you flagging it?",
+    "copyrightViolation": "Copyright violation",
+    "inappropriateContent": "Inappropriate content",
     "howContact": "How can we contact you?",
     "submit": "Report",
     "reportContentDescription": "Is there a problem with this content? Please let us know.",
+    "reportContentSuccess": "Successfully reported a problem with this content. We will investigate it.",
+    "reportContentError": "An error happened while reporting this content",
     "Email": "Email",
     "exampleLocation": "eg. North Pole",
     "backToArtist": "Back to artist",
@@ -933,6 +937,9 @@
     "faqDescription": "Some frequently asked questions about Mirlo",
     "whatWeBuilding": "What we're building",
     "people": "The people doing it "
+  },
+  "common": {
+    "close": "Close"
   },
   "mobileApp": {
     "searchScreen": {
