@@ -39,7 +39,11 @@ export default function PlayFeaturedButton({
       const albumDetails = await Promise.allSettled(
         albums.map((album) =>
           queryClient.fetchQuery(
-            queryAlbum({ slug: album.urlSlug, id: String(album.artistId) }),
+            queryAlbum({
+              slug: album.urlSlug,
+              id: String(album.artistId),
+              apiRoot: album.apiRoot,
+            }),
           ),
         ),
       );

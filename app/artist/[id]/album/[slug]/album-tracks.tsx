@@ -46,6 +46,7 @@ import { screenEdges } from "@/constants/safe-area";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
 import { markdownHeadings, type } from "@/constants/typography";
 import TagPill, { TagPillList } from "@/components/TagPill";
+import { useKnownApiRoot } from "@/state/InstancesContext";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -186,9 +187,15 @@ function formatReleaseDate(utcDate: string | undefined, t: TFunction) {
 }
 
 export default function AlbumTracks() {
-  const { id, slug } = useLocalSearchParams();
+  const params = useLocalSearchParams<{
+    id: string;
+    slug: string;
+    apiRoot?: string;
+  }>();
+  const { id, slug } = params;
+  const apiRoot = useKnownApiRoot(params.apiRoot);
   const { isPending, isError, data, error } = useQuery(
-    queryAlbum({ slug: slug, id: id }),
+    queryAlbum({ slug: slug, id: id, apiRoot }),
   );
   const { setPlayableTracks } = usePlayer();
   const { user } = useAuthContext();
@@ -249,6 +256,8 @@ export default function AlbumTracks() {
   }
 
   const selectedAlbum = data.result;
+  // Wishlists and purchases belong to the account on the default instance
+  const isOtherInstance = !!selectedAlbum.apiRoot;
   const label = findLabel(selectedAlbum);
   const releaseDate = formatReleaseDate(selectedAlbum.releaseDate, t);
   const coverSize = width - 2 * gutter;
@@ -312,7 +321,10 @@ export default function AlbumTracks() {
                       <Link
                         href={{
                           pathname: "/artist/[id]/artist-page",
-                          params: { id: selectedAlbum.artistId },
+                          params: {
+                            id: selectedAlbum.artistId,
+                            apiRoot: selectedAlbum.apiRoot,
+                          },
                         }}
                         style={linkStyle}
                       />
@@ -332,7 +344,10 @@ export default function AlbumTracks() {
                           <Link
                             href={{
                               pathname: "/artist/[id]/artist-page",
-                              params: { id: label.urlSlug ?? label.id },
+                              params: {
+                                id: label.urlSlug ?? label.id,
+                                apiRoot: selectedAlbum.apiRoot,
+                              },
                             }}
                             style={linkStyle}
                           />
@@ -367,11 +382,15 @@ export default function AlbumTracks() {
             </View>
             <View style={[styles.gutter, styles.actions]}>
               <ShareButton url={trackGroupUrl(selectedAlbum)} />
-              <WishlistButton trackGroup={selectedAlbum} />
-              <AddAlbumButton
-                trackGroup={selectedAlbum}
-                setModalVisible={setModalVisible}
-              />
+              {isOtherInstance ? null : (
+                <>
+                  <WishlistButton trackGroup={selectedAlbum} />
+                  <AddAlbumButton
+                    trackGroup={selectedAlbum}
+                    setModalVisible={setModalVisible}
+                  />
+                </>
+              )}
             </View>
             <View style={styles.play}>
               <MemoizedAlbumPlayButton />

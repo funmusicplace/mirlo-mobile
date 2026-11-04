@@ -87,6 +87,8 @@ interface AlbumProps {
   tags?: string[];
   trackGroupId: number;
   minPrice?: number;
+  // The instance it came from, unset for the default one
+  apiRoot?: string;
 }
 
 interface TrackProps {
@@ -139,6 +141,7 @@ interface RNTrack {
         1500: string;
       };
     };
+    apiRoot?: string;
   };
   audio: {
     url: string;

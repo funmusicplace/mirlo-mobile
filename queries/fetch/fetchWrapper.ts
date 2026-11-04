@@ -6,7 +6,8 @@ import { endSession, getAccessToken, refreshAccessToken } from "./session";
 /**
  * Wraps fetch() calls to Mirlo's API with error handling.
  *
- * @param endpoint The API request path (appended to API_ROOT)
+ * @param endpoint The API request path (appended to API_ROOT), or an
+ * absolute URL on another instance
  * @param init Fetch request options
  * @param isRetry True on the single retry after a token refresh
  * @returns The resolved JSON response
@@ -18,7 +19,10 @@ async function fetchWrapper<R>(
   init: RequestInit,
   isRetry = false,
 ): Promise<R> {
-  const accessToken = await getAccessToken();
+  const url = endpoint.startsWith("http") ? endpoint : `${API_ROOT}${endpoint}`;
+  // The session token and the app key never leave this app's own API
+  const ownApi = url.startsWith(`${API_ROOT}/`);
+  const accessToken = ownApi ? await getAccessToken() : null;
 
   const headers = new Headers(init.headers);
 
@@ -26,11 +30,11 @@ async function fetchWrapper<R>(
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  if (API_KEY) {
+  if (API_KEY && ownApi) {
     headers.append("mirlo-api-key", API_KEY);
   }
 
-  const res = await fetch(`${API_ROOT}${endpoint}`, {
+  const res = await fetch(url, {
     ...init,
     headers,
   });
@@ -102,7 +106,8 @@ export function post<T, R>(
 /**
  * Wraps fetch() GET calls to Mirlo's API with error handling.
  *
- * @param endpoint The API request path (appended to API_ROOT)
+ * @param endpoint The API request path (appended to API_ROOT), or an
+ * absolute URL on another instance
  * @param init Fetch request options
  * @returns The resolved JSON response
  * @throws MirloFetchError if the response code is not OK

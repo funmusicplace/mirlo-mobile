@@ -16,8 +16,12 @@ import PlayPauseWrapper from "@/components/PlayPauseWrapper";
 import TrackPlayer, { State } from "react-native-track-player";
 import { usePlayer } from "@/state/PlayerContext";
 import { API_KEY } from "@/constants/api-key";
-import { API_ROOT } from "@/constants/api-root";
-import { audioTrackType, linkifyUrls, trackGroupUrl } from "@/scripts/utils";
+import {
+  audioTrackType,
+  audioUrl,
+  linkifyUrls,
+  trackGroupUrl,
+} from "@/scripts/utils";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
@@ -72,7 +76,7 @@ export default function TrackView() {
           };
           filteredTrack.artist = data.result.artist.name;
           filteredTrack.artwork = data.result.cover.sizes[600];
-          filteredTrack.url = `${API_ROOT}${filteredTrack.audio?.url}`;
+          filteredTrack.url = audioUrl(filteredTrack, data.result);
           filteredTrack.queueIndex = 0; //Only displaying 1 track on this screen
           filteredTrack.trackGroupId = data.result.trackGroupId;
           filteredTrack.audio = {

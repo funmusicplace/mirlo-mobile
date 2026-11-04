@@ -117,11 +117,11 @@ const fetchUserCollection: QueryFunction<
 };
 
 export function queryUserCollection(userId: number | undefined) {
-    return queryOptions({
-        queryKey: ["fetchUserCollection", {userId}],
-        queryFn: fetchUserCollection,
-        enabled: !!userId,
-    })
+  return queryOptions({
+    queryKey: ["fetchUserCollection", { userId }],
+    queryFn: fetchUserCollection,
+    enabled: !!userId,
+  });
 }
 
 const fetchAlbum: QueryFunction<
@@ -131,18 +131,25 @@ const fetchAlbum: QueryFunction<
     {
       slug: string | string[];
       id: string | string[];
+      apiRoot?: string;
     },
   ]
-> = ({ queryKey: [_, { slug, id }], signal }) => {
+> = ({ queryKey: [_, { slug, id, apiRoot }], signal }) => {
   const safeSlug = Array.isArray(slug) ? slug[0] : slug;
   const safeId = Array.isArray(id) ? id[0] : id;
+  const endpoint = `${apiRoot ?? ""}/v1/trackGroups/${safeSlug}/?artistId=${safeId}`;
 
-  return api.get(`/v1/trackGroups/${safeSlug}/?artistId=${safeId}`, { signal });
+  return api
+    .get<{ result: AlbumProps }>(endpoint, { signal })
+    .then(({ result }) => ({
+      result: apiRoot ? { ...result, apiRoot } : result,
+    }));
 };
 
 export function queryAlbum(opts: {
   slug: string | string[];
   id: string | string[];
+  apiRoot?: string;
 }) {
   return queryOptions({
     queryKey: ["fetchAlbum", opts],
@@ -153,21 +160,22 @@ export function queryAlbum(opts: {
 
 const fetchArtist: QueryFunction<
   Artist,
-  ["fetchArtist", { artistSlug: string }]
-> = ({ queryKey: [_, { artistSlug }], signal }) => {
+  ["fetchArtist", { artistSlug: string; apiRoot?: string }]
+> = ({ queryKey: [_, { artistSlug, apiRoot }], signal }) => {
   return api
-    .get<{ result: Artist }>(`/v1/artists/${artistSlug}`, {
+    .get<{ result: Artist }>(`${apiRoot ?? ""}/v1/artists/${artistSlug}`, {
       signal,
     })
     .then((r) => r.result);
 };
 
-export function queryArtist(opts: { artistSlug: string }) {
+export function queryArtist(opts: { artistSlug: string; apiRoot?: string }) {
   return queryOptions({
     queryKey: [
       "fetchArtist",
       {
         artistSlug: opts.artistSlug,
+        apiRoot: opts.apiRoot,
       },
     ],
     queryFn: fetchArtist,

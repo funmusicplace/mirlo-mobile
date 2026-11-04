@@ -19,6 +19,8 @@ import ScreenHeader, {
 import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
 import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
+import { useInstances } from "@/state/InstancesContext";
+import { mergeReleases } from "@/scripts/instances";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as api from "../queries/fetch/fetchWrapper";
 import { API_ROOT } from "@/constants/api-root";
@@ -35,6 +37,7 @@ export default function Index() {
   const { t } = useTranslation("translation");
   const { setIsDataLoaded } = useAppIsReadyContext();
   const colors = useColors();
+  const { instances, loaded } = useInstances();
   const {
     isPending,
     isError,
@@ -45,22 +48,34 @@ export default function Index() {
     isFetchingNextPage,
     isRefetching,
     refetch,
-  } = useInfiniteQuery<{ results: AlbumProps[] }>({
-    queryKey: ["infiniteTrackGroups"],
-    queryFn: ({ pageParam = 0 }) => {
+  } = useInfiniteQuery({
+    // A new source starts the feed over
+    queryKey: ["infiniteTrackGroups", instances],
+    queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
       params.append("skip", String(pageParam));
       params.append("take", String(PAGE_SIZE));
       params.append("distinctArtists", "false");
 
-      return api.get(`/v1/trackGroups?${params}`, {});
+      const pages = await Promise.allSettled(
+        instances.map(({ apiRoot }) =>
+          api
+            .getMany<AlbumProps>(`${apiRoot}/v1/trackGroups?${params}`, {})
+            // Only releases from another instance carry its apiRoot
+            .then(({ results }) =>
+              apiRoot === API_ROOT
+                ? results
+                : results.map((album) => ({ ...album, apiRoot })),
+            ),
+        ),
+      );
+      return mergeReleases(pages, PAGE_SIZE);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.results.length === PAGE_SIZE
-        ? allPages.length * PAGE_SIZE
-        : null;
+      return lastPage.hasMore ? allPages.length * PAGE_SIZE : null;
     },
+    enabled: loaded,
   });
   const { top } = useSafeAreaInsets();
   const trackGroups = data?.pages.flatMap((page) => page.results) || [];
@@ -155,7 +170,10 @@ export default function Index() {
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
         data={trackGroups}
-        keyExtractor={(item, index) => `${item.id}-${index}`}
+        // The index keeps a release that moved between offset pages unique
+        keyExtractor={(item, index) =>
+          `${item.apiRoot ?? ""}-${item.id}-${index}`
+        }
         renderItem={({ item }) => (
           <TrackGroupItem {...item} width={columnWidth} />
         )}

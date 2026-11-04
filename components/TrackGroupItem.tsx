@@ -27,6 +27,7 @@ export default function TrackGroupItem({
   artist,
   artistId,
   urlSlug,
+  apiRoot,
   width,
   href,
   showArtist = true,
@@ -39,7 +40,7 @@ export default function TrackGroupItem({
         router.navigate(
           href ?? {
             pathname: "/artist/[id]/album/[slug]/album-tracks",
-            params: { id: artistId, slug: urlSlug },
+            params: { id: artistId, slug: urlSlug, apiRoot },
           },
         )
       }

@@ -80,6 +80,29 @@ describe("fetchWrapper.get", () => {
     expect(headers.has("Cookie")).toBe(false);
   });
 
+  test("sends the bearer token and the app key to this API only, absolute URLs included", async () => {
+    await startSession(signedInTokens);
+    (global.fetch as jest.Mock).mockImplementation(async () =>
+      okJson({ ok: true }),
+    );
+
+    await api.get("https://test.api/v1/foo", {});
+    await api.get("https://other.example/v1/foo", {});
+
+    const calls = (global.fetch as jest.Mock).mock.calls;
+    expect(calls.map(([url]) => url)).toEqual([
+      "https://test.api/v1/foo",
+      "https://other.example/v1/foo",
+    ]);
+    const header = (name: string) =>
+      calls.map(([, init]) => (init.headers as Headers).get(name));
+    expect(header("Authorization")).toEqual([
+      "Bearer access-token-value",
+      null,
+    ]);
+    expect(header("mirlo-api-key")).toEqual(["test-api-key", null]);
+  });
+
   test("omits Authorization when signed out", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(okJson({ ok: true }));
 
