@@ -51,8 +51,7 @@ export default function Index() {
       const params = new URLSearchParams();
       params.append("skip", String(pageParam));
       params.append("take", String(PAGE_SIZE));
-      params.append("distinctArtists", "true");
-      params.append("isReleased", "released");
+      params.append("distinctArtists", "false");
 
       return api.get(`/v1/trackGroups?${params}`, {});
     },
