@@ -58,16 +58,16 @@ export default function Index() {
       params.append("distinctArtists", "false");
 
       const pages = await Promise.allSettled(
-        instances.map(({ apiRoot }) =>
-          api
-            .getMany<AlbumProps>(`${apiRoot}/v1/trackGroups?${params}`, {})
-            // Only releases from another instance carry its apiRoot
-            .then(({ results }) =>
-              apiRoot === API_ROOT
-                ? results
-                : results.map((album) => ({ ...album, apiRoot })),
-            ),
-        ),
+        instances.map(async ({ apiRoot }) => {
+          const { results } = await api.getMany<AlbumProps>(
+            `/v1/trackGroups?${params}`,
+            { apiRoot },
+          );
+          // Only releases from another instance carry its apiRoot
+          return apiRoot === API_ROOT
+            ? results
+            : results.map((album) => ({ ...album, apiRoot }));
+        }),
       );
       return mergeReleases(pages, PAGE_SIZE);
     },

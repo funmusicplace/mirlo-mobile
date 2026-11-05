@@ -134,16 +134,14 @@ const fetchAlbum: QueryFunction<
       apiRoot?: string;
     },
   ]
-> = ({ queryKey: [_, { slug, id, apiRoot }], signal }) => {
+> = async ({ queryKey: [_, { slug, id, apiRoot }], signal }) => {
   const safeSlug = Array.isArray(slug) ? slug[0] : slug;
   const safeId = Array.isArray(id) ? id[0] : id;
-  const endpoint = `${apiRoot ?? ""}/v1/trackGroups/${safeSlug}/?artistId=${safeId}`;
-
-  return api
-    .get<{ result: AlbumProps }>(endpoint, { signal })
-    .then(({ result }) => ({
-      result: apiRoot ? { ...result, apiRoot } : result,
-    }));
+  const { result } = await api.get<{ result: AlbumProps }>(
+    `/v1/trackGroups/${safeSlug}/?artistId=${safeId}`,
+    { signal, apiRoot },
+  );
+  return { result: apiRoot ? { ...result, apiRoot } : result };
 };
 
 export function queryAlbum(opts: {
@@ -161,12 +159,12 @@ export function queryAlbum(opts: {
 const fetchArtist: QueryFunction<
   Artist,
   ["fetchArtist", { artistSlug: string; apiRoot?: string }]
-> = ({ queryKey: [_, { artistSlug, apiRoot }], signal }) => {
-  return api
-    .get<{ result: Artist }>(`${apiRoot ?? ""}/v1/artists/${artistSlug}`, {
-      signal,
-    })
-    .then((r) => r.result);
+> = async ({ queryKey: [_, { artistSlug, apiRoot }], signal }) => {
+  const { result } = await api.get<{ result: Artist }>(
+    `/v1/artists/${artistSlug}`,
+    { signal, apiRoot },
+  );
+  return result;
 };
 
 export function queryArtist(opts: { artistSlug: string; apiRoot?: string }) {
