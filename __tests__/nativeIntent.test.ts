@@ -101,3 +101,56 @@ describe("redirectSystemPath", () => {
     expect(await redirectSystemPath({ path, initial: true })).toBe("");
   });
 });
+
+describe("a link that remounts the app on Android", () => {
+  const route = (slug: string) => `/artist/arod/album/${slug}/album-tracks`;
+  // Fresh modules stand in for a fresh JS context
+  const load = (os: "ios" | "android") => {
+    jest.resetModules();
+    jest.requireActual("react-native").Platform.OS = os;
+    const mod = jest.requireActual<typeof import("@/app/+native-intent")>(
+      "@/app/+native-intent",
+    );
+    const open = jest.fn();
+    const unsubscribe = mod.subscribeToRelaunchLink(open);
+    const launch = (slug: string) =>
+      mod.redirectSystemPath({
+        path: `https://mirlo.space/arod/release/${slug}`,
+        initial: true,
+      });
+    return { mod, open, unsubscribe, launch };
+  };
+
+  test("maps the first launch as usual", async () => {
+    const { open, launch } = load("android");
+    expect(await launch("a")).toBe(route("a"));
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  test("hands a new link to RootLayout, now or once it subscribes", async () => {
+    const { mod, open, unsubscribe, launch } = load("android");
+    await launch("a");
+    expect(await launch("b")).toBe("");
+    expect(open).toHaveBeenCalledWith(route("b"));
+    unsubscribe();
+    await launch("c");
+    const later = jest.fn();
+    mod.subscribeToRelaunchLink(later);
+    expect(later).toHaveBeenCalledWith(route("c"));
+    expect(open).toHaveBeenCalledTimes(1);
+  });
+
+  test("keeps the restored screen when the path repeats", async () => {
+    const { open, launch } = load("android");
+    await launch("a");
+    expect(await launch("a")).toBe(route("a"));
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  test("never hands links over on iOS", async () => {
+    const { open, launch } = load("ios");
+    await launch("a");
+    expect(await launch("b")).toBe(route("b"));
+    expect(open).not.toHaveBeenCalled();
+  });
+});

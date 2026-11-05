@@ -1,4 +1,10 @@
-import { Stack, usePathname } from "expo-router";
+import {
+  Href,
+  router,
+  Stack,
+  useNavigationContainerRef,
+  usePathname,
+} from "expo-router";
 import { useColorScheme } from "react-native";
 import {
   DarkTheme,
@@ -22,6 +28,7 @@ import { useColors } from "@/constants/colors";
 import { fonts } from "@/constants/typography";
 import "../i18n";
 import { checkForUpdates } from "../scripts/appVersionCheck";
+import { subscribeToRelaunchLink } from "./+native-intent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -69,6 +76,22 @@ export default function RootLayout() {
   useEffect(() => {
     checkForUpdates();
   }, []);
+
+  // expo-router restores the previous screen when Android remounts the app,
+  // so open the link the remount was for once navigation is ready
+  const navigationRef = useNavigationContainerRef();
+  useEffect(
+    () =>
+      subscribeToRelaunchLink((href) => {
+        const open = () => router.navigate(href as Href);
+        if (navigationRef.isReady()) return open();
+        const off = navigationRef.addListener("ready", () => {
+          off();
+          open();
+        });
+      }),
+    [navigationRef],
+  );
 
   useEffect(() => {
     if (isDataLoaded && (fontsLoaded || fontError)) {

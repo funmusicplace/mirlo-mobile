@@ -3,6 +3,7 @@ import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient } from "@/queries/QueryClientWrapper";
 import { queryArtist } from "@/queries/queries";
 import { openOnWeb } from "@/scripts/openInBrowser";
+import { Platform } from "react-native";
 
 // Artist pages share the site root with routes like /login, so a single
 // segment is an artist only if the API says so. Fetching through the query
@@ -20,6 +21,20 @@ async function isArtist(slug: string) {
   }
 }
 
+let launchPath: string | undefined;
+let pendingHref: string | undefined;
+let openRelaunchLink: ((href: string) => void) | undefined;
+
+// RootLayout opens the route that a remount couldn't show
+export function subscribeToRelaunchLink(open: (href: string) => void) {
+  openRelaunchLink = open;
+  if (pendingHref) open(pendingHref);
+  pendingHref = undefined;
+  return () => {
+    if (openRelaunchLink === open) openRelaunchLink = undefined;
+  };
+}
+
 // Maps a mirlo.space link to the app route that shows it. Anything the app
 // can't show opens on the web and leaves navigation alone
 export async function redirectSystemPath({
@@ -28,7 +43,22 @@ export async function redirectSystemPath({
 }: {
   path: string;
   initial: boolean;
-}) {
+}): Promise<string> {
+  // The playback service keeps the process alive after a swipe away, so a
+  // link remounts the app, and expo-router restores the old screen. A
+  // recreated activity repeats its path, so only a new one goes to RootLayout
+  if (initial && Platform.OS === "android" && path !== launchPath) {
+    const isRemount = launchPath !== undefined;
+    launchPath = path;
+    if (isRemount) {
+      const href = await redirectSystemPath({ path, initial });
+      if (!href.startsWith("/")) return href;
+      if (openRelaunchLink) openRelaunchLink(href);
+      else pendingHref = href;
+      return "";
+    }
+  }
+
   // On Android the sign-in redirect also arrives as a deep link. The auth
   // session already has it, so leave navigation alone
   if (path.startsWith(OAUTH_REDIRECT_URI)) return "";
