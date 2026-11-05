@@ -412,6 +412,7 @@ export default function AlbumTracks() {
                 })
               }
               style={styles.flag}
+              textStyle={[styles.flagText, { color: colors.secondaryText }]}
             />
           </View>
         }
@@ -495,6 +496,10 @@ const styles = StyleSheet.create({
   },
   flag: {
     alignSelf: "flex-end",
+  },
+  // The web shows it as plain small text in the caption color
+  flagText: {
+    textDecorationLine: "none",
   },
   modalBackdrop: {
     flex: 1,
