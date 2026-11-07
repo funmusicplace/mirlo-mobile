@@ -51,49 +51,6 @@ export function queryTrackGroups(opts: {
   });
 }
 
-const fetchTopSold: QueryFunction<
-  { results: AlbumProps[] },
-  [
-    "fetchTopSold",
-    {
-      take?: number;
-      datePurchased?: string;
-    },
-  ]
-> = ({ queryKey: [_, { take, datePurchased }], signal }) => {
-  const params = new URLSearchParams();
-  if (take) params.append("take", String(take));
-  if (datePurchased) params.append("datePurchased", String(datePurchased));
-  return api.get(`/v1/trackGroups/topSold?${params}`, { signal });
-};
-
-export function queryTopSold(opts: { take?: number; datePurchased?: string }) {
-  return queryOptions({
-    queryKey: ["fetchTopSold", opts],
-    queryFn: fetchTopSold,
-  });
-}
-
-const fetchMostPlayed: QueryFunction<
-  { results: AlbumProps[] },
-  [
-    "fetchMostPlayed",
-    {
-      take?: number;
-    },
-  ]
-> = ({ queryKey: [_, { take }], signal }) => {
-  const params = new URLSearchParams();
-  if (take) params.append("take", String(take));
-  return api.get(`/v1/trackGroups/mostPlayed?${params}`, { signal });
-};
-
-export function queryMostPlayed(opts: { take?: number }) {
-  return queryOptions({
-    queryKey: ["fetchMostPlayed", opts],
-    queryFn: fetchMostPlayed,
-  });
-}
 const fetchUserPurchases: QueryFunction<
   { results: UserTransaction[] },
   ["fetchUserPurchases", { userId: number | undefined }, ...any]

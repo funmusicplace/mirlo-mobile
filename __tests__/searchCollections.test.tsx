@@ -150,6 +150,21 @@ test("wishlist filter narrows the grid to albums, then tracks", () => {
   ).toBeTruthy();
 });
 
+test("the empty search shows the popular tags and no list links", () => {
+  mockQueries.fetchTags = loaded({ results: [{ tag: "ambient" }] });
+  const { SearchContextProvider } = require("@/state/SearchContext");
+  const Search = require("@/app/search").default;
+  render(
+    <SearchContextProvider>
+      <Search />
+    </SearchContextProvider>,
+  );
+  expect(screen.getByText("Search By Popular Tags")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "ambient" })).toBeTruthy();
+  expect(screen.queryByText("Popular")).toBeNull();
+  expect(screen.queryByText("Most Listened To")).toBeNull();
+});
+
 test("search groups results in the web order", async () => {
   jest.useFakeTimers();
   mockQueries.fetchTags = loaded({ results: [{ tag: "ambient" }] });

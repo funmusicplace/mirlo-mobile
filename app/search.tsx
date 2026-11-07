@@ -6,8 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   SectionList,
-  Platform,
-  Pressable,
   useWindowDimensions,
 } from "react-native";
 import { Result, useSearch } from "@/state/SearchContext";
@@ -22,7 +20,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/constants/colors";
-import { radius, spacing, touchTarget } from "@/constants/spacing";
+import { radius, spacing } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 import Text from "@/components/ThemedText";
 
@@ -160,11 +158,6 @@ export default function SearchPage() {
           ) : (
             <TagPillList>{tagPills}</TagPillList>
           )}
-          <TypeLink label="Popular" pathname="/topSold" />
-          <TypeLink
-            label={t("mobileApp.searchScreen.topListened")}
-            pathname="/mostPlayed"
-          />
         </ScrollView>
       )}
 
@@ -210,34 +203,6 @@ export default function SearchPage() {
   );
 }
 
-function TypeLink({
-  label,
-  pathname,
-}: {
-  label: string;
-  pathname: "/topSold" | "/mostPlayed";
-}) {
-  const router = useRouter();
-  const colors = useColors();
-  return (
-    <Pressable
-      onPress={() => {
-        router.back();
-        router.navigate(pathname);
-      }}
-      accessibilityRole="link"
-      android_ripple={{ color: colors.coverChipBorder }}
-      style={({ pressed }) => [styles.link, pressed && styles.pressed]}
-    >
-      <Text
-        style={[type.body, styles.underline, { color: colors.coverChipText }]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   // Web dialog: 90vw wide, 12 px between its parts
   screen: {
@@ -251,14 +216,6 @@ const styles = StyleSheet.create({
   },
   tagsSpinner: {
     marginVertical: spacing.lg,
-  },
-  link: {
-    alignSelf: "flex-start",
-    minHeight: touchTarget,
-    justifyContent: "center",
-  },
-  underline: {
-    textDecorationLine: "underline",
   },
   // The border separates the card from the overlay in dark mode
   card: {
@@ -277,9 +234,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: spacing.xl,
     paddingHorizontal: RESULT_INSET,
-  },
-  // Android shows the ripple instead
-  pressed: {
-    opacity: Platform.OS === "android" ? 1 : 0.6,
   },
 });

@@ -58,7 +58,7 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `scrim` | Header `Menu` backdrop (`rgba(0,0,0,.5)`) | `rgba(0, 0, 0, 0.5)` | `rgba(0, 0, 0, 0.5)` | Backdrop behind the album purchase dialog |
 | `coverChip` | `Pill variant="cover"` fill: `--mi-black` at 80% | `rgba(17, 17, 17, 0.8)` | `rgba(17, 17, 17, 0.8)` | Chip fill on the search overlay |
 | `coverChipBorder` | `Pill variant="cover"` border: `--mi-white` at 25% | `rgba(255, 255, 255, 0.25)` | `rgba(255, 255, 255, 0.25)` | Chip border and ripples on the search overlay |
-| `coverChipText` | `Pill variant="cover"` text: `--mi-white` | `#ffffff` | `#ffffff` | Chip text, title, labels and links on the search overlay |
+| `coverChipText` | `Pill variant="cover"` text: `--mi-white` | `#ffffff` | `#ffffff` | Chip text, title and labels on the search overlay |
 
 Dark values exist only on mobile, since the web has no system dark mode. They apply the web's dark tint profile (`SITE_THEME_PROFILE.tint.dark` in `client/src/utils/themeVariables.ts`: white at 0.08, 0.18 and 0.35) to a `#111111` background with `#f5f0f0` text, and recompute the web's `color-mix` percentages on that pair. `accent` changes to `#e0607e` in dark because `#BE3455` on `#111111` is 3.4:1. Filled buttons keep `#BE3455` with white text (5.5:1) in both themes.
 
@@ -322,7 +322,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Surface | `bg-black/85`, dialog `min(90vw, 640px)` wide, 10vh from the top, 12 gap | `overlay` fill with a light status bar, top padding the larger of the inset and 10% of the window height, 20 sides, `spacing.md` gap |
 | Header | Title in 20 px semibold white, close button | `SearchHeader`: title in `type.heading` and `coverChipText`, FontAwesome5 `times` at 20 in a 44 pt `HeaderButton` with a `coverChipBorder` ripple |
 | Input | 16.8 px, padding 10 by 40, 1 px border (button color on focus), radius 3, search icon on the left | `SearchInput`: 47 tall, 16.8 text, padding 10 by 40, 1 pt `accent` border, `radius.sm`, FontAwesome5 `search` at 16 in `inputText`, trailing spinner or clear X in a 44 pt slot |
-| Empty query | Type filter radios | "Search by popular" (`type.label`, `coverChipText`), `cover` tag chips, "Popular" and "Top listened" links (`type.body`, underlined, 44 pt) |
+| Empty query | Type filter radios | "Search by popular" (`type.label`, `coverChipText`) and `cover` tag chips |
 | Results | Card on the page background, radius 3, groups with 12 px semibold uppercase headings, 15.2 px rows with 14 px insets, "More results" link | `SectionList` card (`background`, `radius.sm`, 1 pt border). Groups: Tags, Artists, Releases, Tracks. `SearchGroupHeading`: `type.xsmall`, weight 600, uppercase, 0.05em tracking, `secondaryText`. `SearchItem`: `type.listItem`, 44 minimum, "Artist · Title", `tint` pressed fill |
 | No results | 14.4 px centered message, 24 vertical padding | Card with a centered `type.small` message in `secondaryText`, `spacing.xl` vertical padding |
 
@@ -437,7 +437,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Release tags | The web source renders `TrackGroupPills` after the about text, the live World Wore page showed none | The album screen renders its tag chips in the same place |
 | Player and navigation | Player bar, navigation in the header and menu | `Footer` stacks a player row, like the web player strip, over a nav row of three buttons (Recent Releases, Your Collection, Your Wishlist) spread across the width. The nav row is mobile only on purpose, for quick access to the collection and the wishlist. The player row hides on now playing |
 | Now playing | None | Full-screen `now-playing` modal opened from the footer art or title |
-| Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags, two list links and grouped results, without type filters or "More results" |
+| Search | `CommandSearch` with type filters and a "More results" link to the search page | Overlay with popular tags and grouped results, without type filters or "More results" |
 | Login | Email and password, an "or" divider, the email code form and the password reset link | One "Log in with Mirlo" button that signs in on mirlo.space in the system browser, and the sign up link. Purchase and wishlist flows open the same screen |
 | Dark mode | None | Follows the system setting through `useColorScheme()`, with the derived dark tokens |
 | Safe areas | Not applicable | Screen headers pad by the top inset, `Footer` by the bottom inset. Screen `SafeAreaView`s skip the bottom edge on Android through `screenEdges`, because `Footer` already pads it |
