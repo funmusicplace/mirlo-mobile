@@ -13,12 +13,46 @@ jest.mock("@/state/AuthContext", () => ({
   useAuthContext: () => ({ user: null }),
 }));
 
-jest.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// Local strings, so a Transifex token in the env can't change them
+jest.mock("react-i18next", () => {
+  const en = jest.requireActual("@/translation/en.json");
+  const t = (key: string) =>
+    key.split(".").reduce((node, part) => node?.[part], en) ?? key;
+  return { useTranslation: () => ({ t }) };
+});
 
-// The real icon sets state after its font loads, outside act
-jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
+// Web order: no price, pledge, pre-order, zero price, the last four rows pin it
+test.each<[string, Partial<AlbumProps>]>([
+  ["Add to collection", { minPrice: null }],
+  [
+    "Back this project",
+    { minPrice: 500, fundraiser: { isAllOrNothing: true } },
+  ],
+  ["Pre-order", { minPrice: 500, isPreorder: true }],
+  ["Name your price", { minPrice: 0 }],
+  ["Buy", { minPrice: 500 }],
+  ["Add to collection", { minPrice: null, isPreorder: true }],
+  [
+    "Back this project",
+    {
+      minPrice: 0,
+      isPreorder: true,
+      fundraiser: { isAllOrNothing: true },
+    },
+  ],
+  ["Pre-order", { minPrice: 0, isPreorder: true }],
+  ["Name your price", { minPrice: 0, fundraiser: { isAllOrNothing: false } }],
+])("the button reads %s for %j", (label, release) => {
+  render(
+    <AddAlbumButton
+      trackGroup={createMockAlbum(release)}
+      setModalVisible={jest.fn()}
+    />,
+  );
+
+  expect(screen.getByText(label)).toBeTruthy();
+  expect(screen.getByRole("button", { name: label })).toBeTruthy();
+});
 
 test("a signed-out user on a free release is sent to log in", () => {
   const setModalVisible = jest.fn();

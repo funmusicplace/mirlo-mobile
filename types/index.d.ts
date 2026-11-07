@@ -87,7 +87,10 @@ interface AlbumProps {
   tags?: string[];
   trackGroupId: number;
   isGettable?: boolean;
-  minPrice?: number;
+  // In cents, null when the artist set no price
+  minPrice?: number | null;
+  isPreorder?: boolean;
+  fundraiser?: { isAllOrNothing: boolean } | null;
   // The instance it came from, unset for the default one
   apiRoot?: string;
 }

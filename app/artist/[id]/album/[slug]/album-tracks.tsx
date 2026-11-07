@@ -461,13 +461,13 @@ export default function AlbumTracks() {
             style={[styles.modalCard, { backgroundColor: colors.background }]}
           >
             <Button
-              title="Purchase Info"
+              title={t("mobileApp.purchaseInfoModal.purchaseInfo")}
               endIcon={<Ionicons name="open-outline" />}
               onPress={() => handleExternalPurchase(selectedAlbum)}
             />
             <Button
               variant="outlined"
-              title="Close"
+              title={t("common.close")}
               onPress={() => setModalVisible(!modalVisible)}
             />
           </View>

@@ -174,6 +174,7 @@ Borders are 1 pt in `colors.border`, which holds the same value as `tintX` (the 
 | Icon-only button (`onlyIcon`) | `radius.pill`, 30 pt circle | 1 pt `accent` when outlined |
 | Play/pause circle | `radius.pill`, 40 in the footer, 64 on now playing | 1 pt `accent` |
 | Release play button | `radius.pill` | 1 pt `button` (`disabled` without playable tracks) |
+| Release purchase button | `radius.pill` | 1 pt `accent` |
 | Input | `radius.sm` | 1 pt `border`, 1 pt `accent` on the search input |
 | Notice box | `radius.sm` | 4 pt left rule in `alertBorder` |
 | Empty state box | `radius.sm` | 1 pt `tintX` on Collection, none on Wishlist |
@@ -193,6 +194,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | --- | --- | --- |
 | `common/Button.tsx` | `components/Button.tsx` | Matches, with the differences below |
 | `common/Pill.tsx` in `TrackGroup/TrackGroupPills.tsx` | `TagPill` (`tint`, `cover`), `TagPillList` | Matches |
+| `TrackGroup/PurchaseAlbumModal.tsx` | `AddAlbumButton` | Matches the label and its order: "Add to collection" without a price, "Back this project" for an all-or-nothing fundraiser, "Pre-order", "Name your price" at 0, otherwise "Buy". The tap opens the free release dialog, the "Purchase Info" card or the email flow |
 | `Profile/UserNotificationFeed/FilterGroup.tsx` | `FilterGroup`, used by `app/wishlist.tsx` | Matches, without the `overlay` variant, `compact` size and `noMargin` |
 | `Player/index.tsx`, `PlayingTrackDetails.tsx`, `PlayerActions.tsx` | `Footer` | Matches, with the [platform differences](#intentional-platform-differences) |
 | `Header/Header.tsx`, `common/Logo.tsx` | `ScreenHeader`, `HeaderButton`, `BackButton`, `MirloLogo`, `SearchButton`, `MenuButton` | Matches, without the Donate button |
@@ -216,7 +218,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Variant | Web look and use | Mobile `Button` and use |
 | --- | --- | --- |
 | Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in with Mirlo", "Log out", "Play album", purchase modal actions, "Delete account" |
-| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", wishlist and add-to-collection circles |
+| `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", the wishlist circle and the release purchase button |
 | `link` | Button color text, underlined, no padding | `accent` label, underlined, no padding. "Sign up" under the login form |
 | `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page "About" strip button |
 | `dashed`, `pill`, `chip` | Artist management, embed widgets, artist header chips (`ArtistButton`) | Not used on mobile |
@@ -359,7 +361,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 ### Buttons
 
 - One solid `Button` carries the primary action of a screen or form, such as "Log in with Mirlo" or "Play album".
-- `outlined` buttons carry secondary actions beside a solid one, such as "Cancel" next to "Delete account". Album actions (wishlist, add to collection) are outlined `onlyIcon` circles, and share is a solid one.
+- `outlined` buttons carry secondary actions beside a solid one, such as "Cancel" next to "Delete account". On the release page the wishlist heart is an outlined `onlyIcon` circle and share is a solid one. The purchase button is an outlined `rounded` button at the right edge of that row, as on the web.
 - `link` buttons sit inside running text or below a form. `transparent` buttons label a strip or toolbar, and header icons use `HeaderButton`.
 - The release play button is a solid `rounded` button, 70% wide, with a 1 pt `button` border, as "Play album" is on the web.
 - Confirmations follow the web `ConfirmDialog`: a right-aligned row with the outlined cancel first and the solid confirm second, `spacing.sm` apart and 24 above. A destructive action then confirms with `Alert.alert` (`style: "destructive"`). Deleting the account is the exception: `deleteAccount.tsx` opens mirlo.space, which asks for the confirmation. Destructive links use `colors.danger`.
