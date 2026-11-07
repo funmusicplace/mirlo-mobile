@@ -816,7 +816,12 @@
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
     "saveTrackGroupButton": "Save album",
-    "doesNotExist": "This album does not exist or it does not have a public presence."
+    "doesNotExist": "This album does not exist or it does not have a public presence.",
+    "aboutThisTrack": "About this track",
+    "credits": "Credits",
+    "trackPosition": "Track {{position}} of {{count}}",
+    "trackLicense": "License: <licenseLink>{{license}}</licenseLink>",
+    "isrc": "ISRC: {{isrc}}"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

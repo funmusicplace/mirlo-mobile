@@ -119,7 +119,7 @@ Body text uses the system font on both apps. The web stack (`--mi-font-family-st
 | `type.pageTitle` | 32 / 40 | 400 | `h1` at <= 768 px | Page titles: login, tag, collection and wishlist screens |
 | `type.title` | 24 / 26.4 | 600 | Release `h1` in `ItemViewTitle` (fluid, 24 at 390 px) | Release, track and now playing titles |
 | `type.heading` | 20.8 / 28.8 | 400 | `h2` at <= 768 px, `Modal` title | Modal and search titles, in-page headings such as "About", the menu's user name |
-| `type.label` | 16 / 16, uppercase | 400 | `SectionHeader` heading (`h3.h5`) | Section labels such as "RECENT RELEASES", in `colors.accent` |
+| `type.label` | 16 / 16, uppercase | 400 | `SectionHeader` heading (`h3.h5`) | Section labels such as "RECENT RELEASES", in `colors.accent`. The track page's "Lyrics" and "About this track" labels start from it |
 | `type.body` | 16 / 24 | 400 | Body text and paragraphs | Body copy, inputs, button labels, menu links, empty states |
 | `type.small` | 14 / 21 | 400 | `--mi-font-size-small`, artist links | Track titles and index, artist bylines, inline errors, notice messages |
 | `type.caption` | 12.8 / 19.2 | 400 | `<small>` | Release dates, compact button labels |
@@ -138,6 +138,9 @@ Measured elements without a style of their own start from the nearest style:
 | Track row | title 14 on a 28 line, index 14, duration 12 weight 700 | `type.small` for title and index, `type.xsmall` weight 700 for the duration |
 | Player title | 12 / 18, weight 600 | `type.xsmall` with `lineHeight: 18`, `fontWeight: "600"` |
 | Player meta | 10.4 | `fontSize: 10.4` |
+| Track section label | "Lyrics" and "About this track" 16 / 20 uppercase, 0.05em tracking, secondary color. "Credits" 12 / 15 bold, same tracking | `type.label` with `lineHeight: 20` and `letterSpacing: 0.8`, then `type.xsmall` with weight 700, `lineHeight: 15` and `letterSpacing: 0.6`, both in `secondaryText` |
+| Track lyrics | 16 / 26 italic, line breaks kept | `type.body` with `lineHeight: 26` and `fontStyle: "italic"` |
+| Track credits lines | 14 / 20 in the secondary color, 6 between lines, links underlined | `type.small` with `lineHeight: 20` in `secondaryText`, underlined links in the same color |
 
 Web heading defaults at <= 768 px, for elements without a measured value: `h1` 32 / 40, `h2` 20.8 / 28.8, `h3` 19.2, `h4` 20.8, `h5` 19.2 (16 at <= 430 px), `h6` 17.6.
 
@@ -155,6 +158,7 @@ Web heading defaults at <= 768 px, for elements without a measured value: `h1` 3
 | Page title | `type.pageTitle` with `spacing.md` above and below | Profile `h1` (margin 0.7rem 0) |
 | Between sections | `spacing.xxl` (32) | `SectionHeader` top margin (2rem) |
 | Section label | 14 padding above, 10 below, then `spacing.sm` (8) to the content | `SectionHeader`: 0.85rem and 0.65rem padding, 0.25rem margin, plus the grid's 0.25rem top padding |
+| Track page sections | `spacing.xxl` (32) above the first, under a 44 pt track row. Then `spacing.xxl`, a 1 pt `border` rule and `spacing.xl` (24) between sections. `spacing.md` (12) from a label to its content, `spacing.sm` (8) for "Credits" | `TrackSections`: 2.5rem above the first, under a 36 px row. Then 2rem, a 1 px tint-x rule and 1.5rem between sections. 0.75rem from a label to its content, 0.5rem for "Credits" |
 | Tag chip list | `spacing.sm` (8) gap, `spacing.lg` (16) above and below | `TrackGroupPills` |
 | Track row | 44 minimum (`touchTarget`), `gutter` side padding, 28 index box, `spacing.sm` gaps | `TrackRow`: 36 tall, 4 vertical padding, 28 line |
 | Form column | 300 wide and centered, `spacing.lg` (16) side padding, 10% of the window height above | Login page, `--mi-container-small` |
@@ -200,6 +204,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `Header/Header.tsx`, `common/Logo.tsx` | `ScreenHeader`, `HeaderButton`, `BackButton`, `MirloLogo`, `SearchButton`, `MenuButton` | Matches, without the Donate button |
 | `common/SectionHeader.tsx` | `SectionHeader` in `components/ScreenHeader.tsx` | Matches |
 | `common/TrackList/TrackRow.tsx` | `TrackItem` in `PlayPauseWrapper`, `FavoriteTrackButton` | Matches, with 44 pt rows |
+| `TrackGroup/TrackSections.tsx`, `TrackGroup/TrackCredits.tsx` | `TrackSections` in `app/artist/[id]/album/[slug]/tracks/[trackId].tsx` | Matches "Lyrics", "About this track" (plain text) and "Credits": length, place in the release, release date, credited artists with roles, license, ISRC. Without the section links, the purchase button, Flag content, the artist card and the other releases strip |
 | `common/ReleaseCard.tsx` in `TrackgroupGrid` | `TrackGroupItem`, `useGridColumnWidth()`, `CollectionPurchase` | Matches |
 | `common/Box.tsx` | `ErrorNotification` (warning), `CollectionEmpty` (empty state, `bordered` on Collection only) | Matches |
 | `common/Modal.tsx`, `ConfirmDialog.tsx` | Modal routes with `DismissModalBar`, the `deleteAccount.tsx` button row | Matches, with native presentation |
