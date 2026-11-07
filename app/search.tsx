@@ -47,6 +47,7 @@ export default function SearchPage() {
     getOptions,
     setSearchResults,
     searchValue,
+    setSearchValue,
     isSearching,
   } = useSearch();
   const { data: tags, isPending } = useQuery(
@@ -90,6 +91,17 @@ export default function SearchPage() {
   useEffect(() => {
     searchCallbackRef(searchValue);
   }, [searchValue]);
+
+  // Back, swipe and result taps close the overlay too, so reset on unmount
+  useEffect(
+    () => () => {
+      searchCallbackRef.cancel();
+      setSearchValue("");
+      setSearchResults([]);
+      setShowSuggestions(false);
+    },
+    [searchCallbackRef, setSearchValue, setSearchResults, setShowSuggestions],
+  );
 
   const sections = useMemo(
     () =>
