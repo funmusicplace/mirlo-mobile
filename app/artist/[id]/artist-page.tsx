@@ -156,6 +156,7 @@ export default function ArtistPage() {
                 {artistInfo.location ? (
                   <View style={styles.location}>
                     <Ionicons
+                      aria-hidden
                       name="location-outline"
                       size={type.small.fontSize}
                       color={colors.secondaryText}

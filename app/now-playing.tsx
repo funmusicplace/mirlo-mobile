@@ -87,6 +87,8 @@ export default function NowPlaying() {
             </Text>
             <Pressable
               accessibilityRole="link"
+              // Else iOS joins MarqueeText's hidden copies into the label
+              accessibilityLabel={trackGroup?.title}
               android_ripple={{ color: colors.tintX }}
               style={({ pressed }) => [styles.link, pressed && styles.pressed]}
               onPress={() => {
@@ -112,6 +114,7 @@ export default function NowPlaying() {
             </Text>
             <Pressable
               accessibilityRole="link"
+              accessibilityLabel={activeTrack?.artist}
               android_ripple={{ color: colors.tintX }}
               style={({ pressed }) => [styles.link, pressed && styles.pressed]}
               onPress={() => {
