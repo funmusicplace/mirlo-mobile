@@ -181,6 +181,13 @@ test("search groups results in the web order", async () => {
     "Releases",
     "Elec Artist · Elec Album",
   ]);
+  // The website's header search sends the same requests
+  expect(mockGetMany.mock.calls).toEqual([
+    ["/v1/artists", {}, { name: "elec", take: "10" }],
+    ["/v1/trackGroups", {}, { q: "elec", take: "10" }],
+    ["/v1/tracks", {}, { q: "elec", take: "10" }],
+    ["/v1/tags", {}, { tag: "elec", orderBy: "count", take: "10" }],
+  ]);
 
   fireEvent.press(screen.getByLabelText("Clear search"));
   expect(screen.getByText("ambient")).toBeTruthy();
