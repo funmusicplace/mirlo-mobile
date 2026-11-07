@@ -44,16 +44,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/trackGroups/mostPlayed",
-      "sources": ["queries/queries.ts"]
-    },
-    {
-      "method": "GET",
-      "path": "/v1/trackGroups/topSold",
-      "sources": ["queries/queries.ts"]
-    },
-    {
-      "method": "GET",
       "path": "/v1/trackGroups/{param}",
       "sources": ["queries/queries.ts"]
     },

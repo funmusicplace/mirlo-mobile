@@ -198,18 +198,6 @@ export default function RootLayout() {
                       }}
                     />
                     <Stack.Screen
-                      name="mostPlayed"
-                      options={{
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen
-                      name="topSold"
-                      options={{
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen
                       name="wishlist"
                       options={{
                         headerShown: false,
