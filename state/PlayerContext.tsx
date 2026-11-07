@@ -252,8 +252,16 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     ensureTrackPlayerInitialized()
-      .then(() => {
+      .then(async () => {
         console.log("track player set up");
+        // On Android the service outlives a swiped-away activity, so a
+        // relaunch can find a track already playing
+        const track = (await TrackPlayer.getActiveTrack()) as
+          | RNTrack
+          | undefined;
+        if (!track) return;
+        setActiveTrack(track);
+        activeTrackOwnedRef.current = isTrackOwned(track);
       })
       .catch((err) => {
         console.error("Issue setting up Track Player", err);

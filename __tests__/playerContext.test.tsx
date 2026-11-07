@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from "react";
-import { render, act } from "@testing-library/react-native";
+import { render, act, waitFor } from "@testing-library/react-native";
 
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockUser } from "@/__mocks__/mockUser";
@@ -72,5 +72,23 @@ describe("PlayerContextProvider", () => {
     });
 
     expect(mockGet).toHaveBeenCalledWith("/v1/tracks/42/trackPlay", {});
+  });
+
+  test("shows the track that is already playing when the provider mounts", async () => {
+    mockGetActiveTrack.mockResolvedValue(createMockRNTrack({ id: 7 }));
+    const Provider = importProvider();
+    const { usePlayer } = require("@/state/PlayerContext");
+    let seen: { id?: number } | undefined;
+    const Probe = () => {
+      seen = usePlayer().activeTrack;
+      return null;
+    };
+    render(
+      <Provider>
+        <Probe />
+      </Provider>,
+    );
+
+    await waitFor(() => expect(seen).toMatchObject({ id: 7 }));
   });
 });
