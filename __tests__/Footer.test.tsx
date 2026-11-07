@@ -170,3 +170,15 @@ test("the title opens now playing", () => {
     params: { id: 7, slug: "album" },
   });
 });
+
+test("the artist line ends with elapsed and total time, hidden from screen readers", () => {
+  const { rerender } = render(<Footer />);
+  const time = (text: string) =>
+    screen.queryByText(text, { includeHiddenElements: true });
+  expect(time("00:30 / 02:00")).toBeTruthy();
+  // The progress bar already voices the position
+  expect(screen.queryByText("00:30 / 02:00")).toBeNull();
+  mockProgress = { position: 61, duration: 120, buffered: 0 };
+  rerender(<Footer />);
+  expect(time("01:01 / 02:00")).toBeTruthy();
+});

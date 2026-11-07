@@ -24,6 +24,8 @@ import { router, usePathname } from "expo-router";
 import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import MarqueeText from "@/components/MarqueeText";
+import Text from "@/components/ThemedText";
+import { formatTime } from "@/components/TrackItem";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
 import { gutter, radius, spacing } from "@/constants/spacing";
@@ -175,11 +177,16 @@ export default function Footer({ style }: ViewProps) {
               >
                 {title}
               </MarqueeText>
-              <MarqueeText
-                style={[type.cardMeta, { color: colors.secondaryText }]}
-              >
-                {artist}
-              </MarqueeText>
+              <View style={styles.artistRow}>
+                <View style={styles.artist}>
+                  <MarqueeText
+                    style={[type.cardMeta, { color: colors.secondaryText }]}
+                  >
+                    {artist}
+                  </MarqueeText>
+                </View>
+                <FooterTime />
+              </View>
             </View>
           </Pressable>
           <View style={styles.group}>
@@ -295,6 +302,23 @@ function ProgressBar() {
   );
 }
 
+// Its own component so a tick re-renders only the time
+function FooterTime() {
+  const { position, duration } = useProgress();
+  const colors = useColors();
+  return (
+    <Text
+      numberOfLines={1}
+      // The progress bar already reports the position
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[type.cardMeta, styles.time, { color: colors.secondaryText }]}
+    >
+      {`${formatTime(position)} / ${formatTime(duration)}`}
+    </Text>
+  );
+}
+
 function SkipButton({ direction }: { direction: "previous" | "next" }) {
   const colors = useColors();
   const next = direction === "next";
@@ -401,6 +425,19 @@ const styles = StyleSheet.create({
   },
   details: {
     flex: 1,
+  },
+  artistRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  // The marquee gives up width to the time
+  artist: {
+    flex: 1,
+  },
+  time: {
+    flexShrink: 1,
+    fontVariant: ["tabular-nums"],
   },
   group: {
     flexDirection: "row",
