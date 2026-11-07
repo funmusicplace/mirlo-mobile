@@ -215,13 +215,13 @@ The recurring flow once everything's set up is two commands plus filling out the
 
 ### When you can skip the build (JS-only changes) — EAS Update
 
-If the diff touches only JavaScript / assets, push an OTA update instead:
+If the diff touches only JavaScript / assets, an OTA update is enough. Every merge to `main` publishes one to the `production` channel through the [publish-production workflow](.github/workflows/publish-production.yml), and the [preview workflow](.github/workflows/preview.yml) publishes each pull request to a branch of its own. To publish by hand:
 
 ```bash
-eas update --branch production --message "<short description>"
+eas update --channel production --environment production --clear-cache --message "<short description>"
 ```
 
-Existing installs phone home to `expo.updates.url` and pick up the new bundle on next launch. The [preview workflow](.github/workflows/preview.yml) handles the `preview` channel automatically on PR merge; production publishes are manual.
+Without `--environment` the bundle gets no API root or key, and a stale Metro cache can bundle old values, hence `--clear-cache`. Existing installs phone home to `expo.updates.url` and pick up the new bundle on next launch.
 
 **Full rebuild + resubmit *is* required when any of these change:**
 
