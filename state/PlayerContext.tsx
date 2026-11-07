@@ -108,13 +108,15 @@ async function currentAuthorization(): Promise<string | null | undefined> {
   }
 }
 
-function withAuthorization<T extends { headers?: object }>(
-  track: T,
-  authorization: string | null,
-): T {
+function withAuthorization<
+  T extends { headers?: object; trackGroup?: { apiRoot?: string } },
+>(track: T, authorization: string | null): T {
   const headers: Record<string, string> = { ...track.headers };
   delete headers.Authorization;
-  if (authorization) headers.Authorization = authorization;
+  // The session token never leaves this app's own API
+  if (authorization && !track.trackGroup?.apiRoot) {
+    headers.Authorization = authorization;
+  }
   return { ...track, headers };
 }
 
@@ -142,7 +144,10 @@ async function reloadTrackWithCurrentAuthorization(restorePlayback: boolean) {
   reloadingTrack = true;
   try {
     const track = (await TrackPlayer.getActiveTrack()) as RNTrack | undefined;
-    const authorization = await currentAuthorization();
+    // A track from another instance is expected to carry no header
+    const authorization = track?.trackGroup?.apiRoot
+      ? null
+      : await currentAuthorization();
     if (!track || authorization === undefined) return;
 
     const queued = (track.headers as Record<string, string> | undefined)

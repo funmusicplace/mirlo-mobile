@@ -51,14 +51,13 @@ export default function Index() {
   } = useInfiniteQuery({
     // A new source starts the feed over
     queryKey: ["infiniteTrackGroups", instances],
-    queryFn: async ({ pageParam }) => {
-      const params = new URLSearchParams();
-      params.append("skip", String(pageParam));
-      params.append("take", String(PAGE_SIZE));
-      params.append("distinctArtists", "false");
-
+    queryFn: async ({ pageParam: skips }) => {
       const pages = await Promise.allSettled(
-        instances.map(async ({ apiRoot }) => {
+        instances.map(async ({ apiRoot }, index) => {
+          const params = new URLSearchParams();
+          params.append("skip", String(skips[index]));
+          params.append("take", String(PAGE_SIZE));
+          params.append("distinctArtists", "false");
           const { results } = await api.getMany<AlbumProps>(
             `/v1/trackGroups?${params}`,
             { apiRoot },
@@ -69,12 +68,10 @@ export default function Index() {
             : results.map((album) => ({ ...album, apiRoot }));
         }),
       );
-      return mergeReleases(pages, PAGE_SIZE);
+      return mergeReleases(pages, skips, PAGE_SIZE);
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.hasMore ? allPages.length * PAGE_SIZE : null;
-    },
+    initialPageParam: instances.map(() => 0),
+    getNextPageParam: (lastPage) => lastPage.next,
     enabled: loaded,
   });
   const { top } = useSafeAreaInsets();

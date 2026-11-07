@@ -2,8 +2,7 @@
 // NOTE: This hook is currently unused in the app and is slated for removal.
 import { useMemo } from "react";
 import { isEqual } from "lodash";
-import { audioUrl, isTrackOwnedOrPreview } from "@/scripts/utils";
-import { API_KEY } from "@/constants/api-key";
+import { audioHeaders, audioUrl, isTrackOwnedOrPreview } from "@/scripts/utils";
 import { useAuthContext } from "@/state/AuthContext";
 
 export function useProcessedAlbumTracks(
@@ -43,9 +42,7 @@ export function useProcessedAlbumTracks(
         },
         isPreview: track.isPreview,
         order: track.order,
-        headers: {
-          "mirlo-api-key": API_KEY,
-        },
+        headers: audioHeaders(data.result),
       };
 
       allTracks.push(newTrack);

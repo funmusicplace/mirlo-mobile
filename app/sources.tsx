@@ -31,16 +31,13 @@ export default function Sources() {
       style={[styles.screen, { backgroundColor: colors.background }]}
       edges={screenEdges}
     >
-      <DismissModalBar title={t("title", "Sources")} />
+      <DismissModalBar title={t("title")} />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={[type.body, { color: colors.secondaryText }]}>
-          {t(
-            "description",
-            "Recent releases come from every source in this list. You can add any site that runs Mirlo.",
-          )}
+          {t("description")}
         </Text>
         <View>
           {instances.map((instance, index) => (
@@ -59,11 +56,8 @@ export default function Sources() {
                 <Button
                   variant="outlined"
                   size="compact"
-                  title={t("remove", "Remove")}
-                  accessibilityLabel={t("removeLabel", {
-                    name: instance.name,
-                    defaultValue: "Remove {{name}}",
-                  })}
+                  title={t("remove")}
+                  accessibilityLabel={t("removeLabel", { name: instance.name })}
                   onPress={() => removeInstance(instance.apiRoot)}
                 />
               ) : null}
@@ -71,9 +65,7 @@ export default function Sources() {
           ))}
         </View>
         <View>
-          <Text style={styles.label}>
-            {t("addressLabel", "Source address")}
-          </Text>
+          <Text style={styles.label}>{t("addressLabel")}</Text>
           <TextInput
             value={address}
             onChangeText={(text) => {
@@ -82,9 +74,9 @@ export default function Sources() {
             }}
             onSubmitEditing={submit}
             editable={!add.isPending}
-            placeholder={t("addressPlaceholder", "mirlo.example.org")}
+            placeholder={t("addressPlaceholder")}
             placeholderTextColor={colors.inputPlaceholder}
-            accessibilityLabel={t("addressLabel", "Source address")}
+            accessibilityLabel={t("addressLabel")}
             keyboardType="url"
             autoCapitalize="none"
             autoCorrect={false}
@@ -106,13 +98,13 @@ export default function Sources() {
               style={[styles.error, { color: colors.danger }]}
             >
               {add.error.message === "duplicate"
-                ? t("duplicate", "That source is already in the list.")
-                : t("notFound", "Couldn't find a Mirlo site at that address.")}
+                ? t("duplicate")
+                : t("notFound")}
             </Text>
           ) : null}
         </View>
         <Button
-          title={t("add", "Add source")}
+          title={t("add")}
           onPress={submit}
           loading={add.isPending}
           disabled={!address.trim()}

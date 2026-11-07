@@ -15,6 +15,10 @@ export function audioTrackType(
 export const audioUrl = (track: RNTrack, album: AlbumProps) =>
   `${album.apiRoot ?? API_ROOT}${track.audio?.url}`;
 
+// The app key only goes to the default API
+export const audioHeaders = (album: AlbumProps) =>
+  album.apiRoot ? {} : { "mirlo-api-key": API_KEY };
+
 export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
   return {
     title: track.title,
@@ -45,8 +49,7 @@ export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
     isPreview: track.isPreview,
     isFeatured: track.isFeatured,
     order: track.order,
-    // The app key only goes to the default API
-    headers: album.apiRoot ? {} : { "mirlo-api-key": API_KEY },
+    headers: audioHeaders(album),
     type: audioTrackType(track.audio?.url),
   };
 }
@@ -72,6 +75,8 @@ export const isTrackOwnedOrPreview = (
     return false;
   }
   const lookInTrackGroup = trackGroup ?? track.trackGroup;
+  // Ids from another instance never match this user's purchases
+  if (lookInTrackGroup.apiRoot) return false;
   const ownsTrack = lookInTrackGroup.artistId === user.id;
   const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
     (utgp) => utgp.userId === user.id,
@@ -103,6 +108,8 @@ export const isTrackOwned = (
     return false;
   }
   const lookInTrackGroup = trackGroup ?? track.trackGroup;
+  // Ids from another instance never match this user's purchases
+  if (lookInTrackGroup.apiRoot) return false;
 
   // Checks if you are the owner/artist of the track
   const ownsTrack = lookInTrackGroup.artistId === user.id;

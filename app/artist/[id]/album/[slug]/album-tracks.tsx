@@ -193,10 +193,12 @@ export default function AlbumTracks() {
     apiRoot?: string;
   }>();
   const { id, slug } = params;
-  const apiRoot = useKnownApiRoot(params.apiRoot);
-  const { isPending, isError, data, error } = useQuery(
-    queryAlbum({ slug: slug, id: id, apiRoot }),
-  );
+  const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
+  const albumQuery = queryAlbum({ slug: slug, id: id, apiRoot });
+  const { isPending, isError, data, error } = useQuery({
+    ...albumQuery,
+    enabled: ready && albumQuery.enabled,
+  });
   const { setPlayableTracks } = usePlayer();
   const { user } = useAuthContext();
   const [album, setAlbum] = useState<RNTrack[]>();
@@ -229,6 +231,18 @@ export default function AlbumTracks() {
       setPlayableTracks(tracksToPlay);
     }, [data]),
   );
+
+  if (unknown) {
+    return (
+      <View style={styles.screen}>
+        <ErrorNotification
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          error={new Error(t("sources.unknownSource"))}
+        />
+      </View>
+    );
+  }
 
   if (isPending) {
     return (

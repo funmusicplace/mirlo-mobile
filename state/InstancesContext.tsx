@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_ROOT } from "@/constants/api-root";
 import { DEFAULT_INSTANCE, findInstance, Instance } from "@/scripts/instances";
 
 const STORAGE_KEY = "instances";
@@ -72,10 +73,14 @@ export function useInstances() {
 }
 
 // A route param counts only when it names a saved source, so a deep link
-// can't point the app at any host
+// can't point the app at any host. Nothing loads until the saved list is read
 export function useKnownApiRoot(param?: string) {
-  const { instances } = useInstances();
-  return instances.slice(1).some((i) => i.apiRoot === param)
-    ? param
-    : undefined;
+  const { instances, loaded } = useInstances();
+  const known =
+    loaded && (!param || instances.some((i) => i.apiRoot === param));
+  return {
+    apiRoot: known && param !== API_ROOT ? param : undefined,
+    ready: known,
+    unknown: loaded && !known,
+  };
 }

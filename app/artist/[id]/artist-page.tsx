@@ -38,16 +38,26 @@ const TAB_RULE = spacing.xs;
 export default function ArtistPage() {
   const params = useLocalSearchParams<{ id: string; apiRoot?: string }>();
   const { id } = params;
-  const apiRoot = useKnownApiRoot(params.apiRoot);
-  const { data, isError, isPending, error } = useQuery(
-    queryArtist({ artistSlug: String(id) ?? "", apiRoot }),
-  );
+  const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
+  const artistQuery = queryArtist({ artistSlug: String(id) ?? "", apiRoot });
+  const { data, isError, isPending, error } = useQuery({
+    ...artistQuery,
+    enabled: ready && artistQuery.enabled,
+  });
   const { t } = useTranslation("translation");
   const colors = useColors();
   const columnWidth = useGridColumnWidth();
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const contentHeight = useRef(0);
   const aboutHeight = useRef(0);
+
+  if (unknown) {
+    return (
+      <View>
+        <Text>{t("sources.unknownSource")}</Text>
+      </View>
+    );
+  }
 
   if (isPending) {
     return (

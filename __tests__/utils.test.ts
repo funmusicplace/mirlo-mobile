@@ -152,6 +152,20 @@ describe("isTrackOwnedOrPreview", () => {
   });
 });
 
+describe("ownership across instances", () => {
+  test("a user id never matches an artist id from another instance", () => {
+    const track = createMockRNTrack({ isPreview: false });
+    const user = createMockUser({ id: 42 });
+    const album = createMockAlbum({ artistId: 42 });
+    const elsewhere = { ...album, apiRoot: "https://api.mirlo.example.org" };
+
+    expect(isTrackOwnedOrPreview(track, user, album)).toBe(true);
+    expect(isTrackOwnedOrPreview(track, user, elsewhere)).toBe(false);
+    expect(isTrackOwned(track, album, user)).toBe(true);
+    expect(isTrackOwned(track, elsewhere, user)).toBe(false);
+  });
+});
+
 describe("pickFeaturedTrack", () => {
   test("prefers a playable featured track", () => {
     const album = createMockAlbum();

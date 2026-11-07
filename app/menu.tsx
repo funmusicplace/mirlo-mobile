@@ -113,7 +113,7 @@ export default function Menu() {
           />
           <Separator />
           <MenuLink
-            label={t("sources.title", "Sources")}
+            label={t("sources.title")}
             onPress={() => {
               router.back();
               router.push("/sources");

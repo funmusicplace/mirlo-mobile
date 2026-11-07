@@ -56,23 +56,41 @@ function releaseTime({ releaseDate }: AlbumProps) {
   return Number.isNaN(time) ? Number.MAX_SAFE_INTEGER : time;
 }
 
-// One page from every instance, newest first. A failed instance drops out
+// One window from every instance, merged newest first. Each instance's offset
+// advances by the releases taken from its window, so the order holds across
+// pages and a page is never larger than pageSize. A failed instance drops out
 // unless they all failed
 export function mergeReleases(
   pages: PromiseSettledResult<AlbumProps[]>[],
+  skips: number[],
   pageSize: number,
-) {
-  const loaded = pages.flatMap((page) =>
-    page.status === "fulfilled" ? [page.value] : [],
+): { results: AlbumProps[]; next?: number[] } {
+  const windows = pages.map((page) =>
+    page.status === "fulfilled" ? page.value : null,
   );
   const failed = pages.find(
     (page): page is PromiseRejectedResult => page.status === "rejected",
   );
-  if (failed && !loaded.length) throw failed.reason;
+  if (failed && windows.every((window) => window === null)) throw failed.reason;
 
+  const candidates = windows
+    .flatMap((window, source) =>
+      (window ?? []).map((album) => ({ album, source })),
+    )
+    .sort((a, b) => releaseTime(b.album) - releaseTime(a.album));
+  const taken = candidates.slice(0, pageSize);
+  const next = skips.map(
+    (skip, source) => skip + taken.filter((c) => c.source === source).length,
+  );
+  // A full window may have more behind it, a partly used one still has the rest
+  const hasMore = windows.some(
+    (window, source) =>
+      window !== null &&
+      (window.length === pageSize ||
+        next[source] - skips[source] < window.length),
+  );
   return {
-    results: loaded.flat().sort((a, b) => releaseTime(b) - releaseTime(a)),
-    // Offset paging: any instance that filled its page may have more
-    hasMore: loaded.some((results) => results.length === pageSize),
+    results: taken.map((c) => c.album),
+    next: hasMore ? next : undefined,
   };
 }
