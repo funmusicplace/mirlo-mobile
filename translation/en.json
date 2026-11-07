@@ -790,6 +790,7 @@
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "coverForTitle": "Cover for '{{ title }}'",
+    "coverCredit": "Cover art: {{credit}}",
     "viewTrack": "View track",
     "lyrics": "Lyrics",
     "buy": "Buy",
@@ -940,6 +941,10 @@
   },
   "common": {
     "close": "Close"
+  },
+  "playableCover": {
+    "playAlbum": "Play album",
+    "playTrack": "Play track"
   },
   "mobileApp": {
     "searchScreen": {

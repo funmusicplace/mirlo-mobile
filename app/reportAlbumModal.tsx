@@ -82,10 +82,7 @@ export default function ReportAlbumModal() {
       >
         {sent ? (
           <Text accessibilityRole="alert" style={type.body}>
-            {t(
-              "artist.reportContentSuccess",
-              "Successfully reported a problem with this content. We will investigate it.",
-            )}
+            {t("artist.reportContentSuccess")}
           </Text>
         ) : (
           <>
@@ -139,10 +136,7 @@ export default function ReportAlbumModal() {
             accessibilityRole="alert"
             style={[type.small, { color: colors.danger }]}
           >
-            {t(
-              "artist.reportContentError",
-              "An error happened while reporting this content",
-            )}
+            {t("artist.reportContentError")}
           </Text>
         ) : null}
       </ScrollView>

@@ -141,11 +141,7 @@ function AlbumPlayButton() {
   return (
     <Button
       rounded
-      title={
-        playing
-          ? t("clickToPlay.pause", "Pause")
-          : t("playableCover.playAlbum", "Play album")
-      }
+      title={playing ? t("clickToPlay.pause") : t("playableCover.playAlbum")}
       startIcon={
         <Ionicons name={playing ? "pause-outline" : "play-outline"} size={16} />
       }
@@ -360,7 +356,6 @@ export default function AlbumTracks() {
                 <Text style={styles.coverCredit}>
                   {t("trackGroupDetails.coverCredit", {
                     credit: selectedAlbum.coverCredit,
-                    defaultValue: "Cover art: {{credit}}",
                   })}
                 </Text>
               ) : null}

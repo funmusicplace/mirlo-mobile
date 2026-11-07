@@ -58,10 +58,7 @@ export default function Login() {
             {t("logIn")}
           </Text>
           <Text style={[styles.description, { color: colors.secondaryText }]}>
-            {t(
-              "description",
-              "You'll log in on mirlo.space, then return to the app.",
-            )}
+            {t("description")}
           </Text>
           {signInError && (
             <ErrorNotification
@@ -72,7 +69,7 @@ export default function Login() {
           )}
 
           <Button
-            title={t("logInWithMirlo", "Log in with Mirlo")}
+            title={t("logInWithMirlo")}
             onPress={handleLogIn}
             loading={signingIn}
             fullWidth
