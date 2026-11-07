@@ -20,7 +20,7 @@ import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
 import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useInstances } from "@/state/InstancesContext";
-import { mergeReleases } from "@/scripts/instances";
+import { dedupeReleases, mergeReleases } from "@/scripts/instances";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as api from "../queries/fetch/fetchWrapper";
 import { API_ROOT } from "@/constants/api-root";
@@ -75,7 +75,7 @@ export default function Index() {
     enabled: loaded,
   });
   const { top } = useSafeAreaInsets();
-  const trackGroups = data?.pages.flatMap((page) => page.results) || [];
+  const trackGroups = data ? dedupeReleases(data.pages) : [];
   const [showError, setShowError] = useState<boolean>(true);
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const columnWidth = useGridColumnWidth();
@@ -167,10 +167,7 @@ export default function Index() {
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
         data={trackGroups}
-        // The index keeps a release that moved between offset pages unique
-        keyExtractor={(item, index) =>
-          `${item.apiRoot ?? ""}-${item.id}-${index}`
-        }
+        keyExtractor={(item) => `${item.apiRoot ?? ""}-${item.id}`}
         renderItem={({ item }) => (
           <TrackGroupItem {...item} width={columnWidth} />
         )}

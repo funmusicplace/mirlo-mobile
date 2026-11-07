@@ -12,6 +12,7 @@ const BUTTON_SIZE = 28;
 type FavoriteTrackButtonProps = {
   track: {
     id: number;
+    trackGroup?: { apiRoot?: string };
   };
 };
 
@@ -44,6 +45,9 @@ export default function FavoriteTrackButton({
   if (!user) {
     return null;
   }
+
+  // Another instance's track ids mean nothing to this user's favorites
+  if (track.trackGroup?.apiRoot) return null;
 
   return (
     <HeaderButton

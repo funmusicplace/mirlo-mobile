@@ -2,6 +2,7 @@ import { createMockAlbum } from "@/__mocks__/mockAlbum";
 import {
   DEFAULT_INSTANCE,
   candidateApiRoots,
+  dedupeReleases,
   findInstance,
   mergeReleases,
   normalizeUrl,
@@ -192,6 +193,32 @@ describe("mergeReleases", () => {
         2,
       ),
     ).toThrow(offline);
+  });
+});
+
+describe("dedupeReleases", () => {
+  test("keeps the first copy of a release and the same id from another instance", () => {
+    const elsewhere = createMockAlbum({
+      id: 1,
+      apiRoot: "https://api.mirlo.example.org",
+    });
+
+    const releases = dedupeReleases([
+      { results: [createMockAlbum({ id: 1 })] },
+      {
+        results: [
+          createMockAlbum({ id: 1 }),
+          createMockAlbum({ id: 2 }),
+          elsewhere,
+        ],
+      },
+    ]);
+
+    expect(releases.map(({ id, apiRoot }) => [id, apiRoot])).toEqual([
+      [1, undefined],
+      [2, undefined],
+      [1, "https://api.mirlo.example.org"],
+    ]);
   });
 });
 

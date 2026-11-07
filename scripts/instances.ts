@@ -94,3 +94,17 @@ export function mergeReleases(
     next: hasMore ? next : undefined,
   };
 }
+
+// Offset pages can repeat a release that moved between them, so the feed keeps
+// the first copy of each
+export function dedupeReleases(pages: { results: AlbumProps[] }[]) {
+  const seen = new Set<string>();
+  return pages.flatMap((page) =>
+    page.results.filter((album) => {
+      const key = `${album.apiRoot ?? ""}-${album.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }),
+  );
+}

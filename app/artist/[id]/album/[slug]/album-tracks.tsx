@@ -433,20 +433,22 @@ export default function AlbumTracks() {
               </View>
             ) : null}
             {tagPills?.length ? <TagPillList>{tagPills}</TagPillList> : null}
-            <Button
-              variant="link"
-              size="compact"
-              accessibilityRole="link"
-              title={t("artist.flagContent")}
-              onPress={() =>
-                router.push({
-                  pathname: "/reportAlbumModal",
-                  params: { trackGroupId: selectedAlbum.id },
-                })
-              }
-              style={styles.flag}
-              textStyle={[styles.flagText, { color: colors.secondaryText }]}
-            />
+            {isOtherInstance ? null : (
+              <Button
+                variant="link"
+                size="compact"
+                accessibilityRole="link"
+                title={t("artist.flagContent")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/reportAlbumModal",
+                    params: { trackGroupId: selectedAlbum.id },
+                  })
+                }
+                style={styles.flag}
+                textStyle={[styles.flagText, { color: colors.secondaryText }]}
+              />
+            )}
           </View>
         }
       />
