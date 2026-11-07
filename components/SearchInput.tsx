@@ -56,7 +56,12 @@ export default function SearchInput() {
         ]}
       />
       <View pointerEvents="none" style={styles.searchIcon}>
-        <FontAwesome5 name="search" size={ICON_SIZE} color={colors.inputText} />
+        <FontAwesome5
+          aria-hidden
+          name="search"
+          size={ICON_SIZE}
+          color={colors.inputText}
+        />
       </View>
       {isSearching ? (
         <ActivityIndicator color={colors.accent} style={styles.trailing} />

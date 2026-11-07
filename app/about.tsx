@@ -53,6 +53,8 @@ function AboutColumn({
         <Pressable
           key={link.url}
           accessibilityRole="link"
+          // Else iOS reads the glyph first, as ", Instagram"
+          accessibilityLabel={link.label}
           onPress={() => onLinkPress(link.url)}
           android_ripple={{ color: colors.tintX }}
           style={({ pressed }) => [
