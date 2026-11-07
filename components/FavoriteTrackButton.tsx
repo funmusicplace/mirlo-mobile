@@ -3,11 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/state/AuthContext";
 import * as api from "../queries/fetch/fetchWrapper";
-import { HeaderButton } from "@/components/ScreenHeader";
-import { useColors } from "@/constants/colors";
-
-// Web track row options button
-const BUTTON_SIZE = 28;
+import Button from "@/components/Button";
 
 type FavoriteTrackButtonProps = {
   track: {
@@ -20,7 +16,6 @@ export default function FavoriteTrackButton({
   track,
 }: FavoriteTrackButtonProps) {
   const { user, refreshLoggedInUser } = useAuthContext();
-  const colors = useColors();
   const { t } = useTranslation("translation");
   const [isInFavorites, setIsInFavorites] = useState(
     !!user?.trackFavorites?.find((w) => w.trackId === track.id),
@@ -49,21 +44,18 @@ export default function FavoriteTrackButton({
   // Another instance's track ids mean nothing to this user's favorites
   if (track.trackGroup?.apiRoot) return null;
 
+  // Looks like WishlistButton: the web wishlists tracks and releases with one heart
   return (
-    <HeaderButton
-      size={BUTTON_SIZE}
+    <Button
+      variant="outlined"
+      onlyIcon
+      startIcon={<Ionicons name={isInFavorites ? "heart" : "heart-outline"} />}
       onPress={onPress}
       accessibilityLabel={
         isInFavorites
-          ? t("wishlist.removeFromFavorites")
-          : t("wishlist.addToFavorites")
+          ? t("wishlist.removeFromWishlist")
+          : t("wishlist.addToWishlist")
       }
-    >
-      <Ionicons
-        name={isInFavorites ? "star" : "star-outline"}
-        color={colors.accent}
-        size={16}
-      />
-    </HeaderButton>
+    />
   );
 }
