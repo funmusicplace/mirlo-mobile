@@ -21,6 +21,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, usePathname } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import MarqueeText from "@/components/MarqueeText";
@@ -45,24 +46,25 @@ const NAV_ITEMS = [
   {
     route: "/",
     icon: "home",
-    label: "Recent Releases",
-    hint: "Navigates to recent releases",
+    label: "mobileApp.footer.recentReleases",
+    hint: "mobileApp.footer.recentReleasesHint",
   },
   {
     route: "/collections",
     icon: "music-box-multiple",
-    label: "Your Collection",
-    hint: "Navigates to your collection page",
+    label: "mobileApp.footer.yourCollection",
+    hint: "mobileApp.footer.yourCollectionHint",
   },
   {
     route: "/wishlist",
     icon: "heart",
-    label: "Your Wishlist",
-    hint: "Navigates to your wishlist page",
+    label: "mobileApp.footer.yourWishlist",
+    hint: "mobileApp.footer.yourWishlistHint",
   },
 ] as const;
 
 export default function Footer({ style }: ViewProps) {
+  const { t } = useTranslation("translation");
   const insets = useSafeAreaInsets();
   const { activeTrack } = usePlayer();
   const pathname = usePathname();
@@ -119,8 +121,8 @@ export default function Footer({ style }: ViewProps) {
             key={route}
             style={styles.navButton}
             onPress={() => navigate(route)}
-            accessibilityLabel={label}
-            accessibilityHint={hint}
+            accessibilityLabel={t(label)}
+            accessibilityHint={t(hint)}
             accessibilityState={{ selected: active }}
           >
             {icon === "music-box-multiple" ? (
@@ -314,7 +316,7 @@ function FooterTime() {
       importantForAccessibility="no-hide-descendants"
       style={[type.cardMeta, styles.time, { color: colors.secondaryText }]}
     >
-      {`${formatTime(position)} / ${formatTime(duration)}`}
+      {formatTime(position)} / {formatTime(duration)}
     </Text>
   );
 }

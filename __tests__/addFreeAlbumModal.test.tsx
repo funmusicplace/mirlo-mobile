@@ -54,8 +54,16 @@ jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 // Local strings, so a Transifex token in the env can't change them
 jest.mock("react-i18next", () => {
   const en = jest.requireActual("@/translation/en.json");
+  // Transifex serves the website's wording for this key, which opens with "Or,"
+  const web: Record<string, string> = {
+    "trackGroupCard.addAlbumToCollection":
+      "Or, add {{ title }} to your collection",
+  };
   const t = (key: string, vars: Record<string, string> = {}) => {
-    const text = key.split(".").reduce((node, part) => node?.[part], en) ?? key;
+    const text =
+      web[key] ??
+      key.split(".").reduce((node, part) => node?.[part], en) ??
+      key;
     return text.replace(
       /\{\{\s*(\w+)\s*\}\}/g,
       (_: string, name: string) => vars[name],

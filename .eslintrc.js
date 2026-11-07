@@ -21,5 +21,20 @@ module.exports = {
           "Put the text in translation/en.json, t() takes the key and options only",
       },
     ],
+    // Bare text in JSX has to come from t(), string props are out of scope
+    "react/jsx-no-literals": [
+      "error",
+      {
+        noStrings: true,
+        ignoreProps: true,
+        allowedStrings: ["·", "/", "(", ")", "•", "-", ":"],
+      },
+    ],
   },
+  overrides: [
+    {
+      files: ["stories/**", "**/*.stories.*", "__tests__/**"],
+      rules: { "react/jsx-no-literals": "off" },
+    },
+  ],
 };

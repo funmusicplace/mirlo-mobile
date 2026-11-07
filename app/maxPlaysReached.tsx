@@ -6,6 +6,7 @@ import { usePlayer } from "@/state/PlayerContext";
 import { useColors } from "@/constants/colors";
 import { useAuthContext } from "@/state/AuthContext";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
 import Text from "@/components/ThemedText";
@@ -15,6 +16,7 @@ import { type } from "@/constants/typography";
 
 export default function MaxPlaysReached() {
   const colors = useColors();
+  const { t } = useTranslation("translation");
   const { activeTrack } = usePlayer();
   const { user } = useAuthContext();
   const [isEmailSent, setIsEmailSent] = useState<boolean>(false);
@@ -41,17 +43,23 @@ export default function MaxPlaysReached() {
       edges={screenEdges}
     >
       <DismissModalBar
-        title={`You are out of free plays for the track "${activeTrack?.title ?? ""}"`}
+        title={t("mobileApp.maxPlaysReached.title", {
+          title: activeTrack?.title ?? "",
+        })}
       />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.intro}>
-          Buy this {activeTrack?.allowIndividualSale ? "track" : "album"} to:
+          {activeTrack?.allowIndividualSale
+            ? t("mobileApp.maxPlaysReached.buyThisTrackTo")
+            : t("mobileApp.maxPlaysReached.buyThisAlbumTo")}
         </Text>
         <View style={styles.list}>
           {[
-            `Support ${activeTrack?.artist}`,
-            "Get unlimited streaming",
-            "Get high quality downloads",
+            t("mobileApp.emailPurchaseInfoModal.support", {
+              artist: activeTrack?.artist ?? "",
+            }),
+            t("mobileApp.emailPurchaseInfoModal.unlimitedStreaming"),
+            t("mobileApp.emailPurchaseInfoModal.highQualityDownloads"),
           ].map((text) => (
             <Text key={text} style={type.body}>
               • {text}
@@ -61,13 +69,17 @@ export default function MaxPlaysReached() {
 
         {!user && (
           <Text style={styles.callout}>
-            Log In or Sign Up for Purchase Info!
+            {t("mobileApp.emailPurchaseInfoModal.logInOrSignUp")}
           </Text>
         )}
 
         {user && (
           <Button
-            title={isEmailSent ? "Email Sent!" : "Email Purchase Info"}
+            title={
+              isEmailSent
+                ? t("mobileApp.emailPurchaseInfoModal.emailSent")
+                : t("mobileApp.emailPurchaseInfoModal.emailPurchaseInfo")
+            }
             startIcon={
               isEmailSent ? <Ionicons name="checkmark-sharp" /> : undefined
             }
