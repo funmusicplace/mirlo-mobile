@@ -691,10 +691,27 @@ index b2409a0..45c794d 100644
      }
  }
 diff --git a/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt b/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
-index afa6b0f..008f184 100644
+index afa6b0f..1264b77 100644
 --- a/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
 +++ b/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
-@@ -739,9 +739,25 @@ class MusicService : HeadlessJsTaskService() {
+@@ -94,9 +94,15 @@ class MusicService : HeadlessJsTaskService() {
+     private var compactCapabilities: List<Capability> = emptyList()
+ 
+     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
++        // Null intent: a sticky restart after process death, where startForeground throws on Android 12+
++        if (intent == null) {
++            stopSelf()
++            return START_NOT_STICKY
++        }
+         startTask(getTaskConfig(intent))
+         startAndStopEmptyNotificationToAvoidANR()
+-        return START_STICKY
++        // The player dies with the process, so a restart has nothing to resume
++        return START_NOT_STICKY
+     }
+ 
+     /**
+@@ -739,9 +745,25 @@ class MusicService : HeadlessJsTaskService() {
          return bundle
      }
  
@@ -721,7 +738,7 @@ index afa6b0f..008f184 100644
              ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
              ?.emit(event, data?.let { Arguments.fromBundle(it) })
      }
-@@ -751,7 +767,7 @@ class MusicService : HeadlessJsTaskService() {
+@@ -751,7 +773,7 @@ class MusicService : HeadlessJsTaskService() {
          val payload = Arguments.createArray()
          data.forEach { payload.pushMap(Arguments.fromBundle(it)) }
  
