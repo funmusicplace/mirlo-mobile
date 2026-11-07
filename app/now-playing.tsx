@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Image,
@@ -21,6 +22,7 @@ import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
+import { coverSize } from "@/scripts/utils";
 
 export default function NowPlaying() {
   const { activeTrack } = usePlayer();
@@ -30,6 +32,10 @@ export default function NowPlaying() {
   const colors = useColors();
   const trackGroup = activeTrack?.trackGroup;
   const linkStyle = [type.small, { color: colors.accent }];
+  // Measured so the cover leaves room for everything under it
+  const [area, setArea] = useState<{ width: number; height: number }>();
+  const [rest, setRest] = useState(0);
+  const side = area && coverSize(area.width - 2 * gutter, area.height, rest);
 
   return (
     <SafeAreaView
@@ -37,104 +43,129 @@ export default function NowPlaying() {
       edges={screenEdges}
     >
       <DismissModalBar />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        onLayout={(e) => setArea(e.nativeEvent.layout)}
+      >
         <Image
           source={{
             uri: trackGroup?.cover.sizes[1200] ?? trackGroup?.cover.sizes[600],
           }}
           style={{
-            width: "100%",
+            width: side ?? "100%",
             aspectRatio: 1,
+            alignSelf: "center",
             backgroundColor: colors.tint,
           }}
           resizeMode="cover"
         />
-        <Slider
-          style={styles.slider}
-          value={progress.position}
-          minimumValue={0}
-          maximumValue={progress.duration}
-          thumbTintColor="transparent"
-          minimumTrackTintColor={colors.accent}
-          maximumTrackTintColor={colors.track}
-          onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
-          accessibilityLabel="Track progress"
-          accessibilityValue={{
-            text: `${formatTime(progress.position)} of ${formatTime(progress.duration)}`,
-          }}
-        />
-        <View style={styles.times}>
-          <Text
-            style={[type.xsmall, styles.time, { color: colors.secondaryText }]}
-          >
-            {formatTime(progress.position)}
-          </Text>
-          <Text
-            style={[type.xsmall, styles.time, { color: colors.secondaryText }]}
-          >
-            {formatTime(progress.duration)}
-          </Text>
-        </View>
-        <View style={styles.details}>
-          <MarqueeText style={type.title} accessibilityRole="header">
-            {activeTrack?.title}
-          </MarqueeText>
-          <View style={styles.meta}>
-            <Text style={[type.small, { color: colors.secondaryText }]}>
-              {t("trackGroupDetails.fromAlbum")
-                .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                .trim() + " "}
-            </Text>
-            <Pressable
-              accessibilityRole="link"
-              // Else iOS joins MarqueeText's hidden copies into the label
-              accessibilityLabel={trackGroup?.title}
-              android_ripple={{ color: colors.tintX }}
-              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
-              onPress={() => {
-                router.dismiss(1);
-                router.navigate({
-                  pathname: "/artist/[id]/album/[slug]/album-tracks",
-                  params: {
-                    id: String(trackGroup?.artistId),
-                    slug: String(trackGroup?.urlSlug),
-                    apiRoot: trackGroup?.apiRoot,
-                  },
-                });
-              }}
+        <View
+          style={styles.rest}
+          onLayout={(e) => setRest(e.nativeEvent.layout.height)}
+        >
+          <Slider
+            style={styles.slider}
+            value={progress.position}
+            minimumValue={0}
+            maximumValue={progress.duration}
+            thumbTintColor="transparent"
+            minimumTrackTintColor={colors.accent}
+            maximumTrackTintColor={colors.track}
+            onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
+            accessibilityLabel="Track progress"
+            accessibilityValue={{
+              text: `${formatTime(progress.position)} of ${formatTime(progress.duration)}`,
+            }}
+          />
+          <View style={styles.times}>
+            <Text
+              style={[
+                type.xsmall,
+                styles.time,
+                { color: colors.secondaryText },
+              ]}
             >
-              <MarqueeText style={linkStyle}>
-                {trackGroup?.title || t("playableCover.untitled")}
-              </MarqueeText>
-            </Pressable>
-          </View>
-          <View style={styles.meta}>
-            <Text style={[type.small, { color: colors.secondaryText }]}>
-              {t("trackGroupDetails.byArtist")
-                .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                .trim() + " "}
+              {formatTime(progress.position)}
             </Text>
-            <Pressable
-              accessibilityRole="link"
-              accessibilityLabel={activeTrack?.artist}
-              android_ripple={{ color: colors.tintX }}
-              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
-              onPress={() => {
-                router.dismiss(1);
-                router.navigate({
-                  pathname: "/artist/[id]/artist-page",
-                  params: {
-                    id: String(trackGroup?.artistId),
-                    apiRoot: trackGroup?.apiRoot,
-                  },
-                });
-              }}
+            <Text
+              style={[
+                type.xsmall,
+                styles.time,
+                { color: colors.secondaryText },
+              ]}
             >
-              <MarqueeText style={linkStyle}>{activeTrack?.artist}</MarqueeText>
-            </Pressable>
+              {formatTime(progress.duration)}
+            </Text>
           </View>
+          <View style={styles.details}>
+            <MarqueeText style={type.title} accessibilityRole="header">
+              {activeTrack?.title}
+            </MarqueeText>
+            <View style={styles.meta}>
+              <Text style={[type.small, { color: colors.secondaryText }]}>
+                {t("trackGroupDetails.fromAlbum")
+                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
+                  .trim() + " "}
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                // Else iOS joins MarqueeText's hidden copies into the label
+                accessibilityLabel={trackGroup?.title}
+                android_ripple={{ color: colors.tintX }}
+                style={({ pressed }) => [
+                  styles.link,
+                  pressed && styles.pressed,
+                ]}
+                onPress={() => {
+                  router.dismiss(1);
+                  router.navigate({
+                    pathname: "/artist/[id]/album/[slug]/album-tracks",
+                    params: {
+                      id: String(trackGroup?.artistId),
+                      slug: String(trackGroup?.urlSlug),
+                      apiRoot: trackGroup?.apiRoot,
+                    },
+                  });
+                }}
+              >
+                <MarqueeText style={linkStyle}>
+                  {trackGroup?.title || t("playableCover.untitled")}
+                </MarqueeText>
+              </Pressable>
+            </View>
+            <View style={styles.meta}>
+              <Text style={[type.small, { color: colors.secondaryText }]}>
+                {t("trackGroupDetails.byArtist")
+                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
+                  .trim() + " "}
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={activeTrack?.artist}
+                android_ripple={{ color: colors.tintX }}
+                style={({ pressed }) => [
+                  styles.link,
+                  pressed && styles.pressed,
+                ]}
+                onPress={() => {
+                  router.dismiss(1);
+                  router.navigate({
+                    pathname: "/artist/[id]/artist-page",
+                    params: {
+                      id: String(trackGroup?.artistId),
+                      apiRoot: trackGroup?.apiRoot,
+                    },
+                  });
+                }}
+              >
+                <MarqueeText style={linkStyle}>
+                  {activeTrack?.artist}
+                </MarqueeText>
+              </Pressable>
+            </View>
+          </View>
+          <Player style={styles.controls} />
         </View>
-        <Player style={styles.controls} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -146,6 +177,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: gutter,
+  },
+  rest: {
     paddingBottom: spacing.xl,
   },
   slider: {

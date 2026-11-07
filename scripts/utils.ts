@@ -164,3 +164,11 @@ export const releaseMeta = (
   ]
     .filter(Boolean)
     .join(" · ");
+
+const MIN_COVER = 120;
+
+// The cover fills the width unless the rest of the screen needs the height,
+// then it shrinks in whole points so a fraction can't make the screen scroll
+export function coverSize(width: number, height: number, rest: number) {
+  return Math.min(width, Math.max(Math.floor(height - rest), MIN_COVER));
+}
