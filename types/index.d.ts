@@ -118,6 +118,10 @@ interface RNTrack {
     trackId?: number;
     order?: number;
   }[];
+  lyrics?: string | null;
+  description?: string | null;
+  isrc?: string | null;
+  license?: { short?: string; name: string; link?: string | null } | null;
   allowIndividualSale: boolean;
   url: string;
   id: number;

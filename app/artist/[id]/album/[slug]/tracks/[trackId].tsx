@@ -19,14 +19,16 @@ import {
   audioHeaders,
   audioTrackType,
   audioUrl,
-  linkifyUrls,
+  creditedArtists,
   trackGroupUrl,
+  trackMeta,
 } from "@/scripts/utils";
-import { useState, useEffect, useCallback } from "react";
+import { openOnWeb } from "@/scripts/openInBrowser";
+import { formatTime } from "@/components/TrackItem";
+import { Fragment, useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import Markdown from "@/components/Markdown";
 import ErrorNotification from "@/components/ErrorNotification";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
@@ -37,7 +39,7 @@ import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
-import { markdownHeadings, type } from "@/constants/typography";
+import { type } from "@/constants/typography";
 import { useKnownApiRoot } from "@/state/InstancesContext";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
@@ -157,12 +159,6 @@ export default function TrackView() {
     color: colors.accent,
     textDecorationLine: "underline" as const,
   };
-  const markdownStyles = {
-    ...markdownHeadings,
-    body: { ...type.body, color: colors.text },
-    paragraph: { marginTop: 0, marginBottom: spacing.md },
-    link: linkStyle,
-  };
 
   return (
     <SafeAreaView
@@ -264,14 +260,13 @@ export default function TrackView() {
           </View>
         }
         ListFooterComponent={
-          data.result.about ? (
-            <View style={styles.footer}>
-              <Markdown style={markdownStyles}>
-                {linkifyUrls(
-                  data.result.about.replace(/([^\n])\n([^\n])/g, "$1 $2"),
-                )}
-              </Markdown>
-            </View>
+          filteredTrack ? (
+            <TrackSections
+              track={filteredTrack}
+              album={data.result}
+              releaseDate={releaseDate}
+              apiRoot={apiRoot}
+            />
           ) : null
         }
       />
@@ -387,6 +382,110 @@ function TrackPlayButton() {
   );
 }
 
+// The web's Lyrics, About this track and Credits sections
+function TrackSections({
+  track,
+  album,
+  releaseDate,
+  apiRoot,
+}: {
+  track: RNTrack;
+  album: AlbumProps;
+  releaseDate?: string;
+  apiRoot?: string;
+}) {
+  const { t } = useTranslation();
+  const colors = useColors();
+  const muted = { color: colors.secondaryText };
+  const underlined = { ...muted, textDecorationLine: "underline" as const };
+  const credit = [styles.credit, muted];
+  const divider = [styles.divider, { borderTopColor: colors.border }];
+  const { license } = track;
+  const licenseLink = license?.link;
+  const meta = trackMeta(
+    track.audio?.duration ? formatTime(track.audio.duration) : undefined,
+    track.order,
+    album.tracks?.length ?? 0,
+    releaseDate,
+    t,
+  );
+
+  return (
+    <View style={styles.footer}>
+      {track.lyrics ? (
+        <View>
+          <Text accessibilityRole="header" style={[styles.sectionTitle, muted]}>
+            {t("trackGroupDetails.lyrics")}
+          </Text>
+          <Text style={styles.lyrics}>{track.lyrics}</Text>
+        </View>
+      ) : null}
+      {track.description ? (
+        <View style={track.lyrics ? divider : undefined}>
+          <Text accessibilityRole="header" style={[styles.sectionTitle, muted]}>
+            {t("trackGroupDetails.aboutThisTrack")}
+          </Text>
+          <Text style={type.body}>{track.description}</Text>
+        </View>
+      ) : null}
+      <View style={track.lyrics || track.description ? divider : undefined}>
+        <Text accessibilityRole="header" style={[styles.creditsTitle, muted]}>
+          {t("trackGroupDetails.credits")}
+        </Text>
+        <View style={styles.credits}>
+          {meta ? <Text style={credit}>{meta}</Text> : null}
+          <Text style={credit}>
+            {creditedArtists(track, album).map((artist, index) => (
+              <Fragment key={`${artist.artistName}-${artist.order ?? 0}`}>
+                {index > 0 ? ", " : null}
+                {artist.artistId ? (
+                  <Link
+                    href={{
+                      pathname: "/artist/[id]/artist-page",
+                      params: { id: artist.artistId, apiRoot },
+                    }}
+                    style={underlined}
+                  >
+                    {artist.artistName}
+                  </Link>
+                ) : (
+                  artist.artistName
+                )}
+                {artist.role ? ` (${artist.role})` : null}
+              </Fragment>
+            ))}
+          </Text>
+          {license && license.short !== "copyright" ? (
+            <Text style={credit}>
+              <Trans
+                t={t}
+                i18nKey="trackGroupDetails.trackLicense"
+                values={{ license: license.name }}
+                components={{
+                  licenseLink: licenseLink ? (
+                    <Text
+                      accessibilityRole="link"
+                      style={underlined}
+                      onPress={() => openOnWeb(licenseLink)}
+                    />
+                  ) : (
+                    <Text style={muted} />
+                  ),
+                }}
+              />
+            </Text>
+          ) : null}
+          {track.isrc ? (
+            <Text style={credit}>
+              {t("trackGroupDetails.isrc", { isrc: track.isrc })}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function formatReleaseDate(utcDate: string | undefined, t: TFunction) {
   if (!utcDate) return undefined;
   const date = new Date(utcDate);
@@ -442,9 +541,45 @@ const styles = StyleSheet.create({
     width: "70%",
     borderWidth: 1,
   },
+  // Web sections: 2.5rem above the first, 4 px under a 36 px row
   footer: {
     paddingHorizontal: gutter + spacing.sm,
-    paddingTop: spacing.lg,
+    paddingTop: spacing.xxl,
     paddingBottom: spacing.xxl,
+  },
+  // Web: 2rem margin, a rule, then 1.5rem padding between sections
+  divider: {
+    marginTop: spacing.xxl,
+    paddingTop: spacing.xl,
+    borderTopWidth: 1,
+  },
+  // Web section label: uppercase with 0.05em tracking
+  sectionTitle: {
+    ...type.label,
+    lineHeight: 20,
+    letterSpacing: type.label.fontSize * 0.05,
+    marginBottom: spacing.md,
+  },
+  creditsTitle: {
+    ...type.xsmall,
+    lineHeight: 15,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: type.xsmall.fontSize * 0.05,
+    marginBottom: spacing.sm,
+  },
+  // Web: 16 italic on a 26 line
+  lyrics: {
+    ...type.body,
+    lineHeight: 26,
+    fontStyle: "italic",
+  },
+  // Web gap-1.5 between the lines
+  credits: {
+    gap: 6,
+  },
+  credit: {
+    ...type.small,
+    lineHeight: 20,
   },
 });

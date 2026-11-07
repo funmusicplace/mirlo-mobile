@@ -165,6 +165,46 @@ export const releaseMeta = (
     .filter(Boolean)
     .join(" · ");
 
+// The web's credits line: length, place in the release and release date
+export const trackMeta = (
+  length: string | undefined,
+  order: number,
+  trackCount: number,
+  date: string | undefined,
+  t: TFunction,
+) =>
+  [
+    length,
+    trackCount > 1
+      ? t("trackGroupDetails.trackPosition", {
+          position: order,
+          count: trackCount,
+        })
+      : undefined,
+    date,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+type Credit = NonNullable<RNTrack["trackArtists"]>[number];
+
+// The web's credit list: the release artist leads unless the track names them
+export function creditedArtists(track: RNTrack, album: AlbumProps): Credit[] {
+  const credits = (track.trackArtists ?? [])
+    .map((credit) => ({ ...credit, artistName: credit.artistName?.trim() }))
+    .filter((credit) => credit.artistName)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const lead = album.artist;
+  const named = credits.some((credit) =>
+    credit.artistId
+      ? credit.artistId === lead.id
+      : credit.artistName?.toLowerCase() === lead.name.trim().toLowerCase(),
+  );
+  return named
+    ? credits
+    : [{ artistName: lead.name, artistId: lead.id }, ...credits];
+}
+
 const MIN_COVER = 120;
 
 // The cover fills the width unless the rest of the screen needs the height,

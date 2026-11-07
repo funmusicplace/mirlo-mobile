@@ -1,12 +1,14 @@
 import {
   audioTrackType,
   coverSize,
+  creditedArtists,
   textAroundTag,
   isTrackOwned,
   isTrackOwnedOrPreview,
   pickFeaturedTrack,
   releaseMeta,
   trackGroupUrl,
+  trackMeta,
 } from "@/scripts/utils";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
@@ -230,6 +232,65 @@ describe("releaseMeta", () => {
   test("leaves the count off a release without tracks", () => {
     expect(releaseMeta(past, 0, t)).toBe("Released on November 3, 2026");
     expect(releaseMeta(undefined, 0, t)).toBe("");
+  });
+});
+
+describe("trackMeta", () => {
+  const t = i18n.getFixedT("en");
+  const past = t("trackGroupDetails.pastRelease", { date: "November 3, 2026" });
+
+  test("puts the length, the place in the release and the date on one line, like the web", () => {
+    expect(trackMeta("03:12", 1, 3, past, t)).toBe(
+      "03:12 · Track 1 of 3 · Released on November 3, 2026",
+    );
+  });
+
+  test("leaves out the place in a one-track release and any part the track lacks", () => {
+    expect(trackMeta("02:08", 1, 1, past, t)).toBe(
+      "02:08 · Released on November 3, 2026",
+    );
+    expect(trackMeta(undefined, 2, 5, undefined, t)).toBe("Track 2 of 5");
+    expect(trackMeta(undefined, 1, 0, undefined, t)).toBe("");
+  });
+});
+
+describe("creditedArtists", () => {
+  const artist = createMockArtist({ id: 7, name: "Midwinter" });
+  const album = createMockAlbum({ artist, artistId: 7 });
+
+  test("credits the release artist when the track names nobody", () => {
+    const track = createMockRNTrack({ trackArtists: [] });
+    expect(creditedArtists(track, album)).toEqual([
+      { artistName: "Midwinter", artistId: 7 },
+    ]);
+  });
+
+  test("lists the credits by order, blank names dropped, without repeating the release artist", () => {
+    const track = createMockRNTrack({
+      trackArtists: [
+        { artistName: "Guest", role: "Vocals", order: 1 },
+        { artistName: " midwinter ", order: 0 },
+        { artistName: "", role: "Lil Blurr Q", order: 2 },
+      ],
+    });
+    expect(creditedArtists(track, album).map((a) => a.artistName)).toEqual([
+      "midwinter",
+      "Guest",
+    ]);
+  });
+
+  test("puts the release artist ahead of guests, and matches a credit by id first", () => {
+    const track = createMockRNTrack({
+      trackArtists: [{ artistName: "Guest", artistId: 9, order: 0 }],
+    });
+    expect(creditedArtists(track, album).map((a) => a.artistName)).toEqual([
+      "Midwinter",
+      "Guest",
+    ]);
+    const renamed = createMockRNTrack({
+      trackArtists: [{ artistName: "Another name", artistId: 7 }],
+    });
+    expect(creditedArtists(renamed, album)).toHaveLength(1);
   });
 });
 
