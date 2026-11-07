@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Markdown from "@/components/Markdown";
+import ReadMore from "@/components/ReadMore";
 import React, { type ReactNode, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";
@@ -295,18 +296,29 @@ export default function ArtistPage() {
                   { backgroundColor: colors.button },
                 ]}
               >
-                <Markdown
-                  style={{
-                    body: { ...type.body, color: colors.buttonText },
-                    paragraph: { marginTop: 0, marginBottom: spacing.md },
-                    link: {
-                      color: colors.buttonText,
-                      textDecorationLine: "underline",
-                    },
-                  }}
+                <ReadMore
+                  color={colors.buttonText}
+                  moreKey="mobileApp.artistPage.readMore"
+                  lessKey="mobileApp.artistPage.showLess"
                 >
-                  {linkifyUrls(announcement)}
-                </Markdown>
+                  <Markdown
+                    style={{
+                      body: {
+                        ...type.body,
+                        color: colors.buttonText,
+                        // Keeps the last paragraph's margin out of ReadMore's measure
+                        marginBottom: -spacing.md,
+                      },
+                      paragraph: { marginTop: 0, marginBottom: spacing.md },
+                      link: {
+                        color: colors.buttonText,
+                        textDecorationLine: "underline",
+                      },
+                    }}
+                  >
+                    {linkifyUrls(announcement)}
+                  </Markdown>
+                </ReadMore>
               </View>
             ) : null}
             <View style={styles.identity}>
@@ -477,11 +489,8 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     textTransform: "uppercase",
   },
-  // The last paragraph's margin makes up the rest of the bottom padding
   announcement: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xs,
+    padding: spacing.lg,
   },
   // Web tab: 26.4 from the label top to the rule, kept with the 22.4 line
   tab: {

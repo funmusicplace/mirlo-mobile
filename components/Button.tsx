@@ -1,6 +1,7 @@
 import { cloneElement, isValidElement, ReactNode } from "react";
 import {
   AccessibilityRole,
+  AccessibilityState,
   ActivityIndicator,
   GestureResponderEvent,
   Platform,
@@ -34,6 +35,7 @@ export type ButtonProps = {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   accessibilityRole?: AccessibilityRole;
+  accessibilityState?: AccessibilityState;
 };
 
 const BORDER_WIDTH = 1;
@@ -77,6 +79,7 @@ export default function Button({
   accessibilityLabel,
   accessibilityHint,
   accessibilityRole = "button",
+  accessibilityState,
 }: ButtonProps) {
   const colors = useColors();
   const { paddingVertical, paddingHorizontal, text } = sizes[size];
@@ -84,6 +87,7 @@ export default function Button({
   const isLink = variant === "link";
   const isOutlined = variant === "outlined";
   const inactive = !!disabled || !!loading;
+  const state = { ...accessibilityState, disabled: inactive, busy: !!loading };
 
   let color = disabled ? colors.disabled : colors.accent;
   if (isSolid) color = disabled ? colors.inactive : colors.buttonText;
@@ -115,7 +119,7 @@ export default function Button({
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel ?? title}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: inactive, busy: !!loading }}
+      accessibilityState={state}
       // Foreground, or a stale backgroundColor stays until a press
       android_ripple={{ color: colors.tintX, foreground: true }}
       style={({ pressed }) => [

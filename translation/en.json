@@ -364,8 +364,6 @@
     "editLocation": "Edit location",
     "saveLocation": "Save location",
     "cancel": "Cancel",
-    "readMore": "Read more",
-    "readLess": "Read less",
     "configurePayment": "Configure payment processor",
     "howMuch": "Your subscription amount",
     "mustBeAtLeast": "Must be at least {{minAmount}}",
@@ -982,7 +980,9 @@
     },
     "artistPage": {
       "error": "Error: {{message}}",
-      "noAlbums": "No Albums Present!"
+      "noAlbums": "No Albums Present!",
+      "readMore": "Read more",
+      "showLess": "Show less"
     },
     "deleteAccount": {
       "intro": "Review the impact below. You'll finish on mirlo.space, which asks you to confirm before it deletes the account.",
