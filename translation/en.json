@@ -77,7 +77,8 @@
     "about": "About",
     "admin": "Admin",
     "label": "Label",
-    "fulfillment": "Order fulfillment"
+    "fulfillment": "Order fulfillment",
+    "menu": "Menu"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
@@ -378,13 +379,6 @@
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
-  },
-  "clickToPlay": {
-    "untitled": "Untitled",
-    "goToAlbum": "Go to album",
-    "goToTrack": "Go to track",
-    "play": "Play",
-    "pause": "Pause"
   },
   "post": {
     "edit": "Edit",
@@ -952,12 +946,28 @@
     "people": "The people doing it "
   },
   "common": {
+    "dismiss": "Dismiss",
     "close": "Close"
   },
   "playableCover": {
+    "play": "Play",
+    "pause": "Pause",
     "playAlbum": "Play album",
     "playTrack": "Play track",
     "untitled": "Untitled"
+  },
+  "player": {
+    "nextTrack": "Play next track",
+    "loopMusic": "Loop music",
+    "loopingTrack": "Looping current track",
+    "loopingQueue": "Looping queue",
+    "shuffleMusic": "Shuffle music"
+  },
+  "pageTitles": {
+    "search": "Search"
+  },
+  "setup": {
+    "back": "Back"
   },
   "mobileApp": {
     "purchaseInfoModal": {
@@ -1017,6 +1027,17 @@
       "title": "You are out of free plays for the track \"{{title}}\"",
       "buyThisTrackTo": "Buy this track to:",
       "buyThisAlbumTo": "Buy this album to:"
+    },
+    "accessibility": {
+      "previousTrack": "Previous track",
+      "trackProgress": "Track progress",
+      "trackProgressValue": "{{elapsed}} of {{total}}",
+      "repeatOff": "Off",
+      "clearSearch": "Clear search",
+      "opensNowPlaying": "Opens now playing",
+      "opensMenu": "Opens the menu page",
+      "opensSearch": "Opens the search bar",
+      "scrollsToTop": "Scrolls to the top"
     }
   },
   "sources": {

@@ -1,12 +1,14 @@
 import Feather from "@expo/vector-icons/Feather";
 import { usePlayer } from "@/state/PlayerContext";
 import TrackPlayer from "react-native-track-player";
+import { useTranslation } from "react-i18next";
 import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
 import { touchTarget } from "@/constants/spacing";
 
 export default function ShuffleButton() {
   const { shuffled, setShuffled } = usePlayer();
+  const { t } = useTranslation("translation");
   const colors = useColors();
 
   const onPress = async () => {
@@ -102,7 +104,7 @@ export default function ShuffleButton() {
   return (
     <HeaderButton
       size={touchTarget}
-      accessibilityLabel="Shuffle"
+      accessibilityLabel={t("player.shuffleMusic")}
       accessibilityState={{ selected: shuffled }}
       onPress={onPress}
     >

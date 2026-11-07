@@ -100,7 +100,7 @@ export default function PlayFeaturedButton({
       disabled={loading}
       accessibilityRole="button"
       accessibilityLabel={
-        showPause ? t("clickToPlay.pause") : t("clickToPlay.play")
+        showPause ? t("playableCover.pause") : t("playableCover.play")
       }
     >
       <View style={[styles.circle, { backgroundColor: colors.button }]}>

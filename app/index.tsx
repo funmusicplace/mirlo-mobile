@@ -16,7 +16,7 @@ import ScreenHeader, {
   HeaderButton,
   SectionHeader,
 } from "@/components/ScreenHeader";
-import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
+import MirloLogo, { LOGO_LABEL, LOGO_SIZE } from "@/components/MirloLogo";
 import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useInstances } from "@/state/InstancesContext";
@@ -135,8 +135,8 @@ export default function Index() {
         left={
           <HeaderButton
             size={LOGO_SIZE}
-            accessibilityLabel="Mirlo"
-            accessibilityHint="Scrolls to the top"
+            accessibilityLabel={LOGO_LABEL}
+            accessibilityHint={t("mobileApp.accessibility.scrollsToTop")}
             onPress={() =>
               listRef.current?.scrollToOffset({ offset: 0, animated: true })
             }

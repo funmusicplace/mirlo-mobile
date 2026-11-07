@@ -1,6 +1,7 @@
 import { Platform, Pressable, StyleSheet, View, ViewProps } from "react-native";
 import { usePlayer } from "@/state/PlayerContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 import NextButton from "./NextButton";
 import PrevButton from "./PrevButton";
 import LoopButton from "./LoopButton";
@@ -26,6 +27,7 @@ export default function Player({ style }: ViewProps) {
 
 function PlayerPlayButton() {
   const { playbackState, isPlaying } = usePlayer();
+  const { t } = useTranslation("translation");
   const colors = useColors();
   const playing = playbackState.state === State.Buffering || isPlaying;
 
@@ -52,7 +54,9 @@ function PlayerPlayButton() {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={playing ? "Pause" : "Play"}
+      accessibilityLabel={
+        playing ? t("playableCover.pause") : t("playableCover.play")
+      }
       android_ripple={{
         color: colors.tintX,
         borderless: true,

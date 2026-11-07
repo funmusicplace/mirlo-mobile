@@ -1,12 +1,14 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Svg, { Rect } from "react-native-svg";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { HeaderButton } from "@/components/ScreenHeader";
 import { useAuthContext } from "@/state/AuthContext";
 import { useColors } from "@/constants/colors";
 
 export default function MenuButton() {
   const router = useRouter();
+  const { t } = useTranslation("translation");
   const colors = useColors();
   const { user } = useAuthContext();
   return (
@@ -14,8 +16,8 @@ export default function MenuButton() {
       onPress={() => {
         router.push("/menu");
       }}
-      accessibilityLabel="Menu button"
-      accessibilityHint="Opens the menu page"
+      accessibilityLabel={t("headerMenu.menu")}
+      accessibilityHint={t("mobileApp.accessibility.opensMenu")}
     >
       {user ? (
         // The web's signed-in menu glyph

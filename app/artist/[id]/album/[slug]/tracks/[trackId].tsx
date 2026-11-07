@@ -366,7 +366,7 @@ function TrackPlayButton() {
   return (
     <Button
       rounded
-      title={playing ? t("clickToPlay.pause") : t("playableCover.playTrack")}
+      title={playing ? t("playableCover.pause") : t("playableCover.playTrack")}
       startIcon={
         <Ionicons name={playing ? "pause-outline" : "play-outline"} size={16} />
       }

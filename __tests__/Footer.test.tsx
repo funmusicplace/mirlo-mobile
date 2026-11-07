@@ -192,6 +192,18 @@ test("the title opens now playing", () => {
   });
 });
 
+test("the player row carries translated labels and hints", () => {
+  const { rerender } = render(<Footer />);
+  const title = screen.getByLabelText("Song, Band");
+  expect(title.props.accessibilityHint).toBe("Opens now playing");
+  for (const name of ["Previous track", "Play next track", "Play"]) {
+    expect(screen.getByRole("button", { name })).toBeTruthy();
+  }
+  mockPlayer = { ...mockPlayer, isPlaying: true };
+  rerender(<Footer />);
+  expect(screen.getByRole("button", { name: "Pause" })).toBeTruthy();
+});
+
 test("the artist line ends with elapsed and total time, hidden from screen readers", () => {
   const { rerender } = render(<Footer />);
   const time = (text: string) =>

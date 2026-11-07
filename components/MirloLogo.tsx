@@ -2,6 +2,8 @@ import Svg, { Path } from "react-native-svg";
 import { useColors } from "@/constants/colors";
 
 export const LOGO_SIZE = 32;
+// The product name, so it has no translation key
+export const LOGO_LABEL = "Mirlo";
 
 const CIRCLE =
   "M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0Z";
@@ -15,7 +17,7 @@ export default function MirloLogo({ size = LOGO_SIZE }: { size?: number }) {
       width={size}
       height={size}
       viewBox="0 0 40 40"
-      accessibilityLabel="Mirlo"
+      accessibilityLabel={LOGO_LABEL}
       accessibilityRole="image"
     >
       <Path d={CIRCLE} fill={colors.accent} />

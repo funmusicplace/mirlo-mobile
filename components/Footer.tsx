@@ -161,7 +161,7 @@ export default function Footer({ style }: ViewProps) {
             onPress={openNowPlaying}
             accessibilityRole="button"
             accessibilityLabel={`${title}, ${artist}`}
-            accessibilityHint="Opens now playing"
+            accessibilityHint={t("mobileApp.accessibility.opensNowPlaying")}
             // Foreground so the ripple draws over the cover
             android_ripple={{ color: colors.border, foreground: true }}
             style={({ pressed }) => [styles.info, pressed && styles.pressed]}
@@ -224,6 +224,7 @@ function FooterButton({
 }
 
 function ProgressBar() {
+  const { t } = useTranslation("translation");
   const { position, duration } = useProgress();
   const colors = useColors();
   const width = useRef(0);
@@ -277,7 +278,7 @@ function ProgressBar() {
       onResponderTerminate={() => setScrub(null)}
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel="Track progress"
+      accessibilityLabel={t("mobileApp.accessibility.trackProgress")}
       // A zero range reads as "NaN" in VoiceOver
       accessibilityValue={
         max > 0
@@ -322,6 +323,7 @@ function FooterTime() {
 }
 
 function SkipButton({ direction }: { direction: "previous" | "next" }) {
+  const { t } = useTranslation("translation");
   const colors = useColors();
   const next = direction === "next";
 
@@ -335,7 +337,11 @@ function SkipButton({ direction }: { direction: "previous" | "next" }) {
 
   return (
     <FooterButton
-      accessibilityLabel={next ? "Next track" : "Previous track"}
+      accessibilityLabel={
+        next
+          ? t("player.nextTrack")
+          : t("mobileApp.accessibility.previousTrack")
+      }
       onPress={onPress}
     >
       <MaterialIcons
@@ -349,6 +355,7 @@ function SkipButton({ direction }: { direction: "previous" | "next" }) {
 
 function FooterPlayButton() {
   const { playbackState, isPlaying } = usePlayer();
+  const { t } = useTranslation("translation");
   const colors = useColors();
   const playing = playbackState.state === State.Buffering || isPlaying;
 
@@ -376,7 +383,9 @@ function FooterPlayButton() {
 
   return (
     <FooterButton
-      accessibilityLabel={playing ? "Pause" : "Play"}
+      accessibilityLabel={
+        playing ? t("playableCover.pause") : t("playableCover.play")
+      }
       onPress={() => onPress(playbackState)}
     >
       <View style={[styles.playCircle, { borderColor: colors.accent }]}>

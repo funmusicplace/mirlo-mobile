@@ -69,7 +69,7 @@ export default function SearchInput() {
         <Pressable
           onPress={clear}
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t("mobileApp.accessibility.clearSearch")}
           android_ripple={{
             color: colors.tintX,
             borderless: true,

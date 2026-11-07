@@ -26,7 +26,7 @@ export default function SearchHeader({ style }: ViewProps) {
         </Text>
         <HeaderButton
           size={touchTarget}
-          accessibilityLabel="Close"
+          accessibilityLabel={t("common.close")}
           // Light ripple on the dark overlay
           android_ripple={{
             color: colors.coverChipBorder,
