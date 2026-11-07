@@ -53,6 +53,9 @@ export type Result = {
 
 export const SearchContext = createContext<SearchContextType | null>(null);
 
+// The website's header search takes ten matches per group
+const TAKE = "10";
+
 export const SearchContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
@@ -63,27 +66,28 @@ export const SearchContextProvider: React.FC<{
   const { t } = useTranslation();
 
   async function getOptions(searchString: string) {
+    const term = searchString.trim();
     const artists = await api.getMany<Artist>(
       `/v1/artists`,
       {},
-      { name: searchString.trim() },
+      { name: term, take: TAKE },
     );
+    // q matches the title or the artist name
     const trackGroups = await api.getMany<AlbumProps>(
       `/v1/trackGroups`,
       {},
-      { title: searchString.trim() },
+      { q: term, take: TAKE },
     );
     const tracks = await api.getMany<RNTrack>(
       `/v1/tracks`,
       {},
-      { title: searchString.trim() },
+      { q: term, take: TAKE },
     );
     const tags = await api.getMany<Tag>(
       `/v1/tags`,
       {},
-      { tag: searchString.trim(), orderBy: "count" },
+      { tag: term, orderBy: "count", take: TAKE },
     );
-    console.log(tags);
     const results = [
       ...artists.results.map((r, rid) => ({
         firstInCategory: rid === 0,
