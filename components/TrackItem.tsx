@@ -117,9 +117,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
+  // Starts on the gutter, matching the heart's margin on the right
   index: {
     width: INDEX_WIDTH,
-    textAlign: "center",
+    textAlign: "left",
   },
   titles: {
     flex: 1,

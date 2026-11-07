@@ -287,7 +287,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | | Web `TrackRow` at phone width | Mobile `TrackItem` |
 | --- | --- | --- |
 | Size | 36 tall: 4 vertical padding, 28 line height | 44 minimum, `gutter` side padding, `spacing.sm` gaps |
-| Index | 14 px in a 28 box, play glyph on hover, pause glyph while playing | `type.small`, centered in a 28 box |
+| Index | 14 px in a 28 box, play glyph on hover, pause glyph while playing | `type.small`, left-aligned in a 28 box. The trailing heart has no web counterpart, so the gutter balances the row instead of the web's centered digit |
 | Title | 14, co-authors after it | `type.small`, wraps, contributors below in `type.xsmall` and `secondaryText` |
 | Trailing | Duration 12 bold, 28 px options menu (wishlist, links, embed, lyrics, download) | Duration in `type.xsmall` weight 700, then the wishlist heart when signed in: the release's outlined `onlyIcon` `Button` (30 pt circle, Ionicons `heart` at 16 in `accent`, "Add to wishlist" or "Remove from wishlist") |
 | States | Playing: weight 600. Not playable: opacity 0.6. Hover: tint-x fill | Playing: title in `accent`, weight 600. Not playable: opacity 0.6 and disabled. Pressed: opacity 0.6 on iOS, `tintX` ripple on Android |
