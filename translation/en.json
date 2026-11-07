@@ -742,11 +742,14 @@
     "socialBlueSky": "{{username}} on BlueSky",
     "aboutHeading": "Mirlo",
     "about": "About us",
+    "documentation": "Documentation",
     "contact": "Contact us",
     "connectHeading": "Connect",
     "legalHeading": "Legal",
     "terms": "Terms and conditions",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "cookies": "Our use of cookies",
+    "content": "Content policy"
   },
   "notifications": {
     "notifications": "Notifications",

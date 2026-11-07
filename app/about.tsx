@@ -51,7 +51,7 @@ function AboutColumn({
       ) : null}
       {links.map((link) => (
         <Pressable
-          key={link.url}
+          key={link.label}
           accessibilityRole="link"
           onPress={() => onLinkPress(link.url)}
           android_ripple={{ color: colors.tintX }}
@@ -86,12 +86,21 @@ export default function About() {
   const aboutLinks: AboutLinkInfo[] = [
     { label: "mirlo.space", url: "https://mirlo.space" },
     { label: t("footer.about"), url: "https://docs.mirlo.space" },
+    { label: t("footer.documentation"), url: "https://docs.mirlo.space" },
     { label: t("footer.contact"), url: "mailto:hi@mirlo.space" },
   ];
 
   const legalLinks: AboutLinkInfo[] = [
     { label: t("footer.terms"), url: "https://mirlo.space/pages/terms" },
     { label: t("footer.privacy"), url: "https://mirlo.space/pages/privacy" },
+    {
+      label: t("footer.cookies"),
+      url: "https://mirlo.space/pages/cookie-policy",
+    },
+    {
+      label: t("footer.content"),
+      url: "https://mirlo.space/pages/content-policy",
+    },
   ];
 
   const connectLinks: AboutLinkInfo[] = [
