@@ -261,7 +261,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Pressed | Hover only | Opacity 0.6 on iOS. On Android a ripple in `border`: borderless (radius 22) on the buttons, bounded over the art and title, which are one button |
 | Extras | `PlayerActions`: floating wishlist, support and buy buttons. Loop and shuffle hide at <= 576 px | None |
 
-`app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the cover at window width minus 2 x `gutter`, a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28.
+`app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the centered cover at the container width minus 2 x `gutter`, or smaller so the rest of the screen fits without scrolling (`coverSize`, 120 pt at the least, below that the screen scrolls), a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28.
 
 ### Screen header
 

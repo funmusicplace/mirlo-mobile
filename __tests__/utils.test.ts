@@ -1,5 +1,7 @@
 import {
   audioTrackType,
+  coverSize,
+  textAroundTag,
   isTrackOwned,
   isTrackOwnedOrPreview,
   pickFeaturedTrack,
@@ -228,5 +230,21 @@ describe("releaseMeta", () => {
   test("leaves the count off a release without tracks", () => {
     expect(releaseMeta(past, 0, t)).toBe("Released on November 3, 2026");
     expect(releaseMeta(undefined, 0, t)).toBe("");
+  });
+});
+
+describe("coverSize", () => {
+  test("fills the width, shrinks to fit the rest under it, stops at the floor", () => {
+    expect(coverSize(688, 942.5, 298.5)).toBe(644);
+    expect(coverSize(424, 780, 298)).toBe(424);
+    expect(coverSize(688, 400, 298)).toBe(120);
+  });
+});
+
+describe("textAroundTag", () => {
+  test("keeps the words around a link placeholder", () => {
+    expect(textAroundTag("from <albumLink>{{album}}</albumLink>")).toBe("from");
+    expect(textAroundTag("<albumLink>{{album}}</albumLink> から")).toBe("から");
+    expect(textAroundTag("by {{artist}}")).toBe("by {{artist}}");
   });
 });
