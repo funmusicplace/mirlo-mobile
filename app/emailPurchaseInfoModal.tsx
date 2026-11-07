@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as api from "../queries/fetch/fetchWrapper";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/state/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Button from "@/components/Button";
@@ -15,6 +16,7 @@ import { type } from "@/constants/typography";
 
 export default function EmailPurchaseInfoModal() {
   const colors = useColors();
+  const { t } = useTranslation("translation");
   const { trackGroupId, artist, trackGroupTitle } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthContext();
@@ -43,12 +45,18 @@ export default function EmailPurchaseInfoModal() {
     >
       <DismissModalBar />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.intro}>Buy {trackGroupTitle} to:</Text>
+        <Text style={styles.intro}>
+          {t("mobileApp.emailPurchaseInfoModal.buyTo", {
+            title: trackGroupTitle ?? "",
+          })}
+        </Text>
         <View style={styles.list}>
           {[
-            `Support ${artist}`,
-            "Get unlimited streaming",
-            "Get high quality downloads",
+            t("mobileApp.emailPurchaseInfoModal.support", {
+              artist: artist ?? "",
+            }),
+            t("mobileApp.emailPurchaseInfoModal.unlimitedStreaming"),
+            t("mobileApp.emailPurchaseInfoModal.highQualityDownloads"),
           ].map((text) => (
             <Text key={text} style={type.body}>
               • {text}
@@ -58,7 +66,7 @@ export default function EmailPurchaseInfoModal() {
 
         {!user && (
           <Button
-            title="Log In or Sign Up for Purchase Info!"
+            title={t("mobileApp.emailPurchaseInfoModal.logInOrSignUp")}
             accessibilityRole="link"
             onPress={() => router.push("/login")}
             fullWidth
@@ -67,7 +75,11 @@ export default function EmailPurchaseInfoModal() {
         )}
         {user && (
           <Button
-            title={isEmailSent ? "Email Sent!" : "Email Purchase Info"}
+            title={
+              isEmailSent
+                ? t("mobileApp.emailPurchaseInfoModal.emailSent")
+                : t("mobileApp.emailPurchaseInfoModal.emailPurchaseInfo")
+            }
             startIcon={
               isEmailSent ? <Ionicons name="checkmark-sharp" /> : undefined
             }

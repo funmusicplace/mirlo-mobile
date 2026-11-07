@@ -473,3 +473,5 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Mobile | `components/Button.tsx`, `components/TagPill.tsx`, `components/Footer.tsx` | Colors and sizes from tokens only, 44 pt targets through computed `hitSlop` or a fixed 44 pt wrapper, an Android ripple with an iOS fallback, and labels, roles and states on every control. |
 
 Before committing UI changes, run `npx eslint . --ext .ts,.tsx`. The baseline is 0 errors, and UI changes add none.
+
+Text typed straight into JSX fails `react/jsx-no-literals`: put it in `translation/en.json` and read it through `t()`. The rule checks JSX children only, so string props such as `accessibilityLabel` and `title` need `t()` by hand.

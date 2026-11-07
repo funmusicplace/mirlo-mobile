@@ -965,6 +965,58 @@
     },
     "searchScreen": {
       "searchByPopular": "Search By Popular Tags"
+    },
+    "addFreeAlbumModal": {
+      "title": "Add {{ title }} to your collection"
+    },
+    "artistPage": {
+      "error": "Error: {{message}}",
+      "noAlbums": "No Albums Present!"
+    },
+    "deleteAccount": {
+      "intro": "Review the impact below. You'll finish on mirlo.space, which asks you to confirm before it deletes the account.",
+      "whatHappensNext": "What happens next",
+      "permanent": "This permanently deletes your Mirlo account and logs you out of the app.",
+      "artistProfiles_one": "This account has {{count}} artist profile.",
+      "artistProfiles_other": "This account has {{count}} artist profiles.",
+      "activeSubscriptions_one": "This account has {{count}} active artist subscription.",
+      "activeSubscriptions_other": "This account has {{count}} active artist subscriptions.",
+      "musicPurchases_one": "This account has {{count}} music purchase.",
+      "musicPurchases_other": "This account has {{count}} music purchases.",
+      "merchPurchases_one": "This account has {{count}} merch purchase.",
+      "merchPurchases_other": "This account has {{count}} merch purchases.",
+      "cannotBeUndone": "This action cannot be undone.",
+      "accountSummary": "Account summary",
+      "summaryArtistProfiles": "Artist profiles: {{count}}",
+      "summaryArtistSubscriptions": "Artist subscriptions: {{count}}",
+      "summaryMusicPurchases": "Music purchases: {{count}}",
+      "summaryMerchPurchases": "Merch purchases: {{count}}"
+    },
+    "emailPurchaseInfoModal": {
+      "buyTo": "Buy {{title}} to:",
+      "support": "Support {{artist}}",
+      "unlimitedStreaming": "Get unlimited streaming",
+      "highQualityDownloads": "Get high quality downloads",
+      "logInOrSignUp": "Log In or Sign Up for Purchase Info!",
+      "emailPurchaseInfo": "Email Purchase Info",
+      "emailSent": "Email Sent!"
+    },
+    "errorNotification": {
+      "connectionIssue": "Connection Issue",
+      "unableToConnect": "Unable to connect. Check your internet and try again."
+    },
+    "footer": {
+      "recentReleases": "Recent Releases",
+      "recentReleasesHint": "Navigates to recent releases",
+      "yourCollection": "Your Collection",
+      "yourCollectionHint": "Navigates to your collection page",
+      "yourWishlist": "Your Wishlist",
+      "yourWishlistHint": "Navigates to your wishlist page"
+    },
+    "maxPlaysReached": {
+      "title": "You are out of free plays for the track \"{{title}}\"",
+      "buyThisTrackTo": "Buy this track to:",
+      "buyThisAlbumTo": "Buy this album to:"
     }
   },
   "sources": {

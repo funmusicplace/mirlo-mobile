@@ -181,7 +181,9 @@ export default function ArtistPage() {
   if (isError) {
     return (
       <View>
-        <Text>Error: {error.message} </Text>
+        <Text>
+          {t("mobileApp.artistPage.error", { message: error.message })}
+        </Text>
       </View>
     );
   }
@@ -274,7 +276,7 @@ export default function ArtistPage() {
           <Text
             style={[type.body, styles.empty, { color: colors.secondaryText }]}
           >
-            No Albums Present!
+            {t("mobileApp.artistPage.noAlbums")}
           </Text>
         }
         ListHeaderComponent={

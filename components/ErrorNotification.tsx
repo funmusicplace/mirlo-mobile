@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Pressable, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Text from "@/components/ThemedText";
@@ -20,6 +21,7 @@ const ErrorNotification = ({
   error,
 }: ErrorNotificationProps) => {
   const colors = useColors();
+  const { t } = useTranslation("translation");
   if (!visible) return null;
 
   const offline = error.message === "Network request failed";
@@ -38,11 +40,13 @@ const ErrorNotification = ({
       >
         <View style={styles.content}>
           <Text style={styles.title}>
-            {offline ? "Connection Issue" : error.name}
+            {offline
+              ? t("mobileApp.errorNotification.connectionIssue")
+              : error.name}
           </Text>
           <Text style={styles.message}>
             {offline
-              ? "Unable to connect. Check your internet and try again."
+              ? t("mobileApp.errorNotification.unableToConnect")
               : error.message}
           </Text>
         </View>

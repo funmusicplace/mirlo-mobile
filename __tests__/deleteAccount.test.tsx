@@ -38,6 +38,22 @@ jest.mock("@/components/DismissModalBar", () => {
   };
 });
 
+// Real i18next on the local strings: a Transifex token in the env can't
+// change them and plurals resolve
+jest.mock("react-i18next", () => {
+  const i18n = jest.requireActual("i18next").createInstance();
+  i18n.init({
+    lng: "en",
+    resources: {
+      en: { translation: jest.requireActual("@/translation/en.json") },
+    },
+    interpolation: { escapeValue: false },
+    showSupportNotice: false,
+  });
+  const t = i18n.t.bind(i18n);
+  return { useTranslation: () => ({ t }) };
+});
+
 const importScreen = () => require("@/app/deleteAccount").default;
 
 describe("<DeleteAccountScreen />", () => {
@@ -91,6 +107,27 @@ describe("<DeleteAccountScreen />", () => {
     expect(getByText("Music purchases: 3")).toBeTruthy();
     expect(queryByText(/Artist subscriptions:/)).toBeNull();
     expect(queryByText(/Merch purchases:/)).toBeNull();
+  });
+
+  test("the warning lines use the singular for one and the plural for more", () => {
+    mockCurrentUser = createMockUser({
+      artists: [{ id: 1 }, { id: 2 }] as unknown as Artist[],
+      artistUserSubscriptions: [
+        { id: 1 },
+      ] as unknown as LoggedInUser["artistUserSubscriptions"],
+      userTrackGroupPurchases: [{ trackGroupId: 10 }],
+      userTrackPurchases: [],
+      merchPurchase: [{ id: 1 }, { id: 2 }] as unknown as MerchPurchase[],
+    });
+    const Screen = importScreen();
+    const { getByText } = render(<Screen />);
+
+    expect(getByText("This account has 2 artist profiles.")).toBeTruthy();
+    expect(
+      getByText("This account has 1 active artist subscription."),
+    ).toBeTruthy();
+    expect(getByText("This account has 1 music purchase.")).toBeTruthy();
+    expect(getByText("This account has 2 merch purchases.")).toBeTruthy();
   });
 
   test("Delete account finishes on mirlo.space and refreshes the user afterward", async () => {

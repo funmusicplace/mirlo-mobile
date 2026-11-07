@@ -75,7 +75,7 @@ export default function AddFreeAlbumModal() {
       edges={screenEdges}
     >
       <DismissModalBar
-        title={t("trackGroupCard.addAlbumToCollection", {
+        title={t("mobileApp.addFreeAlbumModal.title", {
           title: trackGroupTitle ?? "",
         })}
       />

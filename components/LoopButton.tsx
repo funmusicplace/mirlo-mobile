@@ -46,7 +46,7 @@ export default function LoopButton() {
       />
       {looping === "track" && (
         <Text style={[type.xsmall, styles.indicator, { color: colors.accent }]}>
-          1
+          {1}
         </Text>
       )}
     </HeaderButton>

@@ -84,6 +84,14 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 34, left: 0, right: 0 }),
 }));
 
+// Local strings, so a Transifex token in the env can't change them
+jest.mock("react-i18next", () => {
+  const en = jest.requireActual("@/translation/en.json");
+  const t = (key: string) =>
+    key.split(".").reduce((node, part) => node?.[part], en) ?? key;
+  return { useTranslation: () => ({ t }) };
+});
+
 const flat = (el: { props: { style?: unknown } }) =>
   StyleSheet.flatten(el.props.style as never) as Record<string, unknown>;
 // RNTL skips every event while onStartShouldSetResponder is false, so lay out directly
@@ -160,6 +168,19 @@ test("screen reader increment and decrement seek 10 s, clamped", async () => {
     });
   });
   expect(mockSeekTo).toHaveBeenLastCalledWith(120);
+});
+
+test("the nav buttons carry the tab names and hints", () => {
+  render(<Footer />);
+  const tabs = [
+    ["Recent Releases", "Navigates to recent releases"],
+    ["Your Collection", "Navigates to your collection page"],
+    ["Your Wishlist", "Navigates to your wishlist page"],
+  ];
+  for (const [label, hint] of tabs) {
+    const button = screen.getByRole("button", { name: label });
+    expect(button.props.accessibilityHint).toBe(hint);
+  }
 });
 
 test("the title opens now playing", () => {
