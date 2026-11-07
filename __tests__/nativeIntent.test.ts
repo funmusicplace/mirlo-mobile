@@ -104,52 +104,88 @@ describe("redirectSystemPath", () => {
 
 describe("a link that remounts the app on Android", () => {
   const route = (slug: string) => `/artist/arod/album/${slug}/album-tracks`;
+  const link = (slug: string, repeated = false) => ({
+    href: route(slug),
+    repeated,
+  });
   // Fresh modules stand in for a fresh JS context
   const load = (os: "ios" | "android") => {
     jest.resetModules();
-    jest.requireActual("react-native").Platform.OS = os;
+    const { Platform, PixelRatio } = jest.requireActual("react-native");
+    Platform.OS = os;
+    const fontScale = jest.spyOn(PixelRatio, "getFontScale");
     const mod = jest.requireActual<typeof import("@/app/+native-intent")>(
       "@/app/+native-intent",
     );
     const open = jest.fn();
-    const unsubscribe = mod.subscribeToRelaunchLink(open);
     const launch = (slug: string) =>
       mod.redirectSystemPath({
         path: `https://mirlo.space/arod/release/${slug}`,
         initial: true,
       });
-    return { mod, open, unsubscribe, launch };
+    // A cold start resolves its link before RootLayout subscribes
+    const mount = () => mod.subscribeToRelaunchLink(open);
+    // What RootLayout asks once navigation is ready
+    const shouldOpen = () =>
+      mod.shouldOpenRelaunchLink(open.mock.calls.at(-1)[0]);
+    return { open, mount, launch, shouldOpen, fontScale };
   };
 
   test("maps the first launch as usual", async () => {
-    const { open, launch } = load("android");
+    const { open, mount, launch } = load("android");
     expect(await launch("a")).toBe(route("a"));
+    mount();
     expect(open).not.toHaveBeenCalled();
   });
 
   test("hands a new link to RootLayout, now or once it subscribes", async () => {
-    const { mod, open, unsubscribe, launch } = load("android");
+    const { open, mount, launch, shouldOpen } = load("android");
     await launch("a");
+    const unsubscribe = mount();
     expect(await launch("b")).toBe("");
-    expect(open).toHaveBeenCalledWith(route("b"));
+    expect(open).toHaveBeenCalledWith(link("b"));
+    expect(shouldOpen()).toBe(true);
     unsubscribe();
     await launch("c");
-    const later = jest.fn();
-    mod.subscribeToRelaunchLink(later);
-    expect(later).toHaveBeenCalledWith(route("c"));
     expect(open).toHaveBeenCalledTimes(1);
+    mount();
+    expect(open).toHaveBeenLastCalledWith(link("c"));
+    expect(shouldOpen()).toBe(true);
   });
 
-  test("keeps the restored screen when the path repeats", async () => {
-    const { open, launch } = load("android");
+  test("opens the same link again when the configuration is unchanged", async () => {
+    const { open, mount, launch, shouldOpen } = load("android");
     await launch("a");
-    expect(await launch("a")).toBe(route("a"));
-    expect(open).not.toHaveBeenCalled();
+    mount();
+    expect(await launch("a")).toBe("");
+    expect(open).toHaveBeenCalledWith(link("a", true));
+    expect(shouldOpen()).toBe(true);
+  });
+
+  test("keeps the restored screen when a font size change repeats the path", async () => {
+    const { open, mount, launch, shouldOpen, fontScale } = load("android");
+    await launch("a");
+    mount();
+    fontScale.mockReturnValue(1.3);
+    expect(await launch("a")).toBe("");
+    expect(open).toHaveBeenCalledWith(link("a", true));
+    expect(shouldOpen()).toBe(false);
+    await launch("a");
+    expect(shouldOpen()).toBe(true);
+  });
+
+  test("hands a link over after a remount when the session began without one", async () => {
+    const { open, mount, launch, shouldOpen } = load("android");
+    mount();
+    expect(await launch("a")).toBe("");
+    expect(open).toHaveBeenCalledWith(link("a"));
+    expect(shouldOpen()).toBe(true);
   });
 
   test("never hands links over on iOS", async () => {
-    const { open, launch } = load("ios");
+    const { open, mount, launch } = load("ios");
     await launch("a");
+    mount();
     expect(await launch("b")).toBe(route("b"));
     expect(open).not.toHaveBeenCalled();
   });
