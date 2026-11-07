@@ -118,7 +118,23 @@ test("wishlist cards get remove and play controls, tracks also a caption", () =>
   screen.unmount();
 
   renderCard({});
+  expect(
+    screen.queryByRole("button", { name: "Remove from wishlist" }),
+  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Play" })).toBeNull();
+});
+
+test("collection cards offer the download of a release, a track has none", () => {
+  renderCard({});
+  expect(screen.getByRole("button", { name: "Download" })).toBeTruthy();
+  screen.unmount();
+
+  renderCard({ track });
   expect(screen.queryByRole("button")).toBeNull();
+  screen.unmount();
+
+  renderCard({ wishlist: true });
+  expect(screen.queryByRole("button", { name: "Download" })).toBeNull();
 });
 
 test("the heart removes a track from the favorites and a release from the wishlist", async () => {

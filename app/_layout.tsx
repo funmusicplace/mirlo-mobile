@@ -231,6 +231,15 @@ export default function RootLayout() {
                       }}
                     />
                     <Stack.Screen
+                      name="downloadModal"
+                      options={{
+                        headerShown: false,
+                        presentation: "modal",
+                        animation: "slide_from_bottom",
+                        animationDuration: 200,
+                      }}
+                    />
+                    <Stack.Screen
                       name="reportAlbumModal"
                       options={{
                         headerShown: false,

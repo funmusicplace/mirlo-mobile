@@ -23,6 +23,11 @@
       "sources": ["app/reportAlbumModal.tsx"]
     },
     {
+      "method": "GET",
+      "path": "/v1/jobs",
+      "sources": ["app/downloadModal.tsx"]
+    },
+    {
       "method": "POST",
       "path": "/v1/purchase",
       "sources": ["app/addFreeAlbumModal.tsx"]
@@ -48,9 +53,19 @@
       "sources": ["queries/queries.ts"]
     },
     {
+      "method": "GET",
+      "path": "/v1/trackGroups/{param}/download",
+      "sources": ["app/downloadModal.tsx"]
+    },
+    {
       "method": "POST",
       "path": "/v1/trackGroups/{param}/emailPurchaseLink",
       "sources": ["app/emailPurchaseInfoModal.tsx", "app/maxPlaysReached.tsx"]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/trackGroups/{param}/generate",
+      "sources": ["app/downloadModal.tsx"]
     },
     {
       "method": "POST",

@@ -199,6 +199,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `common/Button.tsx` | `components/Button.tsx` | Matches, with the differences below |
 | `common/Pill.tsx` in `TrackGroup/TrackGroupPills.tsx` | `TagPill` (`tint`, `cover`), `TagPillList` | Matches |
 | `TrackGroup/PurchaseAlbumModal.tsx` | `AddAlbumButton` | Matches the label and its order: "Add to collection" without a price, "Back this project" for an all-or-nothing fundraiser, "Pre-order", "Name your price" at 0, otherwise "Buy". The tap opens the free release dialog, the "Purchase Info" card or the email flow |
+| `common/DownloadAlbumButton.tsx` | `DownloadButton`, `app/downloadModal.tsx` | Matches the formats, their order and labels, the build wait and the strings. Without track downloads, the purchase-link token and the fixed and dropdown variants |
 | `Profile/UserNotificationFeed/FilterGroup.tsx` | `FilterGroup`, used by `app/wishlist.tsx` | Matches, without the `overlay` variant, `compact` size and `noMargin` |
 | `Player/index.tsx`, `PlayingTrackDetails.tsx`, `PlayerActions.tsx` | `Footer` | Matches, with the [platform differences](#intentional-platform-differences) |
 | `Header/Header.tsx`, `common/Logo.tsx` | `ScreenHeader`, `HeaderButton`, `BackButton`, `MirloLogo`, `SearchButton`, `MenuButton` | Matches, without the Donate button |
@@ -303,6 +304,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Link | Release page | Album screen, or `href` when set. `CollectionPurchase` points purchased and favorited tracks at the track screen |
 | Track caption | None, `TrackCard` shows the title only and the hover label says "Go to track" | `caption`, "Track" (`sales.track`), under the title in `type.cardMeta` and `secondaryText`. Wishlist tracks only, so a track and its single-track release read differently |
 | Wishlist actions | Overlay on the cover: wishlist heart, then play | `actions` under the card and outside the link, so each control stays reachable to screen readers: the remove control (`WishlistButton` for a release, `FavoriteTrackButton` for a track), then the filled play circle (`PlayFeaturedButton`), `spacing.lg` apart in a 44 pt row at the bottom of the card, so rows stay level across a grid row. A release plays whole and a track alone, and the circle shows pause while its track plays. Wishlist only |
+| Collection actions | None | `actions` under the card of an owned release: the outlined `onlyIcon` Download circle (`DownloadButton`) in a 44 pt row, which opens the download dialog. Releases only, not tracks or the wishlist |
 | States | Hover shows play, buy and wishlist actions over the cover | Pressed: opacity 0.6 on iOS, foreground `tintX` ripple on Android. `link` role, labeled with title, artist and caption |
 
 ### Artist page
@@ -332,6 +334,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Content | Padding 16 on the sides and bottom | `spacing.lg` padding |
 | Dismiss | Close button, backdrop tap, Escape, focus trap | Close button, swipe down on iOS, back on Android |
 | Confirm | `ConfirmDialog`: right-aligned row, outlined Cancel then solid confirm, 8 apart, 24 above | `deleteAccount.tsx`: the same row with `Button`s, then `Alert.alert` with a destructive action |
+| Download | `DownloadAlbumButton`: "Download" title, "Download FLAC" once a format is picked, the question over seven format buttons, a spinner while the zip builds, then Download and "Choose another format" | `app/downloadModal.tsx`: the same steps and titles, centered text, outlined full-width format buttons `spacing.md` apart, an `accent` spinner, a solid Download and an outlined "Choose another format". iOS saves the zip to the cache and opens the share sheet, Android hands the link to the browser. Failures show `trackGroupCard.downloadFailed` in `danger` under the buttons |
 
 ### Search overlay
 
@@ -377,7 +380,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 ### Buttons
 
 - One solid `Button` carries the primary action of a screen or form, such as "Log in with Mirlo" or "Play album".
-- `outlined` buttons carry secondary actions beside a solid one, such as "Cancel" next to "Delete account". On the release page the wishlist heart is an outlined `onlyIcon` circle and share is a solid one. The purchase button is an outlined `rounded` button at the right edge of that row, as on the web.
+- `outlined` buttons carry secondary actions beside a solid one, such as "Cancel" next to "Delete account". On the release page the wishlist heart is an outlined `onlyIcon` circle and share is a solid one. The purchase button is an outlined `rounded` button at the right edge of that row, as on the web. An owned release shows the Download button there instead, also outlined and `rounded`.
 - `link` buttons sit inside running text or below a form. `transparent` buttons label a strip or toolbar, and header icons use `HeaderButton`.
 - The release play button is a solid `rounded` button, 70% wide, with a 1 pt `button` border, as "Play album" is on the web.
 - Confirmations follow the web `ConfirmDialog`: a right-aligned row with the outlined cancel first and the solid confirm second, `spacing.sm` apart and 24 above. A destructive action then confirms with `Alert.alert` (`style: "destructive"`). Deleting the account is the exception: `deleteAccount.tsx` opens mirlo.space, which asks for the confirmation. Destructive links use `colors.danger`.

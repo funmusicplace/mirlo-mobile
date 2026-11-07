@@ -1,11 +1,12 @@
 import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import DownloadButton from "@/components/DownloadButton";
 import TrackGroupItem from "@/components/TrackGroupItem";
 import Text from "@/components/ThemedText";
 import WishlistCardActions from "@/components/WishlistCardActions";
 import { useColors } from "@/constants/colors";
-import { radius, spacing } from "@/constants/spacing";
+import { radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
 export type CollectionItem = {
@@ -32,8 +33,26 @@ export default function CollectionPurchase({
     caption: track ? t("sales.track") : undefined,
     actions: <WishlistCardActions trackGroup={trackGroup} track={track} />,
   };
+  // Releases only, a track has its own download route
+  const downloadProps =
+    !wishlist && !track
+      ? {
+          actions: (
+            <View style={styles.actions}>
+              <DownloadButton trackGroup={trackGroup} onlyIcon />
+            </View>
+          ),
+        }
+      : undefined;
   if (!track) {
-    return <TrackGroupItem {...trackGroup} width={width} {...wishlistProps} />;
+    return (
+      <TrackGroupItem
+        {...trackGroup}
+        width={width}
+        {...wishlistProps}
+        {...downloadProps}
+      />
+    );
   }
   return (
     <TrackGroupItem
@@ -75,6 +94,12 @@ export function CollectionEmpty({
 }
 
 const styles = StyleSheet.create({
+  // A full touch target tall like the wishlist actions, so Android keeps the hit slop
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: touchTarget,
+  },
   empty: {
     borderRadius: radius.sm,
     paddingVertical: spacing.sm,

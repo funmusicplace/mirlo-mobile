@@ -220,3 +220,13 @@ export function textAroundTag(text: string): string {
   if (open === -1 || close < open) return text.trim();
   return (text.slice(0, open) + text.slice(close + 1)).trim();
 }
+
+// The name the share sheet shows, without what a file system rejects
+export function downloadFileName(artist: string, title: string): string {
+  const name = [artist, title]
+    .filter(Boolean)
+    .join(" - ")
+    .replace(/[\\/:*?"<>|\u0000-\u001f\s]+/g, " ")
+    .trim();
+  return `${name || "album"}.zip`;
+}
