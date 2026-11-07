@@ -186,3 +186,41 @@ test("search groups results in the web order", async () => {
   expect(screen.getByText("ambient")).toBeTruthy();
   jest.useRealTimers();
 });
+
+test("search starts empty every time the overlay opens", async () => {
+  jest.useFakeTimers();
+  mockQueries.fetchTags = loaded({ results: [{ tag: "ambient" }] });
+  mockGetMany.mockImplementation(async (url: string) => ({
+    results: url === "/v1/tags" ? [{ tag: "electronic" }] : [],
+  }));
+  const { SearchContextProvider } = require("@/state/SearchContext");
+  const Search = require("@/app/search").default;
+  const overlay = (open: boolean) => (
+    <SearchContextProvider>{open ? <Search /> : null}</SearchContextProvider>
+  );
+  const { rerender } = render(overlay(true));
+  const input = () => screen.getByLabelText("Search music");
+  const reopen = () => {
+    rerender(overlay(false));
+    rerender(overlay(true));
+  };
+
+  fireEvent.changeText(input(), "elec");
+  await act(async () => {
+    jest.advanceTimersByTime(600);
+  });
+  await screen.findByText("electronic");
+  reopen();
+  expect(input().props.value).toBe("");
+  expect(screen.getByText("ambient")).toBeTruthy();
+
+  // A search still waiting to start must not refill the new overlay
+  fireEvent.changeText(input(), "elec");
+  reopen();
+  await act(async () => {
+    jest.advanceTimersByTime(600);
+  });
+  expect(input().props.value).toBe("");
+  expect(screen.getByText("ambient")).toBeTruthy();
+  jest.useRealTimers();
+});
