@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import "../i18n";
-import { TrackItem } from "@/components/TrackItem";
+import { TrackItem, formatTime } from "@/components/TrackItem";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockUser } from "@/__mocks__/mockUser";
 
@@ -77,4 +77,12 @@ describe("<TrackItem />", () => {
 
     expect(screen.getByText("Tha303")).toBeTruthy();
   });
+});
+
+test("formatTime rounds the whole value before splitting minutes and seconds", () => {
+  expect(formatTime(59.6)).toBe("01:00");
+  expect(formatTime(119.7)).toBe("02:00");
+  expect(formatTime(179.4)).toBe("02:59");
+  expect(formatTime(0)).toBe("00:00");
+  expect(formatTime(11.2)).toBe("00:11");
 });

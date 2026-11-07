@@ -11,8 +11,10 @@ import { type } from "@/constants/typography";
 const INDEX_WIDTH = 28;
 
 export function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Number(seconds.toFixed(0)) % 60;
+  // Round once, or 59.6 reads as 00:00 (minutes floor the raw value)
+  const rounded = Math.round(seconds);
+  const minutes = Math.floor(rounded / 60);
+  const remainingSeconds = rounded % 60;
 
   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
   const formattedSeconds =
