@@ -116,7 +116,8 @@ export default function Button({
       accessibilityLabel={accessibilityLabel ?? title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: !!loading }}
-      android_ripple={{ color: colors.tintX }}
+      // Foreground, or a stale backgroundColor stays until a press
+      android_ripple={{ color: colors.tintX, foreground: true }}
       style={({ pressed }) => [
         styles.base,
         !isLink && !onlyIcon && { paddingVertical, paddingHorizontal },
