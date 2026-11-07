@@ -198,7 +198,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | --- | --- | --- |
 | `common/Button.tsx` | `components/Button.tsx` | Matches, with the differences below |
 | `common/Pill.tsx` in `TrackGroup/TrackGroupPills.tsx` | `TagPill` (`tint`, `cover`), `TagPillList` | Matches |
-| `TrackGroup/PurchaseAlbumModal.tsx` | `AddAlbumButton` | Matches the label and its order: "Add to collection" without a price, "Back this project" for an all-or-nothing fundraiser, "Pre-order", "Name your price" at 0, otherwise "Buy". The tap opens the free release dialog, the "Purchase Info" card or the email flow |
+| `TrackGroup/PurchaseAlbumModal.tsx` | `AddAlbumButton` | Matches the label and its order: "Add to collection" without a price, "Back this project" for an all-or-nothing fundraiser, "Pre-order", "Name your price" at 0, otherwise "Buy". The tap opens the free release dialog only without a price, otherwise the "Purchase Info" card or the email flow |
 | `common/DownloadAlbumButton.tsx` | `DownloadButton`, `app/downloadModal.tsx` | Matches the formats, their order and labels, the build wait and the strings. Without track downloads, the purchase-link token and the fixed and dropdown variants |
 | `Profile/UserNotificationFeed/FilterGroup.tsx` | `FilterGroup`, used by `app/wishlist.tsx` | Matches, without the `overlay` variant, `compact` size and `noMargin` |
 | `Player/index.tsx`, `PlayingTrackDetails.tsx`, `PlayerActions.tsx` | `Footer` | Matches, with the [platform differences](#intentional-platform-differences) |

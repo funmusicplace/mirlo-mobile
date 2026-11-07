@@ -59,9 +59,9 @@ export default function AddAlbumButton({
 
   const onPress = useCallback(() => {
     const region = getAppStoreRegion();
-    const isFree = trackGroup.minPrice === 0 || trackGroup.minPrice === null;
+    const isFree = trackGroup.minPrice === null;
 
-    // We can just add free albums without worrying about Apple purchase guidelines
+    // Only an unpriced release is added directly, Name your price (minimum 0) can take a payment
     if (isFree) {
       if (user) {
         showModal("/addFreeAlbumModal", router, trackGroup);

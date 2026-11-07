@@ -15,6 +15,11 @@ jest.mock("@/state/AuthContext", () => ({
   useAuthContext: () => ({ user: mockUser }),
 }));
 
+let mockRegion = "US";
+jest.mock("expo-localization", () => ({
+  getLocales: () => [{ regionCode: mockRegion }],
+}));
+
 // The real icon sets state after its font loads, outside act
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
@@ -63,7 +68,7 @@ test("a signed-out user on a free release is sent to log in", () => {
   const setModalVisible = jest.fn();
   render(
     <AddAlbumButton
-      trackGroup={createMockAlbum({ minPrice: 0 })}
+      trackGroup={createMockAlbum({ minPrice: null })}
       setModalVisible={setModalVisible}
     />,
   );
@@ -73,6 +78,79 @@ test("a signed-out user on a free release is sent to log in", () => {
   expect(mockPush).toHaveBeenCalledTimes(1);
   expect(mockPush).toHaveBeenCalledWith("/login");
   expect(setModalVisible).not.toHaveBeenCalled();
+});
+
+describe("Name your price", () => {
+  const modalParams = (release: AlbumProps) => ({
+    trackGroupTitle: release.title,
+    trackGroupId: release.id,
+    artistId: release.artistId,
+    artist: release.artist.name,
+  });
+  const press = (release: AlbumProps) => {
+    const setModalVisible = jest.fn();
+    render(
+      <AddAlbumButton trackGroup={release} setModalVisible={setModalVisible} />,
+    );
+    fireEvent.press(screen.getByRole("button"));
+    return setModalVisible;
+  };
+  const release = createMockAlbum({ minPrice: 0 });
+
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+  afterEach(() => {
+    mockUser = null;
+    mockRegion = "US";
+  });
+
+  test("opens the Purchase Info card in the US", () => {
+    mockUser = createMockUser();
+
+    const setModalVisible = press(release);
+
+    expect(setModalVisible).toHaveBeenCalledWith(true);
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  test("starts the email flow outside the US", () => {
+    mockUser = createMockUser();
+    mockRegion = "DE";
+
+    const setModalVisible = press(release);
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/emailPurchaseInfoModal",
+      params: modalParams(release),
+    });
+    expect(setModalVisible).not.toHaveBeenCalled();
+  });
+
+  test("sends a signed-out user outside the US to log in", () => {
+    mockRegion = "DE";
+
+    const setModalVisible = press(release);
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith("/login");
+    expect(setModalVisible).not.toHaveBeenCalled();
+  });
+
+  test("leaves a release without a price on the free dialog", () => {
+    mockUser = createMockUser();
+    const unpriced = createMockAlbum({ minPrice: null });
+
+    const setModalVisible = press(unpriced);
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/addFreeAlbumModal",
+      params: modalParams(unpriced),
+    });
+    expect(setModalVisible).not.toHaveBeenCalled();
+  });
 });
 
 test("a release nobody can get has no add button", () => {
