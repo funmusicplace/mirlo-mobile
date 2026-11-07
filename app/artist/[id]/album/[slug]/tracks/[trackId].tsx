@@ -195,7 +195,9 @@ export default function TrackView() {
                 <Trans
                   t={t}
                   i18nKey="trackGroupDetails.fromAlbum"
-                  values={{ album: data.result.title }}
+                  values={{
+                    album: data.result.title || t("playableCover.untitled"),
+                  }}
                   components={{
                     albumLink: (
                       <Link

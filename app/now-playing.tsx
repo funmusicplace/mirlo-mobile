@@ -103,7 +103,9 @@ export default function NowPlaying() {
                 });
               }}
             >
-              <MarqueeText style={linkStyle}>{trackGroup?.title}</MarqueeText>
+              <MarqueeText style={linkStyle}>
+                {trackGroup?.title || t("playableCover.untitled")}
+              </MarqueeText>
             </Pressable>
           </View>
           <View style={styles.meta}>

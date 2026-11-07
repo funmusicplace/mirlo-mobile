@@ -3,12 +3,14 @@ import {
   isTrackOwned,
   isTrackOwnedOrPreview,
   pickFeaturedTrack,
+  releaseMeta,
   trackGroupUrl,
 } from "@/scripts/utils";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockAlbum } from "@/__mocks__/mockAlbum";
 import { createMockArtist } from "@/__mocks__/mockArtist";
+import i18n from "../i18n";
 
 describe("audioTrackType", () => {
   test("returns 'hls' for .m3u8 URLs", () => {
@@ -196,5 +198,35 @@ describe("pickFeaturedTrack", () => {
     });
     const open = createMockRNTrack({ order: 1, isPreview: true });
     expect(pickFeaturedTrack([locked, open], undefined, album)).toBe(open);
+  });
+});
+
+describe("releaseMeta", () => {
+  const t = i18n.getFixedT("en");
+  const past = t("trackGroupDetails.pastRelease", { date: "November 3, 2026" });
+  const future = t("trackGroupDetails.futureRelease", { date: "February 16" });
+
+  test("puts the date and the track count on one line, like the web", () => {
+    expect(releaseMeta(past, 3, t)).toBe(
+      "Released on November 3, 2026 · 3 tracks",
+    );
+    expect(releaseMeta(future, 13, t)).toBe(
+      "Will be released on February 16 · 13 tracks",
+    );
+  });
+
+  test("shows the count alone when the release has no date", () => {
+    expect(releaseMeta(undefined, 5, t)).toBe("5 tracks");
+  });
+
+  test("uses the singular for one track", () => {
+    expect(releaseMeta(past, 1, t)).toBe(
+      "Released on November 3, 2026 · 1 track",
+    );
+  });
+
+  test("leaves the count off a release without tracks", () => {
+    expect(releaseMeta(past, 0, t)).toBe("Released on November 3, 2026");
+    expect(releaseMeta(undefined, 0, t)).toBe("");
   });
 });

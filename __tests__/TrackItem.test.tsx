@@ -77,6 +77,43 @@ describe("<TrackItem />", () => {
 
     expect(screen.getByText("Tha303")).toBeTruthy();
   });
+
+  test("lists the co-authors by order and leaves out other credits", () => {
+    render(
+      <TrackItem
+        track={createMockRNTrack({
+          trackArtists: [
+            {
+              artistName: "Guest",
+              role: "Vocals",
+              isCoAuthor: false,
+              order: 1,
+            },
+            { artistName: "Second", isCoAuthor: true, order: 2 },
+            { artistName: "First", isCoAuthor: true, order: 0 },
+          ],
+        })}
+        thisSongSelected={false}
+      />,
+    );
+
+    expect(screen.getByText("First, Second")).toBeTruthy();
+    expect(screen.queryByText(/Guest/)).toBeNull();
+  });
+
+  test("keeps a co-author who is the release artist", () => {
+    render(
+      <TrackItem
+        track={createMockRNTrack({
+          artist: "Midwinter",
+          trackArtists: [{ artistName: "Midwinter", isCoAuthor: true }],
+        })}
+        thisSongSelected={false}
+      />,
+    );
+
+    expect(screen.getByText("Midwinter")).toBeTruthy();
+  });
 });
 
 test("formatTime rounds the whole value before splitting minutes and seconds", () => {

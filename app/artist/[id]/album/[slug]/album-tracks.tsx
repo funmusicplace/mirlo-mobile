@@ -18,6 +18,7 @@ import { usePlayer } from "@/state/PlayerContext";
 import {
   handleExternalPurchase,
   isTrackOwnedOrPreview,
+  releaseMeta,
   toRNTrack,
   trackGroupUrl,
 } from "@/scripts/utils";
@@ -134,8 +135,10 @@ function AlbumPlayButton() {
     }
   }, [isPlaying, playableTracks, setActiveTrack, playbackState, setShuffled]);
 
+  // The web has no Play when nothing can play
+  if (!playableTracks.length) return null;
+
   const playing =
-    playableTracks.length > 0 &&
     (isPlaying || playbackState.state === State.Buffering) &&
     activeTrack?.trackGroup?.urlSlug === playableTracks[0].trackGroup?.urlSlug;
 
@@ -147,13 +150,7 @@ function AlbumPlayButton() {
         <Ionicons name={playing ? "pause-outline" : "play-outline"} size={16} />
       }
       onPress={togglePlayBack}
-      disabled={!playableTracks.length}
-      style={[
-        styles.playButton,
-        {
-          borderColor: playableTracks.length ? colors.button : colors.disabled,
-        },
-      ]}
+      style={[styles.playButton, { borderColor: colors.button }]}
     />
   );
 }
@@ -269,7 +266,11 @@ export default function AlbumTracks() {
   // Wishlists and purchases belong to the account on the default instance
   const isOtherInstance = !!selectedAlbum.apiRoot;
   const label = findLabel(selectedAlbum);
-  const releaseDate = formatReleaseDate(selectedAlbum.releaseDate, t);
+  const releaseLine = releaseMeta(
+    formatReleaseDate(selectedAlbum.releaseDate, t),
+    selectedAlbum.tracks?.length ?? 0,
+    t,
+  );
   const coverSize = width - 2 * gutter;
   const linkStyle = {
     color: colors.accent,
@@ -319,7 +320,7 @@ export default function AlbumTracks() {
                 accessibilityRole="header"
                 style={[type.title, styles.title]}
               >
-                {selectedAlbum.title}
+                {selectedAlbum.title || t("playableCover.untitled")}
               </Text>
               <Text style={[type.small, styles.byline]}>
                 <Trans
@@ -415,9 +416,9 @@ export default function AlbumTracks() {
                 )}
               </Markdown>
             ) : null}
-            {releaseDate ? (
+            {releaseLine ? (
               <Text style={[type.caption, { color: colors.secondaryText }]}>
-                {releaseDate}
+                {releaseLine}
               </Text>
             ) : null}
             {selectedAlbum.credits ? (
@@ -497,16 +498,16 @@ const styles = StyleSheet.create({
     minHeight: touchTarget,
     gap: spacing.lg,
   },
-  // Padding keeps the button's hit slop inside the wrapper
   play: {
     alignItems: "center",
-    paddingVertical: spacing.lg,
     paddingHorizontal: gutter + spacing.xl,
   },
   // Web ClickToPlayTracks: 70% wide with a 1 px border, 42 tall
+  // Margin holds the hit slop inside the wrapper and collapses without the button
   playButton: {
     width: "70%",
     borderWidth: 1,
+    marginVertical: spacing.lg,
   },
   // Web caption: 12 on a 16 line at 0.75 opacity, 4 below the cover
   coverCredit: {

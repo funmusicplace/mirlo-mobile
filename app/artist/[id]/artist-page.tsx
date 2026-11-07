@@ -80,6 +80,7 @@ export default function ArtistPage() {
   }
 
   const artistInfo = data;
+  const about = artistInfo.bio || artistInfo.shortDescription;
   // The API sends the banner as background now
   const banner =
     (artistInfo as Artist & { background?: Artist["banner"] }).background ??
@@ -169,14 +170,16 @@ export default function ArtistPage() {
               </View>
             </View>
             <View style={[styles.strip, { borderColor: colors.tintX }]}>
-              <Button
-                variant="transparent"
-                size="compact"
-                rounded
-                title={t("artist.about")}
-                textStyle={[styles.stripLabel, { color: colors.text }]}
-                onPress={scrollToAbout}
-              />
+              {about ? (
+                <Button
+                  variant="transparent"
+                  size="compact"
+                  rounded
+                  title={t("artist.about")}
+                  textStyle={[styles.stripLabel, { color: colors.text }]}
+                  onPress={scrollToAbout}
+                />
+              ) : null}
               {artistInfo.urlSlug ? (
                 <ShareButton
                   url={`${siteUrlFor(apiRoot)}/${artistInfo.urlSlug}`}
@@ -194,16 +197,16 @@ export default function ArtistPage() {
           </View>
         }
         ListFooterComponent={
-          <View
-            style={styles.about}
-            onLayout={(event) => {
-              aboutHeight.current = event.nativeEvent.layout.height;
-            }}
-          >
-            <Text accessibilityRole="header" style={type.heading}>
-              {t("artist.about")}
-            </Text>
-            {artistInfo.bio ? (
+          about ? (
+            <View
+              style={styles.about}
+              onLayout={(event) => {
+                aboutHeight.current = event.nativeEvent.layout.height;
+              }}
+            >
+              <Text accessibilityRole="header" style={type.heading}>
+                {t("artist.about")}
+              </Text>
               <Markdown
                 style={{
                   ...markdownHeadings,
@@ -215,16 +218,10 @@ export default function ArtistPage() {
                   },
                 }}
               >
-                {linkifyUrls(
-                  artistInfo.bio.replace(/([^\n])\n([^\n])/g, "$1 $2"),
-                )}
+                {linkifyUrls(about.replace(/([^\n])\n([^\n])/g, "$1 $2"))}
               </Markdown>
-            ) : (
-              <Text style={type.body}>
-                {artistInfo.name + " is an artist on Mirlo"}
-              </Text>
-            )}
-          </View>
+            </View>
+          ) : null
         }
       />
     </SafeAreaView>
