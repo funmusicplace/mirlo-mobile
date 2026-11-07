@@ -38,6 +38,10 @@
       "/node_modules/",
       "/__mocks__/",
       "/\\.claude/"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|@faker-js))",
+      "/node_modules/react-native-reanimated/plugin/"
     ]
   },
   "dependencies": {
@@ -97,7 +101,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@faker-js/faker": "^9.8.0",
+    "@faker-js/faker": "^10.6.0",
     "@storybook/react-native-web-vite": "^10.6.0",
     "@tanstack/eslint-plugin-query": "^5.62.9",
     "@testing-library/react-native": "^13.2.0",
