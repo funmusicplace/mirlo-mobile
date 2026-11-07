@@ -78,6 +78,11 @@ export async function redirectSystemPath({
     .split("/")
     .filter(Boolean);
   if (!artist) return "/";
+  // The site's release list, never an artist slug
+  if (artist === "releases" && !section) {
+    const tag = url.searchParams.get("tag");
+    return tag ? `/tags/${tag}` : "/";
+  }
   if (!section || section === "releases") {
     if (await isArtist(artist)) return `/artist/${artist}/artist-page`;
   } else if (section === "release" && album) {

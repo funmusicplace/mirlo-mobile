@@ -44,6 +44,10 @@ describe("redirectSystemPath", () => {
       ),
     ).toBe("/artist/arod/album/penaflor-single/tracks/12");
     expect(await redirect("https://mirlo.space/")).toBe("/");
+    expect(await redirect("https://mirlo.space/releases")).toBe("/");
+    expect(await redirect("https://mirlo.space/releases?tag=ambient")).toBe(
+      "/tags/ambient",
+    );
   });
 
   test("hands web-only links to Safari without navigating", async () => {
