@@ -29,7 +29,10 @@ import { useColors } from "@/constants/colors";
 import { fonts } from "@/constants/typography";
 import "../i18n";
 import { checkForUpdates } from "../scripts/appVersionCheck";
-import { subscribeToRelaunchLink } from "./+native-intent";
+import {
+  shouldOpenRelaunchLink,
+  subscribeToRelaunchLink,
+} from "./+native-intent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -79,12 +82,15 @@ export default function RootLayout() {
   }, []);
 
   // expo-router restores the previous screen when Android remounts the app,
-  // so open the link the remount was for once navigation is ready
+  // so open the link the remount was for once navigation is ready, unless the
+  // remount only recreated the activity
   const navigationRef = useNavigationContainerRef();
   useEffect(
     () =>
-      subscribeToRelaunchLink((href) => {
-        const open = () => router.navigate(href as Href);
+      subscribeToRelaunchLink((link) => {
+        const open = () => {
+          if (shouldOpenRelaunchLink(link)) router.navigate(link.href as Href);
+        };
         if (navigationRef.isReady()) return open();
         const off = navigationRef.addListener("ready", () => {
           off();

@@ -3,7 +3,7 @@ import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient } from "@/queries/QueryClientWrapper";
 import { queryArtist } from "@/queries/queries";
 import { openOnWeb } from "@/scripts/openInBrowser";
-import { Platform } from "react-native";
+import { Dimensions, PixelRatio, Platform } from "react-native";
 
 // Artist pages share the site root with routes like /login, so a single
 // segment is an artist only if the API says so. Fetching through the query
@@ -21,15 +21,43 @@ async function isArtist(slug: string) {
   }
 }
 
+export type RelaunchLink = { href: string; repeated: boolean };
+
+// A cold start resolves the initial URL before RootLayout first mounts
+let rootMounted = false;
 let launchPath: string | undefined;
-let pendingHref: string | undefined;
-let openRelaunchLink: ((href: string) => void) | undefined;
+let launchConfig: string | undefined;
+let pendingLink: RelaunchLink | undefined;
+let openRelaunchLink: ((link: RelaunchLink) => void) | undefined;
+
+// Font size and display changes recreate the activity, which repeats the
+// launch path. Orientation, theme and language never do, so they stay out
+function currentConfig() {
+  const { width, height, scale } = Dimensions.get("screen");
+  return [
+    Math.min(width, height),
+    Math.max(width, height),
+    scale,
+    PixelRatio.getFontScale(),
+  ].join("|");
+}
+
+// A repeated path is the recreated activity's own intent unless nothing in
+// the configuration changed, in which case the listener opened the link again.
+// Called once navigation is ready, when the new metrics have arrived
+export function shouldOpenRelaunchLink({ repeated }: RelaunchLink) {
+  const config = currentConfig();
+  const unchanged = config === launchConfig;
+  launchConfig = config;
+  return !repeated || unchanged;
+}
 
 // RootLayout opens the route that a remount couldn't show
-export function subscribeToRelaunchLink(open: (href: string) => void) {
+export function subscribeToRelaunchLink(open: (link: RelaunchLink) => void) {
+  rootMounted = true;
   openRelaunchLink = open;
-  if (pendingHref) open(pendingHref);
-  pendingHref = undefined;
+  if (pendingLink) open(pendingLink);
+  pendingLink = undefined;
   return () => {
     if (openRelaunchLink === open) openRelaunchLink = undefined;
   };
@@ -45,20 +73,26 @@ export async function redirectSystemPath({
   initial: boolean;
 }): Promise<string> {
   // The playback service keeps the process alive after a swipe away, so a
-  // link remounts the app, and expo-router restores the old screen. A
-  // recreated activity repeats its path, so only a new one goes to RootLayout
-  if (initial && Platform.OS === "android" && path !== launchPath) {
-    const isRemount = launchPath !== undefined;
+  // link remounts the app, and expo-router restores the old screen. RootLayout
+  // opens the link instead, once it knows the path isn't a recreated activity's
+  if (initial && Platform.OS === "android") {
+    const repeated = path === launchPath;
     launchPath = path;
-    if (isRemount) {
-      const href = await redirectSystemPath({ path, initial });
+    if (!rootMounted) {
+      launchConfig = currentConfig();
+    } else {
+      const href = await mapSystemPath(path, initial);
       if (!href.startsWith("/")) return href;
-      if (openRelaunchLink) openRelaunchLink(href);
-      else pendingHref = href;
+      const link = { href, repeated };
+      if (openRelaunchLink) openRelaunchLink(link);
+      else pendingLink = link;
       return "";
     }
   }
+  return mapSystemPath(path, initial);
+}
 
+async function mapSystemPath(path: string, initial: boolean): Promise<string> {
   // On Android the sign-in redirect also arrives as a deep link. The auth
   // session already has it, so leave navigation alone
   if (path.startsWith(OAUTH_REDIRECT_URI)) return "";
