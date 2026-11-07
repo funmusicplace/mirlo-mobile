@@ -275,6 +275,7 @@
     "youveBoughtRelease": "You've bought <linkToRelease>{{title}}</linkToRelease>! It's now available in your <linkToCollection>collection</linkToCollection>.",
     "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>.",
     "dates": "Dates",
+    "tourDatesModalTitle": "Tour dates",
     "saveDates": "Save dates",
     "addTourDates": "Manage tour dates",
     "buyTickets": "Get tickets",
@@ -465,7 +466,8 @@
     "isLabelConfirmed": "Has label confirmed relationship?",
     "confirmRelationship": "Confirm relationship",
     "willPublishAt": "Will publish at {{ date }}",
-    "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
+    "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!",
+    "links": "Links"
   },
   "managePost": {
     "managePost": "Manage post",

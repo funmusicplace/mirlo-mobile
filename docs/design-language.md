@@ -204,6 +204,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `common/CommandSearch/CommandSearch.tsx` via `Header/HeaderSearch.tsx` | `app/search.tsx`, `SearchHeader`, `SearchInput`, `SearchItem`, `SearchGroupHeading` | Matches, without filters or "More results" |
 | `Header/Menu.tsx`, `Header/MenuLink.tsx` | `app/menu.tsx` with `MenuLink` and `Separator` | Matches |
 | `Footer.tsx` link columns ("Mirlo", "Legal", "Connect") | `app/about.tsx` | Matches: 14 / 21 bold headings, 14 pt underlined accent links with brand icons, two columns, 44 pt rows. The web route `/pages/about` redirects to docs.mirlo.space |
+| `Artist/ArtistHeaderActionsStrip.tsx`, `ArtistTourDates.tsx`, `ManageArtist/ArtistFormLinks.tsx`, the bar in `ManageArtist/ManageArtistDetails/ManageArtistAnnouncement.tsx` | The strip, the announcement bar and the footer sections in `app/artist/[id]/artist-page.tsx` | Matches, see [Artist page](#artist-page) |
 | `common/Input.tsx`, `FormComponent.tsx`, `LogInForm.tsx`, `EmailVerification.tsx` | `app/login.tsx` | Sign-in happens on mirlo.space, see the login [platform differences](#intentional-platform-differences) |
 | `common/Spinner.tsx`, `LoadingSpinner.tsx`, `FullPageLoadingSpinner.tsx` | `ActivityIndicator` in `colors.accent` | Matches: the web artist, release and track pages also load behind a centered spinner |
 | `common/Snackbar.tsx` | None | `ErrorNotification` covers request errors |
@@ -218,7 +219,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Default (`solid` on mobile) | `--mi-button-color` fill, `--mi-button-text-color` text. "Log in", "Sign up", "More releases" | `button` fill, `buttonText` label. "Log in with Mirlo", "Log out", "Play album", purchase modal actions, "Delete account" |
 | `outlined` | 1 px border and text in the button color, bold. "Browse tags", "View all artists" | 1 pt border and label in `accent`, weight 700. "Cancel", "Close", wishlist and add-to-collection circles |
 | `link` | Button color text, underlined, no padding | `accent` label, underlined, no padding. "Sign up" under the login form |
-| `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page "About" strip button |
+| `transparent` | Button color text and icon, bold, no border. Header and player icon buttons | `accent` label, weight 700, no border. The artist page strip buttons (Dates, About, Links), with a `text` label, weight 400 and uppercase |
 | `dashed`, `pill`, `chip` | Artist management, embed widgets, artist header chips (`ArtistButton`) | Not used on mobile |
 
 - Sizes: the web default is 16 px text with 8 by 11.2 padding (40 tall), `compact` is 12.8 px with 4.8 by 8, `tiny` is 12.8 px and 24 tall, and `big` is 19.2 px with 16 by 20.8. Mobile snaps these to the scale: default `type.body` with 8 by 12 (40 tall), `compact` `type.caption` with 4 by 8, `big` `type.large` at a 19.2 line with 16 by 24.
@@ -296,6 +297,16 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Track caption | None, `TrackCard` shows the title only and the hover label says "Go to track" | `caption`, "Track" (`sales.track`), under the title in `type.cardMeta` and `secondaryText`. Wishlist tracks only, so a track and its single-track release read differently |
 | Wishlist actions | Overlay on the cover: wishlist heart, then play | `actions` under the card and outside the link, so each control stays reachable to screen readers: the remove control (`WishlistButton` for a release, `FavoriteTrackButton` for a track), then the filled play circle (`PlayFeaturedButton`), `spacing.lg` apart in a 44 pt row at the bottom of the card, so rows stay level across a grid row. A release plays whole and a track alone, and the circle shows pause while its track plays. Wishlist only |
 | States | Hover shows play, buy and wishlist actions over the cover | Pressed: opacity 0.6 on iOS, foreground `tintX` ripple on Android. `link` role, labeled with title, artist and caption |
+
+### Artist page
+
+| | Web | Mobile |
+| --- | --- | --- |
+| Announcement | `AnnouncementWrapper`: a full-width bar between the header and the artist name, 16 padding, 16 / 24 Markdown with underlined links, in the artist's colors | A bar between the banner and the name row: `button` fill, `buttonText` text and links (the instance palette stands in for the artist's colors, 5.5:1 in both themes), 16 padding, the Markdown and `linkifyUrls` of the About section. Hidden when the text is blank |
+| Strip | Dates, About and Links buttons, then contact, RSS and share icons | `transparent` compact buttons for Dates, About and Links when the artist has them, in that order, then share. Each scrolls to its section. The row wraps at large text sizes |
+| Sections | A modal for Dates and About, a page for Links | The list footer: Tour dates, About and Links, `spacing.xxl` (32) apart, each under a `type.heading` heading. Only the sections the artist has |
+| Tour date row | A 56 wide box with the short month over the day, the location in 14 weight 500, the long date in 12 `secondaryText`, a solid "Get tickets" button, "Event page" once the date has passed | The same box (`radius.sm`, 1 pt `border`), the location in `type.small` weight 500, the long date in `type.xsmall` and `secondaryText`, then "Get tickets" or "Event page" as an underlined `accent` `type.small` line. Rows keep the API's order, as the web does. A row with a ticket link is one `link` element, 44 pt minimum. The day is the UTC day the API stores |
+| Link row | A card per link with a brand icon and its label, every link including those left out of the header | A 44 pt row per link in underlined `accent` `type.body`, every link, labeled like the web (the artist's label, "Email", the link type) with the host as the fallback, also for the generic "Website" type. Legacy `links` come first. Opens in the browser, mail in the mail app. No brand icons |
 
 ### Notices and errors
 
@@ -434,6 +445,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 | Rows and inputs | Track rows 36, inputs 42 | 44 minimum for track rows, menu links, search rows and inputs |
 | Donate | "Donate now" button in the header | None, to follow App Store rules |
 | Artist colors | Artist and release pages apply each artist's colors (`ArtistColorsProvider`) | Instance palette everywhere |
+| Artist dates and links | Dates open a modal and Links a page of cards | Sections at the end of the artist page, reached from the strip, see [Artist page](#artist-page) |
 | Release tags | The web source renders `TrackGroupPills` after the about text, the live World Wore page showed none | The album screen renders its tag chips in the same place |
 | Player and navigation | Player bar, navigation in the header and menu | `Footer` stacks a player row, like the web player strip, over a nav row of three buttons (Recent Releases, Your Collection, Your Wishlist) spread across the width. The nav row is mobile only on purpose, for quick access to the collection and the wishlist. The player row hides on now playing |
 | Now playing | None | Full-screen `now-playing` modal opened from the footer art or title |
