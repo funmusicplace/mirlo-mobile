@@ -1,10 +1,12 @@
 import { useAuthContext } from "@/state/AuthContext";
+import { StyleSheet } from "react-native";
 import { Router, useRouter } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { getLocales } from "expo-localization";
 import Button from "@/components/Button";
+import { spacing } from "@/constants/spacing";
 
 type AddAlbumButtonProps = {
   trackGroup: AlbumProps;
@@ -29,6 +31,17 @@ const showModal = (
       artist: trackGroup.artist.name,
     },
   });
+};
+
+// Same order as the web PurchaseAlbumModal
+const purchaseLabel = (trackGroup: AlbumProps, t: TFunction) => {
+  if (trackGroup.minPrice === null) return t("trackGroupCard.addToCollection");
+  if (trackGroup.fundraiser?.isAllOrNothing)
+    return t("trackGroupCard.backThisProject");
+  if (trackGroup.isPreorder) return t("trackGroupCard.preOrder");
+  return trackGroup.minPrice === 0
+    ? t("trackGroupCard.nameYourPriceLabel")
+    : t("trackGroupCard.buy");
 };
 
 export default function AddAlbumButton({
@@ -74,11 +87,19 @@ export default function AddAlbumButton({
   return ids && ids.includes(trackGroup.id) ? null : (
     <Button
       variant="outlined"
-      onlyIcon
-      // Ionicons pads the plus more than the heart
-      startIcon={<Ionicons name="add" size={20} />}
+      rounded
+      title={purchaseLabel(trackGroup, t)}
       onPress={onPress}
-      accessibilityLabel={t("trackGroupCard.addToCollection")}
+      style={styles.purchase}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  // Right edge like the web, wraps at large text sizes, clear of the cover
+  purchase: {
+    marginLeft: "auto",
+    marginVertical: spacing.xs,
+    flexShrink: 1,
+  },
+});
