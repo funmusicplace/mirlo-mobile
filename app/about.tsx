@@ -121,10 +121,7 @@ export default function About() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.row, stacked && styles.stacked]}>
           <AboutColumn heading={t("footer.aboutHeading")} links={aboutLinks} />
-          <AboutColumn
-            heading={t("footer.legalHeading", "Legal")}
-            links={legalLinks}
-          />
+          <AboutColumn heading={t("footer.legalHeading")} links={legalLinks} />
         </View>
         <View style={[styles.row, stacked && styles.stacked]}>
           <AboutColumn

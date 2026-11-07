@@ -51,8 +51,8 @@ export default function FavoriteTrackButton({
       onPress={onPress}
       accessibilityLabel={
         isInFavorites
-          ? t("wishlist.removeFromFavorites", "Remove from favorites")
-          : t("wishlist.addToFavorites", "Add to favorites")
+          ? t("wishlist.removeFromFavorites")
+          : t("wishlist.addToFavorites")
       }
     >
       <Ionicons

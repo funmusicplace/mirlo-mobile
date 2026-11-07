@@ -169,7 +169,7 @@ export default function Index() {
         ListHeaderComponent={
           <>
             <Text style={styles.explore} accessibilityRole="header">
-              {t("home.exploreMusic", "Explore music")}
+              {t("home.exploreMusic")}
             </Text>
             <SectionHeader
               right={
