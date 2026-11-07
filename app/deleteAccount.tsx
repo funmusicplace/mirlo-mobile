@@ -90,6 +90,14 @@ export default function DeleteAccountScreen() {
     if (openedAccountPage && !user) router.dismissTo("/");
   }, [openedAccountPage, user, router]);
 
+  // Signed out: log in first, unless the account was just deleted
+  const needsLogin = !user && !openedAccountPage;
+  useEffect(() => {
+    if (needsLogin) router.push("/login");
+  }, [needsLogin, router]);
+
+  if (needsLogin) return null;
+
   return (
     <SafeAreaView
       style={[styles.screen, { backgroundColor: colors.background }]}

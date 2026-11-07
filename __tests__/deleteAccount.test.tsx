@@ -5,11 +5,16 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { createMockUser } from "@/__mocks__/mockUser";
 
 const mockDismiss = jest.fn();
+const mockPush = jest.fn();
 const mockOpenInBrowser = jest.fn();
 const mockRefreshLoggedInUser = jest.fn();
 
 jest.mock("expo-router", () => ({
-  useRouter: () => ({ dismiss: mockDismiss, dismissTo: mockDismiss }),
+  useRouter: () => ({
+    dismiss: mockDismiss,
+    dismissTo: mockDismiss,
+    push: mockPush,
+  }),
 }));
 
 jest.mock("@/scripts/openInBrowser", () => ({
@@ -118,19 +123,17 @@ describe("<DeleteAccountScreen />", () => {
     rerender(<Screen />);
 
     expect(mockDismiss).toHaveBeenCalledWith("/");
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
-  test("button press is a no-op when there is no logged-in user", () => {
+  test("signed out visitors go to login and never see the button", () => {
     mockCurrentUser = null;
 
     const Screen = importScreen();
-    const { getAllByText } = render(<Screen />);
+    const { queryByText } = render(<Screen />);
 
-    // The button is disabled without a user
-    const matches = getAllByText("Delete account");
-    fireEvent.press(matches[matches.length - 1]);
-
+    expect(mockPush).toHaveBeenCalledWith("/login");
+    expect(queryByText("Delete account")).toBeNull();
     expect(mockOpenInBrowser).not.toHaveBeenCalled();
-    expect(mockDismiss).not.toHaveBeenCalled();
   });
 });
