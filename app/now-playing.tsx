@@ -96,6 +96,7 @@ export default function NowPlaying() {
                   params: {
                     id: String(trackGroup?.artistId),
                     slug: String(trackGroup?.urlSlug),
+                    apiRoot: trackGroup?.apiRoot,
                   },
                 });
               }}
@@ -117,7 +118,10 @@ export default function NowPlaying() {
                 router.dismiss(1);
                 router.navigate({
                   pathname: "/artist/[id]/artist-page",
-                  params: { id: String(trackGroup?.artistId) },
+                  params: {
+                    id: String(trackGroup?.artistId),
+                    apiRoot: trackGroup?.apiRoot,
+                  },
                 });
               }}
             >

@@ -19,6 +19,8 @@ import ScreenHeader, {
 import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
 import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
+import { useInstances } from "@/state/InstancesContext";
+import { dedupeReleases, mergeReleases } from "@/scripts/instances";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as api from "../queries/fetch/fetchWrapper";
 import { API_ROOT } from "@/constants/api-root";
@@ -35,6 +37,7 @@ export default function Index() {
   const { t } = useTranslation("translation");
   const { setIsDataLoaded } = useAppIsReadyContext();
   const colors = useColors();
+  const { instances, loaded } = useInstances();
   const {
     isPending,
     isError,
@@ -45,25 +48,34 @@ export default function Index() {
     isFetchingNextPage,
     isRefetching,
     refetch,
-  } = useInfiniteQuery<{ results: AlbumProps[] }>({
-    queryKey: ["infiniteTrackGroups"],
-    queryFn: ({ pageParam = 0 }) => {
-      const params = new URLSearchParams();
-      params.append("skip", String(pageParam));
-      params.append("take", String(PAGE_SIZE));
-      params.append("distinctArtists", "false");
-
-      return api.get(`/v1/trackGroups?${params}`, {});
+  } = useInfiniteQuery({
+    // A new source starts the feed over
+    queryKey: ["infiniteTrackGroups", instances],
+    queryFn: async ({ pageParam: skips }) => {
+      const pages = await Promise.allSettled(
+        instances.map(async ({ apiRoot }, index) => {
+          const params = new URLSearchParams();
+          params.append("skip", String(skips[index]));
+          params.append("take", String(PAGE_SIZE));
+          params.append("distinctArtists", "false");
+          const { results } = await api.getMany<AlbumProps>(
+            `/v1/trackGroups?${params}`,
+            { apiRoot },
+          );
+          // Only releases from another instance carry its apiRoot
+          return apiRoot === API_ROOT
+            ? results
+            : results.map((album) => ({ ...album, apiRoot }));
+        }),
+      );
+      return mergeReleases(pages, skips, PAGE_SIZE);
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.results.length === PAGE_SIZE
-        ? allPages.length * PAGE_SIZE
-        : null;
-    },
+    initialPageParam: instances.map(() => 0),
+    getNextPageParam: (lastPage) => lastPage.next,
+    enabled: loaded,
   });
   const { top } = useSafeAreaInsets();
-  const trackGroups = data?.pages.flatMap((page) => page.results) || [];
+  const trackGroups = data ? dedupeReleases(data.pages) : [];
   const [showError, setShowError] = useState<boolean>(true);
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const columnWidth = useGridColumnWidth();
@@ -155,7 +167,7 @@ export default function Index() {
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
         data={trackGroups}
-        keyExtractor={(item, index) => `${item.id}-${index}`}
+        keyExtractor={(item) => `${item.apiRoot ?? ""}-${item.id}`}
         renderItem={({ item }) => (
           <TrackGroupItem {...item} width={columnWidth} />
         )}

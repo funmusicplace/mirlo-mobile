@@ -14,6 +14,8 @@ import Markdown from "@/components/Markdown";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";
+import { siteUrlFor } from "@/scripts/instances";
+import { useKnownApiRoot } from "@/state/InstancesContext";
 import Text from "@/components/ThemedText";
 import Button from "@/components/Button";
 import ShareButton from "@/components/ShareButton";
@@ -34,16 +36,28 @@ const AVATAR_SIZE = 56;
 const TAB_RULE = spacing.xs;
 
 export default function ArtistPage() {
-  const { id } = useLocalSearchParams();
-  const { data, isError, isPending, error } = useQuery(
-    queryArtist({ artistSlug: String(id) ?? "" }),
-  );
+  const params = useLocalSearchParams<{ id: string; apiRoot?: string }>();
+  const { id } = params;
+  const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
+  const artistQuery = queryArtist({ artistSlug: String(id) ?? "", apiRoot });
+  const { data, isError, isPending, error } = useQuery({
+    ...artistQuery,
+    enabled: ready && artistQuery.enabled,
+  });
   const { t } = useTranslation("translation");
   const colors = useColors();
   const columnWidth = useGridColumnWidth();
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const contentHeight = useRef(0);
   const aboutHeight = useRef(0);
+
+  if (unknown) {
+    return (
+      <View>
+        <Text>{t("sources.unknownSource")}</Text>
+      </View>
+    );
+  }
 
   if (isPending) {
     return (
@@ -99,7 +113,12 @@ export default function ArtistPage() {
         data={artistInfo.trackGroups}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <TrackGroupItem {...item} width={columnWidth} showArtist={false} />
+          <TrackGroupItem
+            {...item}
+            apiRoot={apiRoot}
+            width={columnWidth}
+            showArtist={false}
+          />
         )}
         onContentSizeChange={(_, height) => {
           contentHeight.current = height;
@@ -159,7 +178,7 @@ export default function ArtistPage() {
               />
               {artistInfo.urlSlug ? (
                 <ShareButton
-                  url={`https://mirlo.space/${artistInfo.urlSlug}`}
+                  url={`${siteUrlFor(apiRoot)}/${artistInfo.urlSlug}`}
                 />
               ) : null}
             </View>

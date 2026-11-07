@@ -951,5 +951,17 @@
       "searchByPopular": "Search By Popular Tags",
       "topListened": "Most Listened To"
     }
+  },
+  "sources": {
+    "title": "Sources",
+    "description": "Recent releases come from every source in this list. You can add any site that runs Mirlo.",
+    "addressLabel": "Source address",
+    "addressPlaceholder": "mirlo.example.org",
+    "add": "Add source",
+    "remove": "Remove",
+    "removeLabel": "Remove {{name}}",
+    "notFound": "Couldn't find a Mirlo site at that address.",
+    "duplicate": "That source is already in the list.",
+    "unknownSource": "This page comes from a source that isn't in your list."
   }
 }

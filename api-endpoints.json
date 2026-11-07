@@ -13,6 +13,11 @@
       "sources": ["state/SearchContext.tsx"]
     },
     {
+      "method": "GET",
+      "path": "/v1/artists/{param}",
+      "sources": ["queries/queries.ts"]
+    },
+    {
       "method": "POST",
       "path": "/v1/flag",
       "sources": ["app/reportAlbumModal.tsx"]

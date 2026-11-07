@@ -46,6 +46,7 @@ import { screenEdges } from "@/constants/safe-area";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
 import { markdownHeadings, type } from "@/constants/typography";
 import TagPill, { TagPillList } from "@/components/TagPill";
+import { useKnownApiRoot } from "@/state/InstancesContext";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -182,10 +183,18 @@ function formatReleaseDate(utcDate: string | undefined, t: TFunction) {
 }
 
 export default function AlbumTracks() {
-  const { id, slug } = useLocalSearchParams();
-  const { isPending, isError, data, error } = useQuery(
-    queryAlbum({ slug: slug, id: id }),
-  );
+  const params = useLocalSearchParams<{
+    id: string;
+    slug: string;
+    apiRoot?: string;
+  }>();
+  const { id, slug } = params;
+  const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
+  const albumQuery = queryAlbum({ slug: slug, id: id, apiRoot });
+  const { isPending, isError, data, error } = useQuery({
+    ...albumQuery,
+    enabled: ready && albumQuery.enabled,
+  });
   const { setPlayableTracks } = usePlayer();
   const { user } = useAuthContext();
   const [album, setAlbum] = useState<RNTrack[]>();
@@ -219,6 +228,18 @@ export default function AlbumTracks() {
     }, [data]),
   );
 
+  if (unknown) {
+    return (
+      <View style={styles.screen}>
+        <ErrorNotification
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          error={new Error(t("sources.unknownSource"))}
+        />
+      </View>
+    );
+  }
+
   if (isPending) {
     return (
       <View style={styles.screen}>
@@ -245,6 +266,8 @@ export default function AlbumTracks() {
   }
 
   const selectedAlbum = data.result;
+  // Wishlists and purchases belong to the account on the default instance
+  const isOtherInstance = !!selectedAlbum.apiRoot;
   const label = findLabel(selectedAlbum);
   const releaseDate = formatReleaseDate(selectedAlbum.releaseDate, t);
   const coverSize = width - 2 * gutter;
@@ -308,7 +331,10 @@ export default function AlbumTracks() {
                       <Link
                         href={{
                           pathname: "/artist/[id]/artist-page",
-                          params: { id: selectedAlbum.artistId },
+                          params: {
+                            id: selectedAlbum.artistId,
+                            apiRoot: selectedAlbum.apiRoot,
+                          },
                         }}
                         style={linkStyle}
                       />
@@ -328,7 +354,10 @@ export default function AlbumTracks() {
                           <Link
                             href={{
                               pathname: "/artist/[id]/artist-page",
-                              params: { id: label.urlSlug ?? label.id },
+                              params: {
+                                id: label.urlSlug ?? label.id,
+                                apiRoot: selectedAlbum.apiRoot,
+                              },
                             }}
                             style={linkStyle}
                           />
@@ -362,11 +391,15 @@ export default function AlbumTracks() {
             </View>
             <View style={[styles.gutter, styles.actions]}>
               <ShareButton url={trackGroupUrl(selectedAlbum)} />
-              <WishlistButton trackGroup={selectedAlbum} />
-              <AddAlbumButton
-                trackGroup={selectedAlbum}
-                setModalVisible={setModalVisible}
-              />
+              {isOtherInstance ? null : (
+                <>
+                  <WishlistButton trackGroup={selectedAlbum} />
+                  <AddAlbumButton
+                    trackGroup={selectedAlbum}
+                    setModalVisible={setModalVisible}
+                  />
+                </>
+              )}
             </View>
             <View style={styles.play}>
               <MemoizedAlbumPlayButton />
@@ -395,20 +428,22 @@ export default function AlbumTracks() {
               </View>
             ) : null}
             {tagPills?.length ? <TagPillList>{tagPills}</TagPillList> : null}
-            <Button
-              variant="link"
-              size="compact"
-              accessibilityRole="link"
-              title={t("artist.flagContent")}
-              onPress={() =>
-                router.push({
-                  pathname: "/reportAlbumModal",
-                  params: { trackGroupId: selectedAlbum.id },
-                })
-              }
-              style={styles.flag}
-              textStyle={[styles.flagText, { color: colors.secondaryText }]}
-            />
+            {isOtherInstance ? null : (
+              <Button
+                variant="link"
+                size="compact"
+                accessibilityRole="link"
+                title={t("artist.flagContent")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/reportAlbumModal",
+                    params: { trackGroupId: selectedAlbum.id },
+                  })
+                }
+                style={styles.flag}
+                textStyle={[styles.flagText, { color: colors.secondaryText }]}
+              />
+            )}
           </View>
         }
       />

@@ -15,9 +15,13 @@ import { Link, useRouter } from "expo-router";
 import PlayPauseWrapper from "@/components/PlayPauseWrapper";
 import TrackPlayer, { State } from "react-native-track-player";
 import { usePlayer } from "@/state/PlayerContext";
-import { API_KEY } from "@/constants/api-key";
-import { API_ROOT } from "@/constants/api-root";
-import { audioTrackType, linkifyUrls, trackGroupUrl } from "@/scripts/utils";
+import {
+  audioHeaders,
+  audioTrackType,
+  audioUrl,
+  linkifyUrls,
+  trackGroupUrl,
+} from "@/scripts/utils";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
@@ -34,15 +38,24 @@ import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
 import { markdownHeadings, type } from "@/constants/typography";
+import { useKnownApiRoot } from "@/state/InstancesContext";
 
 type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
 export default function TrackView() {
-  const { slug, id, trackId } = useLocalSearchParams();
-
-  const { data, isPending, isError, error } = useQuery(
-    queryAlbum({ slug: slug, id: id }),
-  );
+  const params = useLocalSearchParams<{
+    slug: string;
+    id: string;
+    trackId: string;
+    apiRoot?: string;
+  }>();
+  const { slug, id, trackId } = params;
+  const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
+  const albumQuery = queryAlbum({ slug: slug, id: id, apiRoot });
+  const { data, isPending, isError, error } = useQuery({
+    ...albumQuery,
+    enabled: ready && albumQuery.enabled,
+  });
   const router = useRouter();
   const { setPlayableTracks } = usePlayer();
   const [album, setAlbum] = useState<RNTrack[]>();
@@ -69,19 +82,18 @@ export default function TrackView() {
             id: data.result.trackGroupId,
             releaseDate: data.result.releaseDate,
             trackGroupId: data.result.trackGroupId,
+            apiRoot: data.result.apiRoot,
           };
           filteredTrack.artist = data.result.artist.name;
           filteredTrack.artwork = data.result.cover.sizes[600];
-          filteredTrack.url = `${API_ROOT}${filteredTrack.audio?.url}`;
+          filteredTrack.url = audioUrl(filteredTrack, data.result);
           filteredTrack.queueIndex = 0; //Only displaying 1 track on this screen
           filteredTrack.trackGroupId = data.result.trackGroupId;
           filteredTrack.audio = {
             url: filteredTrack.audio?.url,
             duration: filteredTrack.audio?.duration,
           };
-          filteredTrack.headers = {
-            "mirlo-api-key": API_KEY,
-          };
+          filteredTrack.headers = audioHeaders(data.result);
           filteredTrack.type = audioTrackType(filteredTrack.audio.url);
 
           setPlayableTracks([filteredTrack]);
@@ -90,6 +102,18 @@ export default function TrackView() {
       }
     }, [data]),
   );
+
+  if (unknown) {
+    return (
+      <View style={styles.screen}>
+        <ErrorNotification
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          error={new Error(t("sources.unknownSource"))}
+        />
+      </View>
+    );
+  }
 
   if (isPending) {
     return (
@@ -121,7 +145,10 @@ export default function TrackView() {
   );
 
   if (!filteredTrack) {
-    router.dismissTo(`/artist/${id}/album/${slug}/album-tracks`);
+    router.dismissTo({
+      pathname: "/artist/[id]/album/[slug]/album-tracks",
+      params: { id, slug, apiRoot },
+    });
   }
 
   const releaseDate = formatReleaseDate(data.result.releaseDate, t);
@@ -177,6 +204,7 @@ export default function TrackView() {
                           params: {
                             id: data.result.artistId,
                             slug: data.result.urlSlug,
+                            apiRoot,
                           },
                         }}
                         style={linkStyle}
@@ -195,7 +223,7 @@ export default function TrackView() {
                       <Link
                         href={{
                           pathname: "/artist/[id]/artist-page",
-                          params: { id: data.result.artistId },
+                          params: { id: data.result.artistId, apiRoot },
                         }}
                         style={linkStyle}
                       />

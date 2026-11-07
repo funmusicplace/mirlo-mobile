@@ -3,10 +3,12 @@ import { API_KEY } from "@/constants/api-key";
 import { MirloFetchError } from "./MirloFetchError";
 import { endSession, getAccessToken, refreshAccessToken } from "./session";
 
+export type ApiRequestInit = RequestInit & { apiRoot?: string };
+
 /**
  * Wraps fetch() calls to Mirlo's API with error handling.
  *
- * @param endpoint The API request path (appended to API_ROOT)
+ * @param endpoint The API request path, appended to init.apiRoot or API_ROOT
  * @param init Fetch request options
  * @param isRetry True on the single retry after a token refresh
  * @returns The resolved JSON response
@@ -15,10 +17,14 @@ import { endSession, getAccessToken, refreshAccessToken } from "./session";
  */
 async function fetchWrapper<R>(
   endpoint: string,
-  init: RequestInit,
+  init: ApiRequestInit,
   isRetry = false,
 ): Promise<R> {
-  const accessToken = await getAccessToken();
+  const { apiRoot = API_ROOT, ...request } = init;
+  const url = `${apiRoot}${endpoint}`;
+  // The session token and the app key never leave this app's own API
+  const ownApi = apiRoot === API_ROOT;
+  const accessToken = ownApi ? await getAccessToken() : null;
 
   const headers = new Headers(init.headers);
 
@@ -26,12 +32,12 @@ async function fetchWrapper<R>(
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  if (API_KEY) {
+  if (API_KEY && ownApi) {
     headers.append("mirlo-api-key", API_KEY);
   }
 
-  const res = await fetch(`${API_ROOT}${endpoint}`, {
-    ...init,
+  const res = await fetch(url, {
+    ...request,
     headers,
   });
 
@@ -86,7 +92,7 @@ function isInvalidToken(res: Response) {
 export function post<T, R>(
   endpoint: string,
   body: T,
-  init: RequestInit = {},
+  init: ApiRequestInit = {},
 ): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "POST",
@@ -102,20 +108,23 @@ export function post<T, R>(
 /**
  * Wraps fetch() GET calls to Mirlo's API with error handling.
  *
- * @param endpoint The API request path (appended to API_ROOT)
+ * @param endpoint The API request path, appended to init.apiRoot or API_ROOT
  * @param init Fetch request options
  * @returns The resolved JSON response
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
  */
-export function get<R>(endpoint: string, init: RequestInit): Promise<R> {
+export function get<R>(endpoint: string, init: ApiRequestInit): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "GET",
     ...init,
   });
 }
 
-export function del<R>(endpoint: string, init: RequestInit = {}): Promise<R> {
+export function del<R>(
+  endpoint: string,
+  init: ApiRequestInit = {},
+): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "DELETE",
     ...init,
@@ -124,7 +133,7 @@ export function del<R>(endpoint: string, init: RequestInit = {}): Promise<R> {
 
 export function getMany<R>(
   endpoint: string,
-  init: RequestInit,
+  init: ApiRequestInit,
   query?: { [key: string]: string },
 ): Promise<{ results: R[]; total?: number }> {
   const fullEndpoint = convertQueryToSeachParams(endpoint, query);

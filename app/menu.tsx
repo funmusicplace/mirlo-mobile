@@ -113,6 +113,13 @@ export default function Menu() {
           />
           <Separator />
           <MenuLink
+            label={t("sources.title")}
+            onPress={() => {
+              router.back();
+              router.push("/sources");
+            }}
+          />
+          <MenuLink
             label={t("headerMenu.about")}
             onPress={() => {
               router.back();
