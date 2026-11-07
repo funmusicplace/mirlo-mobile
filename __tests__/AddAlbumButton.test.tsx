@@ -3,15 +3,20 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import AddAlbumButton from "@/components/AddAlbumButton";
 import { createMockAlbum } from "@/__mocks__/mockAlbum";
+import { createMockUser } from "@/__mocks__/mockUser";
 
 const mockPush = jest.fn();
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
+let mockUser: LoggedInUser | null = null;
 jest.mock("@/state/AuthContext", () => ({
-  useAuthContext: () => ({ user: null }),
+  useAuthContext: () => ({ user: mockUser }),
 }));
+
+// The real icon sets state after its font loads, outside act
+jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
 // Local strings, so a Transifex token in the env can't change them
 jest.mock("react-i18next", () => {
@@ -79,4 +84,76 @@ test("a release nobody can get has no add button", () => {
   );
 
   expect(screen.queryByRole("button")).toBeNull();
+});
+
+describe("a release the user owns", () => {
+  const owner = (trackGroupId: number) =>
+    createMockUser({ userTrackGroupPurchases: [{ trackGroupId }] });
+
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+  afterEach(() => {
+    mockUser = null;
+  });
+
+  test("offers its download, also when nobody can get it", () => {
+    mockUser = owner(7);
+    render(
+      <AddAlbumButton
+        trackGroup={createMockAlbum({
+          id: 7,
+          minPrice: 500,
+          isGettable: false,
+        })}
+        setModalVisible={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Download" })).toBeTruthy();
+    expect(screen.queryByText("Buy")).toBeNull();
+  });
+
+  test("opens the download dialog for the release", () => {
+    mockUser = owner(7);
+    const trackGroup = createMockAlbum({ id: 7 });
+    render(
+      <AddAlbumButton trackGroup={trackGroup} setModalVisible={jest.fn()} />,
+    );
+
+    fireEvent.press(screen.getByRole("button", { name: "Download" }));
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/downloadModal",
+      params: {
+        trackGroupId: 7,
+        trackGroupTitle: trackGroup.title,
+        artist: trackGroup.artist.name,
+      },
+    });
+  });
+
+  test("keeps a pre-order back until it ships", () => {
+    mockUser = owner(7);
+    render(
+      <AddAlbumButton
+        trackGroup={createMockAlbum({ id: 7, isPreorder: true })}
+        setModalVisible={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  test("another release still shows its purchase button", () => {
+    mockUser = owner(8);
+    render(
+      <AddAlbumButton
+        trackGroup={createMockAlbum({ id: 7, minPrice: 500 })}
+        setModalVisible={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Buy" })).toBeTruthy();
+  });
 });

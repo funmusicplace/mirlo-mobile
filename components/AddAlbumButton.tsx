@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { getLocales } from "expo-localization";
 import Button from "@/components/Button";
+import DownloadButton from "@/components/DownloadButton";
 import { spacing } from "@/constants/spacing";
 
 type AddAlbumButtonProps = {
@@ -82,9 +83,13 @@ export default function AddAlbumButton({
       }
     }
   }, [setModalVisible, user, trackGroup, router]);
+  // The download route checks only the purchase, so owners keep it when the flag is off
+  if (ids?.includes(trackGroup.id)) {
+    return <DownloadButton trackGroup={trackGroup} style={styles.purchase} />;
+  }
   // An absent flag keeps the button
   if (trackGroup.isGettable === false) return null;
-  return ids && ids.includes(trackGroup.id) ? null : (
+  return (
     <Button
       variant="outlined"
       rounded

@@ -2,6 +2,7 @@ import {
   audioTrackType,
   coverSize,
   creditedArtists,
+  downloadFileName,
   textAroundTag,
   isTrackOwned,
   isTrackOwnedOrPreview,
@@ -307,5 +308,27 @@ describe("textAroundTag", () => {
     expect(textAroundTag("from <albumLink>{{album}}</albumLink>")).toBe("from");
     expect(textAroundTag("<albumLink>{{album}}</albumLink> から")).toBe("から");
     expect(textAroundTag("by {{artist}}")).toBe("by {{artist}}");
+  });
+});
+
+describe("downloadFileName", () => {
+  test("joins the artist and the title into a zip name", () => {
+    expect(downloadFileName("Matt Thys", "dronefields")).toBe(
+      "Matt Thys - dronefields.zip",
+    );
+  });
+
+  test("replaces what a file name can't hold and collapses whitespace", () => {
+    expect(downloadFileName("AC/DC", 'Who Made Who? "Live"')).toBe(
+      "AC DC - Who Made Who Live.zip",
+    );
+    expect(downloadFileName("A\\B  |  C", "x:y\n\tz\u0000")).toBe(
+      "A B C - x y z.zip",
+    );
+  });
+
+  test("drops a blank part and falls back to album", () => {
+    expect(downloadFileName("Solo", "")).toBe("Solo.zip");
+    expect(downloadFileName("", "")).toBe("album.zip");
   });
 });
