@@ -181,6 +181,21 @@ interface PlayPauseWrapperProps {
   onTrackScreen: boolean;
 }
 
+interface Link {
+  url: string;
+  linkType?: string;
+  linkLabel?: string;
+  inHeader?: boolean;
+  iconUrl?: string;
+}
+
+interface TourDate {
+  id: number;
+  date: string;
+  location: string;
+  ticketsUrl?: string | null;
+}
+
 interface Artist {
   name: string;
   bio: string;
@@ -196,6 +211,8 @@ interface Artist {
   trackGroups: AlbumProps[];
   links?: string[];
   linksJson?: Link[];
+  announcementText?: string | null;
+  tourDates?: TourDate[];
   properties?: {
     colors: ArtistColors;
   };
