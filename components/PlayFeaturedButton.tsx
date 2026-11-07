@@ -12,10 +12,27 @@ import { useColors } from "@/constants/colors";
 import { radius } from "@/constants/spacing";
 import { HeaderButton } from "@/components/ScreenHeader";
 
+type PickTracks = (
+  tracks: RNTrack[],
+  user: LoggedInUser | null | undefined,
+  album: AlbumProps,
+) => RNTrack[];
+
+const pickFeatured: PickTracks = (tracks, user, album) => {
+  const picked = pickFeaturedTrack(tracks, user, album);
+  return picked ? [picked] : [];
+};
+
+// Queues what `pick` takes from each album, the featured track by default
 export default function PlayFeaturedButton({
   albums,
+  pick = pickFeatured,
+  isCurrent,
 }: {
   albums: AlbumProps[];
+  pick?: PickTracks;
+  // Also shows pause for a track that this button didn't queue itself
+  isCurrent?: (track: RNTrack) => boolean;
 }) {
   const { t } = useTranslation("translation");
   const colors = useColors();
@@ -25,7 +42,10 @@ export default function PlayFeaturedButton({
   const [loading, setLoading] = useState(false);
   const [mix, setMix] = useState<RNTrack[]>([]);
 
-  const mixIsActive = mix.some((track) => track.url === activeTrack?.url);
+  const mixIsActive =
+    !!activeTrack &&
+    (mix.some((track) => track.url === activeTrack.url) ||
+      !!isCurrent?.(activeTrack));
   const showPause = isPlaying && mixIsActive;
 
   const onPress = async () => {
@@ -52,12 +72,12 @@ export default function PlayFeaturedButton({
       albumDetails.forEach((outcome) => {
         if (outcome.status !== "fulfilled") return;
         const album = outcome.value.result;
-        const picked = pickFeaturedTrack(
-          (album.tracks ?? []).map((track) => toRNTrack(track, album)),
-          user,
-          album,
+        const found = (album.tracks ?? []).map((track) =>
+          toRNTrack(track, album),
         );
-        if (picked) tracks.push({ ...picked, queueIndex: tracks.length });
+        pick(found, user, album).forEach((picked) =>
+          tracks.push({ ...picked, queueIndex: tracks.length }),
+        );
       });
       if (!tracks.length) return;
 

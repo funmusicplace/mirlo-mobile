@@ -85,14 +85,22 @@ export const isTrackOwnedOrPreview = (
   return ownsTrack || boughtTrack;
 };
 
+export function playableTracks(
+  tracks: RNTrack[],
+  user: LoggedInUser | null | undefined,
+  album: AlbumProps,
+): RNTrack[] {
+  return tracks
+    .filter((track) => isTrackOwnedOrPreview(track, user, album))
+    .sort((a, b) => a.order - b.order);
+}
+
 export function pickFeaturedTrack(
   tracks: RNTrack[],
   user: LoggedInUser | null | undefined,
   album: AlbumProps,
 ): RNTrack | undefined {
-  const playable = tracks
-    .filter((track) => isTrackOwnedOrPreview(track, user, album))
-    .sort((a, b) => a.order - b.order);
+  const playable = playableTracks(tracks, user, album);
 
   return playable.find((track) => track.isFeatured) ?? playable[0];
 }
