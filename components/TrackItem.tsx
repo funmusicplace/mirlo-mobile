@@ -42,11 +42,14 @@ export const TrackItem = ({
   const canPlayTrack = isTrackOwnedOrPreview(track, user, album);
   const active = canPlayTrack && thisSongSelected;
 
+  // Like the web: co-authors by order, the release artist included
   // Artists sometimes leave a name blank and type it into the role field
-  const names = (track.trackArtists ?? [])
+  const contributors = (track.trackArtists ?? [])
+    .filter((artist) => artist.isCoAuthor)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((artist) => artist.artistName?.trim())
-    .filter(Boolean);
-  const contributors = names.join(", ");
+    .filter(Boolean)
+    .join(", ");
   return (
     // The favorite sits beside the row button so screen readers reach it
     <View style={styles.row}>
@@ -79,7 +82,7 @@ export const TrackItem = ({
           >
             {track.title}
           </Text>
-          {contributors && names[0] !== track.artist ? (
+          {contributors ? (
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"

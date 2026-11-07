@@ -69,6 +69,8 @@ export default function AddAlbumButton({
       }
     }
   }, [setModalVisible, user, trackGroup, router]);
+  // An absent flag keeps the button
+  if (trackGroup.isGettable === false) return null;
   return ids && ids.includes(trackGroup.id) ? null : (
     <Button
       variant="outlined"

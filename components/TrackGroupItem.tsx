@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Href, router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { gutter, spacing } from "@/constants/spacing";
@@ -34,6 +35,8 @@ export default function TrackGroupItem({
 }: AlbumProps & { width?: number; href?: Href; showArtist?: boolean }) {
   const colors = useColors();
   const isDark = useColorScheme() === "dark";
+  const { t } = useTranslation("translation");
+  const displayTitle = title || t("playableCover.untitled");
   return (
     <Pressable
       onPress={() =>
@@ -45,7 +48,9 @@ export default function TrackGroupItem({
         )
       }
       accessibilityRole="link"
-      accessibilityLabel={showArtist ? `${title}, ${artist.name}` : title}
+      accessibilityLabel={
+        showArtist ? `${displayTitle}, ${artist.name}` : displayTitle
+      }
       // Foreground so the ripple draws over the cover
       android_ripple={{ color: colors.tintX, foreground: true }}
       style={({ pressed }) => [
@@ -65,7 +70,7 @@ export default function TrackGroupItem({
         style={[styles.cover, { backgroundColor: colors.tint }]}
       />
       <Text style={styles.title} numberOfLines={1}>
-        {title}
+        {displayTitle}
       </Text>
       {showArtist && (
         <Text

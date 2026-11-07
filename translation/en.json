@@ -808,6 +808,8 @@
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
     "about": "About:",
     "noTracks": "There are no tracks in this album yet.",
     "isPrivate": "Is private?",
@@ -947,7 +949,8 @@
   },
   "playableCover": {
     "playAlbum": "Play album",
-    "playTrack": "Play track"
+    "playTrack": "Play track",
+    "untitled": "Untitled"
   },
   "mobileApp": {
     "searchScreen": {

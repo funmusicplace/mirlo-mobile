@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { openInBrowser } from "@/scripts/openInBrowser";
 import { API_ROOT } from "@/constants/api-root";
 import { API_KEY } from "@/constants/api-key";
@@ -140,3 +141,18 @@ export const trackGroupUrl = (trackGroup: AlbumProps) =>
 export const handleExternalPurchase = (trackGroup: AlbumProps) => {
   openInBrowser(trackGroupUrl(trackGroup));
 };
+
+// The web puts the release date and the track count on one line
+export const releaseMeta = (
+  date: string | undefined,
+  trackCount: number,
+  t: TFunction,
+) =>
+  [
+    date,
+    trackCount > 0
+      ? t("trackGroupDetails.trackCount", { count: trackCount })
+      : undefined,
+  ]
+    .filter(Boolean)
+    .join(" · ");

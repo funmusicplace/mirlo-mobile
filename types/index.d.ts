@@ -86,6 +86,7 @@ interface AlbumProps {
   about?: string;
   tags?: string[];
   trackGroupId: number;
+  isGettable?: boolean;
   minPrice?: number;
   // The instance it came from, unset for the default one
   apiRoot?: string;
@@ -115,6 +116,7 @@ interface RNTrack {
     artistName?: string;
     isCoAuthor?: boolean;
     trackId?: number;
+    order?: number;
   }[];
   allowIndividualSale: boolean;
   url: string;
@@ -175,6 +177,7 @@ interface PlayPauseWrapperProps {
 interface Artist {
   name: string;
   bio: string;
+  shortDescription?: string;
   activityPub: boolean;
   urlSlug?: string;
   userId: number;

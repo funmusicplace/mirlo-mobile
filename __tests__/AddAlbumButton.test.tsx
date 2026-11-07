@@ -35,3 +35,14 @@ test("a signed-out user on a free release is sent to log in", () => {
   expect(mockPush).toHaveBeenCalledWith("/login");
   expect(setModalVisible).not.toHaveBeenCalled();
 });
+
+test("a release nobody can get has no add button", () => {
+  render(
+    <AddAlbumButton
+      trackGroup={createMockAlbum({ isGettable: false })}
+      setModalVisible={jest.fn()}
+    />,
+  );
+
+  expect(screen.queryByRole("button")).toBeNull();
+});
