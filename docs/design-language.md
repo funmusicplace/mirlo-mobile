@@ -293,7 +293,9 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Title | 14 / 19.25, weight 400, text color, one line, 8 below the cover | `type.cardTitle`, one line, `spacing.sm` above |
 | Artist | 12 / 18 link in the button color, one line | `type.cardMeta` in `accent`, one line, `spacing.xs` above. `showArtist={false}` drops it on the artist page |
 | Link | Release page | Album screen, or `href` when set. `CollectionPurchase` points purchased and favorited tracks at the track screen |
-| States | Hover shows play, buy and wishlist actions over the cover | Pressed: opacity 0.6 on iOS, foreground `tintX` ripple on Android. `link` role, labeled with title and artist |
+| Track caption | None, `TrackCard` shows the title only and the hover label says "Go to track" | `caption`, "Track" (`sales.track`), under the title in `type.cardMeta` and `secondaryText`. Wishlist tracks only, so a track and its single-track release read differently |
+| Wishlist actions | Overlay on the cover: wishlist heart, then play | `actions` under the card and outside the link, so each control stays reachable to screen readers: the remove control (`WishlistButton` for a release, `FavoriteTrackButton` for a track), then the filled play circle (`PlayFeaturedButton`), `spacing.lg` apart in a 44 pt row at the bottom of the card, so rows stay level across a grid row. A release plays whole and a track alone, and the circle shows pause while its track plays. Wishlist only |
+| States | Hover shows play, buy and wishlist actions over the cover | Pressed: opacity 0.6 on iOS, foreground `tintX` ripple on Android. `link` role, labeled with title, artist and caption |
 
 ### Notices and errors
 

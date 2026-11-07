@@ -29,6 +29,12 @@ jest.mock("@/components/MirloLogo", () => {
   return { __esModule: true, LOGO_SIZE: 32, default: () => <View /> };
 });
 
+// The card controls need the player and a query client, wishlistCard.test.tsx covers them
+jest.mock("@/components/WishlistCardActions", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 // Local strings, so a Transifex token in the env can't change them
 jest.mock("react-i18next", () => {
   const en = jest.requireActual("@/translation/en.json");

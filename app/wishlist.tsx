@@ -111,6 +111,7 @@ export default function Wishlist() {
             trackGroup={item.trackGroup}
             track={item.track}
             width={columnWidth}
+            wishlist
           />
         )}
         ListHeaderComponent={
