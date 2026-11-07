@@ -2,16 +2,22 @@ import { StyleSheet } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { usePlayer } from "@/state/PlayerContext";
 import TrackPlayer, { RepeatMode } from "react-native-track-player";
+import { useTranslation } from "react-i18next";
 import Text from "@/components/ThemedText";
 import { HeaderButton } from "@/components/ScreenHeader";
 import { useColors } from "@/constants/colors";
 import { spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
-const MODE_LABELS = { none: "Off", queue: "Queue", track: "Track" } as const;
+const MODE_KEYS = {
+  none: "mobileApp.accessibility.repeatOff",
+  queue: "player.loopingQueue",
+  track: "player.loopingTrack",
+} as const;
 
 export default function LoopButton() {
   const { looping, setLooping } = usePlayer();
+  const { t } = useTranslation("translation");
   const colors = useColors();
 
   const onPress = async () => {
@@ -34,9 +40,9 @@ export default function LoopButton() {
   return (
     <HeaderButton
       size={touchTarget}
-      accessibilityLabel="Repeat"
+      accessibilityLabel={t("player.loopMusic")}
       accessibilityState={{ selected: looping !== "none" }}
-      accessibilityValue={{ text: MODE_LABELS[looping] }}
+      accessibilityValue={{ text: t(MODE_KEYS[looping]) }}
       onPress={onPress}
     >
       <Feather

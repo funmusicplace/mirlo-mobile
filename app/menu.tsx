@@ -75,7 +75,7 @@ export default function Menu() {
       <ScreenHeader
         right={
           <HeaderButton
-            accessibilityLabel="Close"
+            accessibilityLabel={t("common.close")}
             onPress={() => router.dismiss()}
           >
             <FontAwesome5 name="times" size={20} color={colors.text} solid />

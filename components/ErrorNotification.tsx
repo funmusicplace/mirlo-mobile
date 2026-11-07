@@ -53,7 +53,7 @@ const ErrorNotification = ({
         <Pressable
           onPress={onDismiss}
           accessibilityRole="button"
-          accessibilityLabel="Dismiss"
+          accessibilityLabel={t("common.dismiss")}
           hitSlop={(touchTarget - 20) / 2}
           style={({ pressed }) => [styles.dismiss, pressed && styles.pressed]}
         >

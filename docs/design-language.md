@@ -433,7 +433,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 
 ### Accessibility
 
-- Give every icon-only control an `accessibilityLabel`, plus an `accessibilityHint` when the label doesn't make the result clear.
+- Give every icon-only control an `accessibilityLabel`, plus an `accessibilityHint` when the label doesn't make the result clear. Both come from `t()`, and so does the `text` of an `accessibilityValue`.
 - Set roles: `button` for actions, `link` for navigation to content, `adjustable` for the progress bar, `alert` for errors, `header` for screen titles and section labels, `radiogroup` with `radio` pills for filters.
 - Set states: `selected` on the active footer item, the playing track row and active shuffle and repeat, `checked` on the selected filter pill, `disabled` on disabled controls, `busy` while loading. Repeat also reports its mode through `accessibilityValue`.
 - Every control gets a 44 pt hit area (`touchTarget`). When the visual is smaller, add `hitSlop` up to 44, and pad the parent by the slop where Android would clip it, as `TagPillList` and `FilterGroup` do.
@@ -474,4 +474,4 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 
 Before committing UI changes, run `npx eslint . --ext .ts,.tsx`. The baseline is 0 errors, and UI changes add none.
 
-Text typed straight into JSX fails `react/jsx-no-literals`: put it in `translation/en.json` and read it through `t()`. The rule checks JSX children only, so string props such as `accessibilityLabel` and `title` need `t()` by hand.
+Text typed straight into JSX fails `react/jsx-no-literals`: put it in `translation/en.json` and read it through `t()`. That rule checks JSX children only, so string props such as `title` need `t()` by hand. Literal `accessibilityLabel`, `accessibilityHint` and `accessibilityValue` text fails `no-restricted-syntax`, except in stories and tests. The one constant is `LOGO_LABEL`, the product name on the logo.

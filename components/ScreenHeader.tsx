@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
@@ -82,10 +83,11 @@ export function HeaderButton({
 }
 
 export function BackButton() {
+  const { t } = useTranslation("translation");
   const colors = useColors();
   return (
     <HeaderButton
-      accessibilityLabel="Back"
+      accessibilityLabel={t("setup.back")}
       onPress={() => {
         if (router.canGoBack()) router.back();
         else router.dismissTo("/");

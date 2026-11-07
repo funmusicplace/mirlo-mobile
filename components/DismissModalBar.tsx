@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useTranslation } from "react-i18next";
 import { HeaderButton } from "@/components/ScreenHeader";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
@@ -14,6 +15,7 @@ type DismissModalBarProps = {
 // Web Modal header: h2 title on the left, close button on the right
 export default function DismissModalBar({ title }: DismissModalBarProps) {
   const router = useRouter();
+  const { t } = useTranslation("translation");
   const colors = useColors();
 
   return (
@@ -30,7 +32,10 @@ export default function DismissModalBar({ title }: DismissModalBarProps) {
           {title}
         </Text>
       ) : null}
-      <HeaderButton accessibilityLabel="Close" onPress={() => router.dismiss()}>
+      <HeaderButton
+        accessibilityLabel={t("common.close")}
+        onPress={() => router.dismiss()}
+      >
         <FontAwesome5 name="times" size={20} color={colors.text} />
       </HeaderButton>
     </View>

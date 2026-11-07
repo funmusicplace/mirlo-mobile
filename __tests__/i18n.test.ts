@@ -72,6 +72,12 @@ describe("i18n fallback", () => {
     expect(i18n.t("mobileApp.footer.recentReleases")).toBe("Recent Releases");
     expect(i18n.t("mobileApp.footer.yourCollection")).toBe("Your Collection");
     expect(
+      i18n.t("mobileApp.accessibility.trackProgressValue", {
+        elapsed: "00:30",
+        total: "02:00",
+      }),
+    ).toBe("00:30 of 02:00");
+    expect(
       i18n.t("trackGroupCard.addAlbumToCollection", { title: "Demo" }),
     ).toBe("Or, add Demo to your collection");
     expect(i18n.t("mobileApp.addFreeAlbumModal.title", { title: "Demo" })).toBe(

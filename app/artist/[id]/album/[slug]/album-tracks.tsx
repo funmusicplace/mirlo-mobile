@@ -145,7 +145,7 @@ function AlbumPlayButton() {
   return (
     <Button
       rounded
-      title={playing ? t("clickToPlay.pause") : t("playableCover.playAlbum")}
+      title={playing ? t("playableCover.pause") : t("playableCover.playAlbum")}
       startIcon={
         <Ionicons name={playing ? "pause-outline" : "play-outline"} size={16} />
       }

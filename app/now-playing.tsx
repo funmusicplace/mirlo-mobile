@@ -72,9 +72,12 @@ export default function NowPlaying() {
             minimumTrackTintColor={colors.accent}
             maximumTrackTintColor={colors.track}
             onSlidingComplete={async (value) => await TrackPlayer.seekTo(value)}
-            accessibilityLabel="Track progress"
+            accessibilityLabel={t("mobileApp.accessibility.trackProgress")}
             accessibilityValue={{
-              text: `${formatTime(progress.position)} of ${formatTime(progress.duration)}`,
+              text: t("mobileApp.accessibility.trackProgressValue", {
+                elapsed: formatTime(progress.position),
+                total: formatTime(progress.duration),
+              }),
             }}
           />
           <View style={styles.times}>

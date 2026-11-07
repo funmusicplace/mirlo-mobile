@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
 import ScreenHeader, { HeaderButton } from "@/components/ScreenHeader";
-import MirloLogo, { LOGO_SIZE } from "@/components/MirloLogo";
+import MirloLogo, { LOGO_LABEL, LOGO_SIZE } from "@/components/MirloLogo";
 import { useGridColumnWidth } from "@/components/TrackGroupItem";
 import CollectionPurchase, {
   CollectionEmpty,
@@ -125,8 +125,8 @@ export default function Collections() {
         left={
           <HeaderButton
             size={LOGO_SIZE}
-            accessibilityLabel="Mirlo"
-            accessibilityHint="Scrolls to the top"
+            accessibilityLabel={LOGO_LABEL}
+            accessibilityHint={t("mobileApp.accessibility.scrollsToTop")}
             onPress={() =>
               listRef.current?.scrollToOffset({ offset: 0, animated: true })
             }
