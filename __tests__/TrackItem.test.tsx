@@ -4,6 +4,7 @@ import "../i18n";
 import { TrackItem, formatTime } from "@/components/TrackItem";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockUser } from "@/__mocks__/mockUser";
+import * as api from "@/queries/fetch/fetchWrapper";
 
 jest.mock("@react-native-async-storage/async-storage", () => ({}));
 
@@ -17,7 +18,7 @@ jest.mock("@/state/AuthContext", () => ({
 }));
 
 describe("<TrackItem />", () => {
-  test("plays from the row and keeps the favorite reachable beside it", () => {
+  test("plays from the row and keeps the wishlist heart reachable beside it", () => {
     const onPress = jest.fn();
     render(
       <TrackItem
@@ -33,8 +34,26 @@ describe("<TrackItem />", () => {
     expect(screen.getByText("2")).toBeTruthy();
     expect(screen.getByText("03:50")).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "Add to favorites" }),
+      screen.getByRole("button", { name: "Add to wishlist" }),
     ).toBeTruthy();
+  });
+
+  test("the heart posts the favorite and flips its label", async () => {
+    render(
+      <TrackItem
+        track={createMockRNTrack({ id: 7 })}
+        thisSongSelected={false}
+      />,
+    );
+
+    fireEvent.press(screen.getByRole("button", { name: "Add to wishlist" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Remove from wishlist" }),
+    ).toBeTruthy();
+    expect(api.post).toHaveBeenCalledWith("/v1/tracks/7/favorite", {
+      favorite: true,
+    });
   });
 
   test("disables rows the listener can't play", () => {

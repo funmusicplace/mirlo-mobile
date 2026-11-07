@@ -41,7 +41,7 @@ Each key exists as `colors.light.<key>` and `colors.dark.<key>`.
 | `secondaryText` | `--mi-light-foreground-color` (73% mix) | `#454545` | `#b7b4b4` | Contributors, release dates, player times, the footer artist, byline prefixes, search group headings and empty messages |
 | `inactive` | `--mi-neutral-500` | `#8b8083` | `#8b8083` | Unselected nav icons, shuffle and repeat when off, disabled solid button label |
 | `disabled` | `--mi-disabled-color` (13.3% mix) | `#dddddd` | `#2f2f2f` | Disabled button fill, label and border |
-| `accent` | `--mi-button-color` used as text | `#BE3455` | `#e0607e` | Links, section labels, header, player and favorite icons, active nav icons, logo circle, progress fill, chip text, playing track title, search input border, spinners |
+| `accent` | `--mi-button-color` used as text | `#BE3455` | `#e0607e` | Links, section labels, header and player icons, active nav icons, logo circle, progress fill, chip text, playing track title, search input border, spinners |
 | `button` | `--mi-button-color` | `#BE3455` | `#BE3455` | Filled button and play circle fill |
 | `buttonText` | `--mi-button-text-color` | `#ffffff` | `#ffffff` | Text and icons on filled buttons, logo glyph |
 | `danger` | `--mi-red-700` (light), `--mi-warning-color` (dark) | `#6e162d` | `#f2897a` | Inline errors, the menu's "Delete account" link |
@@ -280,9 +280,9 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Size | 36 tall: 4 vertical padding, 28 line height | 44 minimum, `gutter` side padding, `spacing.sm` gaps |
 | Index | 14 px in a 28 box, play glyph on hover, pause glyph while playing | `type.small`, centered in a 28 box |
 | Title | 14, co-authors after it | `type.small`, wraps, contributors below in `type.xsmall` and `secondaryText` |
-| Trailing | Duration 12 bold, 28 px options menu (favorite, links, embed, lyrics, download) | Duration in `type.xsmall` weight 700, then a favorite star (Ionicons at 16 in `accent`) in a 28 pt `HeaderButton` when signed in |
+| Trailing | Duration 12 bold, 28 px options menu (wishlist, links, embed, lyrics, download) | Duration in `type.xsmall` weight 700, then the wishlist heart when signed in: the release's outlined `onlyIcon` `Button` (30 pt circle, Ionicons `heart` at 16 in `accent`, "Add to wishlist" or "Remove from wishlist") |
 | States | Playing: weight 600. Not playable: opacity 0.6. Hover: tint-x fill | Playing: title in `accent`, weight 600. Not playable: opacity 0.6 and disabled. Pressed: opacity 0.6 on iOS, `tintX` ripple on Android |
-| Accessibility | Play and pause buttons in the index box | `button` role with `selected` and `disabled` state. The favorite sits outside the row button so screen readers reach it |
+| Accessibility | Play and pause buttons in the index box | `button` role with `selected` and `disabled` state. The wishlist heart sits outside the row button so screen readers reach it |
 
 ### Release grid item
 
@@ -411,7 +411,7 @@ Use `Pressable` with a `style` callback, as `Button`, `HeaderButton`, `TagPill` 
 
 - Use the web's glyph when `@expo/vector-icons` ships its set: `FontAwesome5` for `react-icons/fa` (search, `user-alt`, `chevron-left`, `times`), `MaterialIcons` for `react-icons/md` (skip), and Ionicons for `react-icons/io` and `io5` (heart, add).
 - Sets with no Expo equivalent get the closest glyph: Ionicons `play-outline` and `pause-outline` for `VscPlay` and `TfiControlPause`, Feather `repeat` and `shuffle` for `RxLoop` and `RxShuffle`, FontAwesome5 `share-alt` for `BsShare`.
-- Mobile-only controls, such as the footer navigation and the favorite star, use Ionicons.
+- Mobile-only controls, such as the footer navigation, use Ionicons.
 
 ### Accessibility
 

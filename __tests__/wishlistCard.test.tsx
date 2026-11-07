@@ -26,9 +26,10 @@ jest.mock("expo-router", () => ({
 }));
 
 const mockGet = jest.fn();
+const mockPost = jest.fn();
 jest.mock("@/queries/fetch/fetchWrapper", () => ({
   get: (...args: unknown[]) => mockGet(...args),
-  post: jest.fn(),
+  post: (...args: unknown[]) => mockPost(...args),
 }));
 
 const mockTrack = (id: number, order: number, isPreview = true) =>
@@ -103,7 +104,7 @@ test("wishlist cards get remove and play controls, tracks also a caption", () =>
     }),
   ).toBeTruthy();
   expect(
-    screen.getByRole("button", { name: "Remove from favorites" }),
+    screen.getByRole("button", { name: "Remove from wishlist" }),
   ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Play" })).toBeTruthy();
   screen.unmount();
@@ -118,6 +119,28 @@ test("wishlist cards get remove and play controls, tracks also a caption", () =>
 
   renderCard({});
   expect(screen.queryByRole("button")).toBeNull();
+});
+
+test("the heart removes a track from the favorites and a release from the wishlist", async () => {
+  renderCard({ track, wishlist: true });
+  fireEvent.press(screen.getByRole("button", { name: "Remove from wishlist" }));
+  await waitFor(() =>
+    expect(mockPost).toHaveBeenCalledWith(`/v1/tracks/${track.id}/favorite`, {
+      favorite: false,
+    }),
+  );
+  screen.unmount();
+
+  mockPost.mockClear();
+  renderCard({ wishlist: true });
+  fireEvent.press(screen.getByRole("button", { name: "Remove from wishlist" }));
+  await waitFor(() =>
+    expect(mockPost).toHaveBeenCalledWith(
+      `/v1/trackGroups/${album.id}/wishlist`,
+      { wishlist: false },
+    ),
+  );
+  expect(mockPost).toHaveBeenCalledTimes(1);
 });
 
 test("play queues the playable tracks of a release in order, a track alone", async () => {
