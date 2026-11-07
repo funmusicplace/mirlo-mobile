@@ -22,7 +22,7 @@ import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
 import { gutter, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
-import { coverSize } from "@/scripts/utils";
+import { coverSize, textAroundTag } from "@/scripts/utils";
 
 export default function NowPlaying() {
   const { activeTrack } = usePlayer();
@@ -103,9 +103,7 @@ export default function NowPlaying() {
             </MarqueeText>
             <View style={styles.meta}>
               <Text style={[type.small, { color: colors.secondaryText }]}>
-                {t("trackGroupDetails.fromAlbum")
-                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                  .trim() + " "}
+                {textAroundTag(t("trackGroupDetails.fromAlbum")) + " "}
               </Text>
               <Pressable
                 accessibilityRole="link"
@@ -135,9 +133,7 @@ export default function NowPlaying() {
             </View>
             <View style={styles.meta}>
               <Text style={[type.small, { color: colors.secondaryText }]}>
-                {t("trackGroupDetails.byArtist")
-                  .replace(/<[^>]*>.*?<\/[^>]*>/g, "")
-                  .trim() + " "}
+                {textAroundTag(t("trackGroupDetails.byArtist")) + " "}
               </Text>
               <Pressable
                 accessibilityRole="link"

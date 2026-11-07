@@ -172,3 +172,11 @@ const MIN_COVER = 120;
 export function coverSize(width: number, height: number, rest: number) {
   return Math.min(width, Math.max(Math.floor(height - rest), MIN_COVER));
 }
+
+// The words around a <tag>...</tag> placeholder, the link itself is drawn separately
+export function textAroundTag(text: string): string {
+  const open = text.indexOf("<");
+  const close = text.lastIndexOf(">");
+  if (open === -1 || close < open) return text.trim();
+  return (text.slice(0, open) + text.slice(close + 1)).trim();
+}

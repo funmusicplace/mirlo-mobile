@@ -1,6 +1,7 @@
 import {
   audioTrackType,
   coverSize,
+  textAroundTag,
   isTrackOwned,
   isTrackOwnedOrPreview,
   pickFeaturedTrack,
@@ -237,5 +238,13 @@ describe("coverSize", () => {
     expect(coverSize(688, 942.5, 298.5)).toBe(644);
     expect(coverSize(424, 780, 298)).toBe(424);
     expect(coverSize(688, 400, 298)).toBe(120);
+  });
+});
+
+describe("textAroundTag", () => {
+  test("keeps the words around a link placeholder", () => {
+    expect(textAroundTag("from <albumLink>{{album}}</albumLink>")).toBe("from");
+    expect(textAroundTag("<albumLink>{{album}}</albumLink> から")).toBe("から");
+    expect(textAroundTag("by {{artist}}")).toBe("by {{artist}}");
   });
 });
