@@ -11,11 +11,10 @@ const txBackend = new TransifexI18next({
   token: process.env.EXPO_PUBLIC_TRANSIFEX_TOKEN,
   // other options from @transifex/native init function
 });
-// the translations
-// (tip move them in a JSON file and import them,
-// or even better, manage them separated from your code: https://react.i18next.com/guides/multiple-translation-files)
+// Transifex only holds the website's strings, so the bundle sits behind every
+// language as the last fallback instead of replacing Transifex English
 const resources = {
-  en: {
+  bundled: {
     translation: en,
   },
 };
@@ -39,11 +38,13 @@ if (hasTransifex) {
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
-    ...(!hasTransifex ? { resources } : {}),
+    resources,
+    // Languages without a bundle still load from the backend
+    partialBundledLanguages: true,
     lng: defaultLanguage?.short ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
     // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
     // if you're using a language detector, do not define the lng option
-    fallbackLng: "en",
+    fallbackLng: ["en", "bundled"],
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
