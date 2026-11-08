@@ -107,7 +107,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     minHeight: touchTarget,
     // Holds the favorite's hit slop, Android drops touches outside the parent
-    paddingHorizontal: gutter,
+    paddingLeft: gutter,
+    // The digit sits about 11 pt into its box, the heart gets the same room so both side margins match
+    paddingRight: gutter + spacing.md,
     gap: spacing.sm,
   },
   main: {
@@ -117,10 +119,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
-  // Starts on the gutter, matching the heart's margin on the right
   index: {
     width: INDEX_WIDTH,
-    textAlign: "left",
+    textAlign: "center",
   },
   titles: {
     flex: 1,
