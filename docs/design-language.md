@@ -160,7 +160,7 @@ Web heading defaults at <= 768 px, for elements without a measured value: `h1` 3
 | Section label | 14 padding above, 10 below, then `spacing.sm` (8) to the content | `SectionHeader`: 0.85rem and 0.65rem padding, 0.25rem margin, plus the grid's 0.25rem top padding |
 | Track page sections | `spacing.xxl` (32) above the first, under a 44 pt track row. Then `spacing.xxl`, a 1 pt `border` rule and `spacing.xl` (24) between sections. `spacing.md` (12) from a label to its content, `spacing.sm` (8) for "Credits" | `TrackSections`: 2.5rem above the first, under a 36 px row. Then 2rem, a 1 px tint-x rule and 1.5rem between sections. 0.75rem from a label to its content, 0.5rem for "Credits" |
 | Tag chip list | `spacing.sm` (8) gap, `spacing.lg` (16) above and below | `TrackGroupPills` |
-| Track row | 44 minimum (`touchTarget`), `gutter` side padding, 28 index box, `spacing.sm` gaps | `TrackRow`: 36 tall, 4 vertical padding, 28 line |
+| Track row | 44 minimum (`touchTarget`), `gutter` left padding and `gutter` + `spacing.md` right padding, 28 index box, `spacing.sm` gaps | `TrackRow`: 36 tall, 4 vertical padding, 28 line |
 | Form column | 300 wide and centered, `spacing.lg` (16) side padding, 10% of the window height above | Login page, `--mi-container-small` |
 | Form field | Label, `spacing.sm` (8), input, `spacing.xl` (24) before the next field | `FormComponent` |
 | Modal title bar | `radius.lg` (15) top padding, `spacing.lg` sides, `spacing.sm` bottom | `Modal` header, sheet padded by `--mi-border-radius-x` |
@@ -286,8 +286,8 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | | Web `TrackRow` at phone width | Mobile `TrackItem` |
 | --- | --- | --- |
-| Size | 36 tall: 4 vertical padding, 28 line height | 44 minimum, `gutter` side padding, `spacing.sm` gaps |
-| Index | 14 px in a 28 box, play glyph on hover, pause glyph while playing | `type.small`, left-aligned in a 28 box. The trailing heart has no web counterpart, so the gutter balances the row instead of the web's centered digit |
+| Size | 36 tall: 4 vertical padding, 28 line height | 44 minimum, `gutter` left padding and `gutter` + `spacing.md` right padding, `spacing.sm` gaps |
+| Index | 14 px in a 28 box, play glyph on hover, pause glyph while playing | `type.small`, centered in a 28 box like the web. The trailing heart has no web counterpart. The row adds `spacing.md` of right padding so the heart's margin matches the digit's inset |
 | Title | 14, co-authors after it | `type.small`, wraps, contributors below in `type.xsmall` and `secondaryText` |
 | Trailing | Duration 12 bold, 28 px options menu (wishlist, links, embed, lyrics, download) | Duration in `type.xsmall` weight 700, then the wishlist heart when signed in: the release's outlined `onlyIcon` `Button` (30 pt circle, Ionicons `heart` at 16 in `accent`, "Add to wishlist" or "Remove from wishlist") |
 | States | Playing: weight 600. Not playable: opacity 0.6. Hover: tint-x fill | Playing: title in `accent`, weight 600. Not playable: opacity 0.6 and disabled. Pressed: opacity 0.6 on iOS, `tintX` ripple on Android |
