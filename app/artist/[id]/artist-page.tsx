@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { chunk } from "lodash";
 import { queryArtist } from "@/queries/queries";
 import { useLocalSearchParams } from "expo-router";
 import {
@@ -27,6 +28,7 @@ import { siteUrlFor } from "@/scripts/instances";
 import { useKnownApiRoot } from "@/state/InstancesContext";
 import Text from "@/components/ThemedText";
 import Button from "@/components/Button";
+import ArtistTile from "@/components/ArtistTile";
 import ShareButton from "@/components/ShareButton";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import SearchButton from "@/components/SearchButton";
@@ -46,7 +48,7 @@ const TAB_RULE = spacing.xs;
 // Web: w-14
 const DATE_BOX_WIDTH = 56;
 
-type Section = "dates" | "about" | "links";
+type Section = "roster" | "dates" | "about" | "links";
 
 function LinkRow({ link }: { link: Link }) {
   const { t } = useTranslation("translation");
@@ -192,13 +194,17 @@ export default function ArtistPage() {
   const artistInfo = data;
   const about = artistInfo.bio || artistInfo.shortDescription;
   // The API sends the banner as background now
-  const banner =
-    (artistInfo as Artist & { background?: Artist["banner"] }).background ??
-    artistInfo.banner;
+  const banner = artistInfo.background ?? artistInfo.banner;
   const bannerUri = banner?.sizes?.[1200] ?? banner?.sizes?.[625];
   const announcement = artistInfo.announcementText?.trim();
   const tourDates = artistInfo.tourDates ?? [];
   const links = artistLinks(artistInfo);
+  // The owner's roster rides on all their profiles, so only a label shows it
+  const roster = artistInfo.isLabelProfile
+    ? (artistInfo.user?.artistLabels ?? [])
+    : [];
+  const rosterTitle =
+    artistInfo.properties?.titles?.roster || t("artist.roster");
 
   // The sections are the list footer, so the first starts at the content end
   // minus the footer. A short last section would aim past the end, so clamp
@@ -351,6 +357,7 @@ export default function ArtistPage() {
               </View>
             </View>
             <View style={[styles.strip, { borderColor: colors.tintX }]}>
+              {roster.length ? stripButton("roster", rosterTitle) : null}
               {tourDates.length
                 ? stripButton("dates", t("artist.dates"))
                 : null}
@@ -375,13 +382,33 @@ export default function ArtistPage() {
           </View>
         }
         ListFooterComponent={
-          tourDates.length || about || links.length ? (
+          roster.length || tourDates.length || about || links.length ? (
             <View
               style={styles.footer}
               onLayout={(event) => {
                 footerHeight.current = event.nativeEvent.layout.height;
               }}
             >
+              {roster.length
+                ? section(
+                    "roster",
+                    rosterTitle,
+                    <View>
+                      {chunk(roster, 2).map((pair) => (
+                        <View key={pair[0].artist.id} style={styles.rosterRow}>
+                          {pair.map(({ artist }) => (
+                            <ArtistTile
+                              key={artist.id}
+                              artist={artist}
+                              apiRoot={apiRoot}
+                              width={columnWidth}
+                            />
+                          ))}
+                        </View>
+                      ))}
+                    </View>,
+                  )
+                : null}
               {tourDates.length
                 ? section(
                     "dates",
@@ -511,6 +538,10 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: gutter,
     gap: spacing.sm,
+  },
+  rosterRow: {
+    flexDirection: "row",
+    gap: spacing.md,
   },
   linkRow: {
     minHeight: touchTarget,

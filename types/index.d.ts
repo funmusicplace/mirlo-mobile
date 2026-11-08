@@ -207,6 +207,7 @@ interface Artist {
   location?: string;
   enabled: boolean;
   createdAt: string;
+  isLabelProfile?: boolean;
   artistLabels?: ArtistLabel[];
   trackGroups: AlbumProps[];
   links?: string[];
@@ -215,13 +216,22 @@ interface Artist {
   tourDates?: TourDate[];
   properties?: {
     colors: ArtistColors;
+    titles?: {
+      roster?: string;
+      releases?: string;
+      merch?: string;
+      posts?: string;
+      support?: string;
+    };
   };
-  user?: Partial<User>;
+  // The owner's roster, shown on label profiles only
+  user?: { artistLabels?: ArtistLabel[] };
   banner?: {
     url: string;
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
+  background?: Artist["banner"];
   avatar?: {
     url: string;
     sizes?: { [key: string]: string };
@@ -230,6 +240,18 @@ interface Artist {
   location?: string;
   bio: string;
   maxFreePlays?: number;
+}
+
+interface ArtistLabel {
+  artistId: number;
+  labelUserId: number;
+  isLabelApproved: boolean;
+  isArtistApproved: boolean;
+  canLabelManageArtist: boolean;
+  canLabelAddReleases: boolean;
+  isDisplayedOnArtistPage: boolean;
+  orderIndex: number | null;
+  artist: Artist;
 }
 
 interface Tag {
