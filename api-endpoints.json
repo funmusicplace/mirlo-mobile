@@ -28,6 +28,11 @@
       "sources": ["app/downloadModal.tsx"]
     },
     {
+      "method": "GET",
+      "path": "/v1/labels/{param}/trackGroups",
+      "sources": ["queries/queries.ts"]
+    },
+    {
       "method": "POST",
       "path": "/v1/purchase",
       "sources": ["app/addFreeAlbumModal.tsx"]

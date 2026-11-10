@@ -137,6 +137,25 @@ export function queryArtist(opts: { artistSlug: string; apiRoot?: string }) {
     enabled: !!opts.artistSlug,
   });
 }
+
+const fetchLabelTrackGroups: QueryFunction<
+  { results: AlbumProps[] },
+  ["fetchLabelTrackGroups", { labelSlug: string; apiRoot?: string }]
+> = ({ queryKey: [_, { labelSlug, apiRoot }], signal }) => {
+  return api.get(`/v1/labels/${labelSlug}/trackGroups`, { signal, apiRoot });
+};
+
+export function queryLabelTrackGroups(opts: {
+  labelSlug: string;
+  apiRoot?: string;
+}) {
+  return queryOptions({
+    queryKey: ["fetchLabelTrackGroups", opts],
+    queryFn: fetchLabelTrackGroups,
+    enabled: !!opts.labelSlug,
+  });
+}
+
 const fetchTags: QueryFunction<
   { results: Tag[]; total?: number },
   [

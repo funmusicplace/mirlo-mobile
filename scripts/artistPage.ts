@@ -39,6 +39,18 @@ export function artistLinks(artist: Pick<Artist, "links" | "linksJson">) {
   ].filter((link) => link.url?.trim().replace(WEB_URL, ""));
 }
 
+// The website's sortTabsByOrder: tabs missing from tabOrder follow the listed ones
+export function sortTabsByOrder<T extends string>(
+  tabs: T[],
+  tabOrder: readonly string[] = [],
+) {
+  const rank = (tab: T) => {
+    const index = tabOrder.indexOf(tab);
+    return index === -1 ? tabOrder.length : index;
+  };
+  return [...tabs].sort((a, b) => rank(a) - rank(b));
+}
+
 // The API stores a tour date as UTC midnight, so its calendar day is the UTC
 // one, where a local read would show the day before west of Greenwich
 export function tourDay(date: string) {

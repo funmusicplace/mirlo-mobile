@@ -1,13 +1,16 @@
 import React from "react";
-import { Image } from "react-native";
+import { ActivityIndicator, FlatList, Image } from "react-native";
 import {
+  act,
   fireEvent,
   isHiddenFromAccessibility,
   render,
   screen,
+  within,
 } from "@testing-library/react-native";
 import ArtistTile from "@/components/ArtistTile";
 import ArtistPage from "@/app/artist/[id]/artist-page";
+import { createMockAlbum } from "@/__mocks__/mockAlbum";
 import { createMockArtist } from "@/__mocks__/mockArtist";
 
 const mockPush = jest.fn();
@@ -18,11 +21,23 @@ jest.mock("expo-router", () => ({
 }));
 
 let mockArtist: Artist;
+let mockLabel: {
+  data?: { results: AlbumProps[] };
+  isPending: boolean;
+  isError: boolean;
+};
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({ data: mockArtist, isPending: false, isError: false }),
+  useQuery: (options: { queryKey: string[] }) =>
+    options.queryKey[0] === "fetchLabelTrackGroups"
+      ? mockLabel
+      : { data: mockArtist, isPending: false, isError: false },
 }));
 jest.mock("@/queries/queries", () => ({
-  queryArtist: () => ({ enabled: true }),
+  queryArtist: () => ({ queryKey: ["fetchArtist"], enabled: true }),
+  queryLabelTrackGroups: () => ({
+    queryKey: ["fetchLabelTrackGroups"],
+    enabled: true,
+  }),
 }));
 jest.mock("@/state/InstancesContext", () => ({
   useKnownApiRoot: () => ({ apiRoot: undefined, ready: true, unknown: false }),
@@ -164,7 +179,7 @@ describe("ArtistTile", () => {
   });
 });
 
-describe("artist page roster", () => {
+describe("artist page tabs", () => {
   const rosterEntry = (artist: Artist): ArtistLabel => ({
     artistId: artist.id,
     labelUserId: 1,
@@ -176,6 +191,18 @@ describe("artist page roster", () => {
     orderIndex: null,
     artist,
   });
+  const jessica = artistWith({ id: 8, name: "Jessica Moss" });
+  const release = (id: number, title: string, artist: Artist) =>
+    createMockAlbum({ id, title, artist, artistId: artist.id });
+  const labelReleases = [
+    release(11, "Hyper Natural", artistWith()),
+    release(12, "Entire Cities", jessica),
+  ];
+  const ownRelease = release(
+    13,
+    "Corona Borealis",
+    artistWith({ id: 1, name: "Constellation" }),
+  );
   const page = (overrides?: Partial<Artist>) => {
     mockArtist = createMockArtist({
       id: 1,
@@ -183,44 +210,168 @@ describe("artist page roster", () => {
       bio: "",
       isLabelProfile: true,
       user: {
-        artistLabels: [
-          rosterEntry(artistWith()),
-          rosterEntry(artistWith({ id: 8, name: "Jessica Moss" })),
-        ],
+        artistLabels: [rosterEntry(artistWith()), rosterEntry(jessica)],
       },
+      trackGroups: [ownRelease],
       ...overrides,
     });
     return render(<ArtistPage />);
   };
+  const tabNames = () =>
+    screen
+      .getAllByRole("tab")
+      .map((tab) => within(tab).getByText(/./).props.children);
 
-  test("a label gets a strip button and a section, titled by the label or Roster", () => {
+  beforeEach(() => {
+    // The list batches its cells on a timer that would fire outside act
+    jest.useFakeTimers();
+    mockLabel = {
+      data: { results: labelReleases },
+      isPending: false,
+      isError: false,
+    };
+  });
+  afterEach(() => jest.useRealTimers());
+
+  test("a label without a tab order lands on Roster, and Releases swaps in the label's releases", () => {
     page();
-    expect(screen.getByRole("button", { name: "Roster" })).toBeTruthy();
-    expect(screen.getByRole("header", { name: "Roster" })).toBeTruthy();
+    expect(tabNames()).toEqual(["Roster", "Releases"]);
+    expect(
+      screen.getByRole("tab", { name: "Roster", selected: true }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("tab", { name: "Releases", selected: false }),
+    ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Joni Void" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Jessica Moss" })).toBeTruthy();
-    screen.unmount();
+    expect(screen.queryByRole("link", { name: /Hyper Natural/ })).toBeNull();
+    // The tabs replace the strip button and the footer section
+    expect(screen.queryByRole("button", { name: "Roster" })).toBeNull();
+    expect(screen.queryByRole("header", { name: "Roster" })).toBeNull();
 
+    fireEvent.press(screen.getByRole("tab", { name: "Releases" }));
+    expect(
+      screen.getByRole("tab", { name: "Releases", selected: true }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Hyper Natural, Joni Void" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Entire Cities, Jessica Moss" }),
+    ).toBeTruthy();
+    expect(screen.queryByLabelText("Joni Void")).toBeNull();
+    // The own release is not in the label's list, which holds every artist's
+    expect(screen.queryByRole("link", { name: /Corona Borealis/ })).toBeNull();
+
+    fireEvent.press(screen.getByRole("tab", { name: "Roster" }));
+    expect(screen.getByRole("link", { name: "Joni Void" })).toBeTruthy();
+  });
+
+  test("the label's tab order and titles decide the tabs and the landing one", () => {
     page({
       properties: {
         colors: {},
         titles: { roster: "Artists" },
+        tabOrder: ["releases", "roster", "posts", "support", "merch"],
       },
     });
-    expect(screen.getByRole("button", { name: "Artists" })).toBeTruthy();
-    expect(screen.getByRole("header", { name: "Artists" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Roster" })).toBeNull();
+    expect(tabNames()).toEqual(["Releases", "Artists"]);
+    expect(
+      screen.getByRole("tab", { name: "Releases", selected: true }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Entire Cities, Jessica Moss" }),
+    ).toBeTruthy();
+    expect(screen.queryByLabelText("Joni Void")).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Roster" })).toBeNull();
+
+    fireEvent.press(screen.getByRole("tab", { name: "Artists" }));
+    expect(screen.getByRole("link", { name: "Joni Void" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: /Entire Cities/ })).toBeNull();
   });
 
-  test("an artist the label owner also owns, or a label without artists, shows none", () => {
+  test("a label without releases has the Roster tab only", () => {
+    mockLabel = { data: { results: [] }, isPending: false, isError: false };
+    page({ trackGroups: [] });
+    expect(tabNames()).toEqual(["Roster"]);
+    expect(screen.getByRole("link", { name: "Joni Void" })).toBeTruthy();
+  });
+
+  test("while the label's releases load, Releases shows a spinner, and goes if nothing comes", () => {
+    mockLabel = { isPending: true, isError: false };
+    page({
+      trackGroups: [],
+      properties: { colors: {}, tabOrder: ["releases", "roster"] },
+    });
+    expect(tabNames()).toEqual(["Releases", "Roster"]);
+    expect(
+      screen.getByRole("tab", { name: "Releases", selected: true }),
+    ).toBeTruthy();
+    expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeTruthy();
+    expect(screen.queryByText("No Albums Present!")).toBeNull();
+
+    mockLabel = { data: { results: [] }, isPending: false, isError: false };
+    screen.rerender(<ArtistPage />);
+    expect(tabNames()).toEqual(["Roster"]);
+    expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    expect(screen.getByRole("link", { name: "Joni Void" })).toBeTruthy();
+  });
+
+  test("a label list that fails falls back to the label's own releases", () => {
+    mockLabel = { isPending: false, isError: true };
+    page({ properties: { colors: {}, tabOrder: ["releases", "roster"] } });
+    expect(
+      screen.getByRole("link", { name: "Corona Borealis, Constellation" }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("link", { name: /Hyper Natural/ })).toBeNull();
+  });
+
+  test("a strip button aims again while the list grows, until it settles or the user drags", () => {
+    const scroll = jest
+      .spyOn(FlatList.prototype, "scrollToOffset")
+      .mockImplementation(() => {});
+    page({ bio: "We are a label" });
+    const list = screen.UNSAFE_getByType(FlatList);
+    const grow = (height: number) =>
+      act(() => list.props.onContentSizeChange(0, height));
+    const about = () => screen.getByRole("button", { name: "About" });
+
+    grow(3000);
+    fireEvent.press(about());
+    // The rows below the screen are estimates, so the end moves as they render
+    grow(3600);
+    expect(scroll.mock.calls.map(([params]) => params?.offset)).toEqual([
+      2984, 3584,
+    ]);
+
+    act(() => jest.advanceTimersByTime(600));
+    grow(3700);
+    expect(scroll).toHaveBeenCalledTimes(2);
+
+    fireEvent.press(about());
+    act(() => list.props.onScrollBeginDrag());
+    grow(3800);
+    expect(scroll).toHaveBeenCalledTimes(3);
+    scroll.mockRestore();
+  });
+
+  test("an artist the label owner also owns, or a label without artists, has no tabs", () => {
     // The API sends the owner's roster on every profile the owner has
     page({ isLabelProfile: false });
-    expect(screen.queryByRole("button", { name: "Roster" })).toBeNull();
+    expect(screen.queryByRole("tab")).toBeNull();
+    expect(screen.queryByRole("tablist")).toBeNull();
     expect(screen.queryByRole("link", { name: "Joni Void" })).toBeNull();
+    expect(screen.getByRole("header", { name: "Releases" })).toBeTruthy();
+    // Its own releases, without the label's list or an artist line
+    expect(screen.getByRole("link", { name: "Corona Borealis" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: /Hyper Natural/ })).toBeNull();
     screen.unmount();
 
     page({ user: { artistLabels: [] } });
-    expect(screen.queryByRole("button", { name: "Roster" })).toBeNull();
-    expect(screen.queryByRole("header", { name: "Roster" })).toBeNull();
+    expect(screen.queryByRole("tab")).toBeNull();
+    expect(screen.getByRole("header", { name: "Releases" })).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Hyper Natural, Joni Void" }),
+    ).toBeTruthy();
   });
 });
