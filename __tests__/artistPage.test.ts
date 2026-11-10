@@ -4,6 +4,7 @@ import {
   linkHref,
   linkLabel,
   openLink,
+  sortTabsByOrder,
   tourDay,
 } from "@/scripts/artistPage";
 import { openOnWeb } from "@/scripts/openInBrowser";
@@ -81,6 +82,38 @@ describe("artistLinks", () => {
 
   test("copes with an artist that has neither list", () => {
     expect(artistLinks({})).toEqual([]);
+  });
+});
+
+describe("sortTabsByOrder", () => {
+  const tabs = ["roster", "releases"];
+
+  test("keeps the order it got without a tab order, or without these tabs in it", () => {
+    expect(sortTabsByOrder(tabs)).toEqual(["roster", "releases"]);
+    expect(sortTabsByOrder(tabs, [])).toEqual(["roster", "releases"]);
+    expect(sortTabsByOrder(tabs, ["merch", "support", "posts"])).toEqual([
+      "roster",
+      "releases",
+    ]);
+  });
+
+  test("follows the tab order, with tabs it leaves out after the listed ones", () => {
+    const all = ["releases", "roster", "posts", "support", "merch"];
+    expect(sortTabsByOrder(tabs, all)).toEqual(["releases", "roster"]);
+    expect(sortTabsByOrder(tabs, ["posts", "roster", "releases"])).toEqual([
+      "roster",
+      "releases",
+    ]);
+    expect(sortTabsByOrder(tabs, ["merch", "support", "releases"])).toEqual([
+      "releases",
+      "roster",
+    ]);
+    expect(sortTabsByOrder(tabs, ["roster"])).toEqual(["roster", "releases"]);
+  });
+
+  test("leaves the list it got alone", () => {
+    sortTabsByOrder(tabs, ["releases"]);
+    expect(tabs).toEqual(["roster", "releases"]);
   });
 });
 

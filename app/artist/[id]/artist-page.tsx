@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { chunk } from "lodash";
-import { queryArtist } from "@/queries/queries";
+import { queryArtist, queryLabelTrackGroups } from "@/queries/queries";
 import { useLocalSearchParams } from "expo-router";
 import {
   View,
@@ -15,13 +14,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Markdown from "@/components/Markdown";
 import ReadMore from "@/components/ReadMore";
-import React, { type ReactNode, useRef } from "react";
+import React, { type ReactNode, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { linkifyUrls } from "@/scripts/utils";
 import {
   artistLinks,
   linkLabel,
   openLink,
+  sortTabsByOrder,
   tourDay,
 } from "@/scripts/artistPage";
 import { siteUrlFor } from "@/scripts/instances";
@@ -45,10 +45,14 @@ const BANNER_HEIGHT = 100;
 const AVATAR_SIZE = 56;
 // Web tab underline
 const TAB_RULE = spacing.xs;
+// Lifts a tab's 30 pt box to a 44 pt touch target
+const TAB_SLOP = spacing.sm;
 // Web: w-14
 const DATE_BOX_WIDTH = 56;
 
-type Section = "roster" | "dates" | "about" | "links";
+type Section = "dates" | "about" | "links";
+type Tab = "roster" | "releases";
+type Item = ArtistLabel | AlbumProps;
 
 function LinkRow({ link }: { link: Link }) {
   const { t } = useTranslation("translation");
@@ -152,14 +156,22 @@ export default function ArtistPage() {
     ...artistQuery,
     enabled: ready && artistQuery.enabled,
   });
+  const labelQuery = queryLabelTrackGroups({ labelSlug: String(id), apiRoot });
+  const labelTrackGroups = useQuery({
+    ...labelQuery,
+    enabled: ready && !!data?.isLabelProfile && labelQuery.enabled,
+  });
+  const [picked, setPicked] = useState<Tab>();
   const { t } = useTranslation("translation");
   const colors = useColors();
   const columnWidth = useGridColumnWidth();
-  const listRef = useRef<FlatList<AlbumProps>>(null);
+  const listRef = useRef<FlatList<Item>>(null);
   const listHeight = useRef(0);
   const contentHeight = useRef(0);
   const footerHeight = useRef(0);
   const sectionTops = useRef<Partial<Record<Section, number>>>({});
+  const aimedAt = useRef<Section>(undefined);
+  const aimTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   if (unknown) {
     return (
@@ -199,16 +211,43 @@ export default function ArtistPage() {
   const announcement = artistInfo.announcementText?.trim();
   const tourDates = artistInfo.tourDates ?? [];
   const links = artistLinks(artistInfo);
+  const isLabel = !!artistInfo.isLabelProfile;
   // The owner's roster rides on all their profiles, so only a label shows it
-  const roster = artistInfo.isLabelProfile
-    ? (artistInfo.user?.artistLabels ?? [])
-    : [];
+  const roster = isLabel ? (artistInfo.user?.artistLabels ?? []) : [];
   const rosterTitle =
     artistInfo.properties?.titles?.roster || t("artist.roster");
+  const releasesTitle =
+    artistInfo.properties?.titles?.releases || t("artist.releases");
+  // A label lists its artists' releases too, an older instance may lack the route
+  const labelList = isLabel && !labelTrackGroups.isError;
+  const releasesPending = labelList && labelTrackGroups.isPending;
+  const releases = labelList
+    ? (labelTrackGroups.data?.results ?? [])
+    : artistInfo.trackGroups;
+  // A pending list counts, else the landing tab flips once it arrives
+  const tabs = sortTabsByOrder<Tab>(
+    ["roster", "releases"],
+    artistInfo.properties?.tabOrder,
+  ).filter((tab) =>
+    tab === "roster"
+      ? roster.length > 0
+      : artistInfo.trackGroups.length > 0 ||
+        releases.length > 0 ||
+        releasesPending,
+  );
+  const activeTab = tabs.find((tab) => tab === picked) ?? tabs[0];
+  const items: Item[] = activeTab === "roster" ? roster : releases;
 
   // The sections are the list footer, so the first starts at the content end
   // minus the footer. A short last section would aim past the end, so clamp
   const scrollToSection = (name: Section) => {
+    // Rows below the screen are estimates until they render, so a long list's
+    // end moves after the jump: aim again on each size change until it settles
+    aimedAt.current = name;
+    clearTimeout(aimTimer.current);
+    aimTimer.current = setTimeout(() => {
+      aimedAt.current = undefined;
+    }, 500);
     const top =
       contentHeight.current -
       footerHeight.current +
@@ -263,28 +302,49 @@ export default function ArtistPage() {
         ref={listRef}
         numColumns={2}
         columnWrapperStyle={styles.columns}
-        data={artistInfo.trackGroups}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <TrackGroupItem
-            {...item}
-            apiRoot={apiRoot}
-            width={columnWidth}
-            showArtist={false}
-          />
-        )}
+        data={items}
+        // Only roster entries carry labelUserId, and the prefixes keep the ids apart
+        keyExtractor={(item) =>
+          "labelUserId" in item
+            ? `artist-${item.artistId}`
+            : `release-${item.id}`
+        }
+        renderItem={({ item }) =>
+          "labelUserId" in item ? (
+            <ArtistTile
+              artist={item.artist}
+              apiRoot={apiRoot}
+              width={columnWidth}
+            />
+          ) : (
+            <TrackGroupItem
+              {...item}
+              apiRoot={apiRoot}
+              width={columnWidth}
+              showArtist={isLabel}
+            />
+          )
+        }
         onLayout={(event) => {
           listHeight.current = event.nativeEvent.layout.height;
         }}
         onContentSizeChange={(_, height) => {
           contentHeight.current = height;
+          if (aimedAt.current) scrollToSection(aimedAt.current);
+        }}
+        onScrollBeginDrag={() => {
+          aimedAt.current = undefined;
         }}
         ListEmptyComponent={
-          <Text
-            style={[type.body, styles.empty, { color: colors.secondaryText }]}
-          >
-            {t("mobileApp.artistPage.noAlbums")}
-          </Text>
+          releasesPending ? (
+            <ActivityIndicator color={colors.accent} style={styles.empty} />
+          ) : (
+            <Text
+              style={[type.body, styles.empty, { color: colors.secondaryText }]}
+            >
+              {t("mobileApp.artistPage.noAlbums")}
+            </Text>
+          )
         }
         ListHeaderComponent={
           <View>
@@ -357,7 +417,6 @@ export default function ArtistPage() {
               </View>
             </View>
             <View style={[styles.strip, { borderColor: colors.tintX }]}>
-              {roster.length ? stripButton("roster", rosterTitle) : null}
               {tourDates.length
                 ? stripButton("dates", t("artist.dates"))
                 : null}
@@ -371,44 +430,60 @@ export default function ArtistPage() {
                 />
               ) : null}
             </View>
-            <View style={[styles.tab, { borderBottomColor: colors.accent }]}>
-              <Text
-                accessibilityRole="header"
-                style={[type.large, { color: colors.accent }]}
-              >
-                {t("artist.releases")}
-              </Text>
+            <View
+              accessibilityRole={roster.length ? "tablist" : undefined}
+              style={styles.tabs}
+            >
+              {roster.length ? (
+                tabs.map((tab) => {
+                  const selected = tab === activeTab;
+                  return (
+                    <Pressable
+                      key={tab}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected }}
+                      hitSlop={TAB_SLOP}
+                      onPress={() => setPicked(tab)}
+                      android_ripple={{ color: colors.tintX }}
+                      style={({ pressed }) => [
+                        styles.tab,
+                        {
+                          borderBottomColor: selected
+                            ? colors.accent
+                            : "transparent",
+                        },
+                        pressed && Platform.OS === "ios" && styles.pressed,
+                      ]}
+                    >
+                      <Text style={[type.large, { color: colors.accent }]}>
+                        {tab === "roster" ? rosterTitle : releasesTitle}
+                      </Text>
+                    </Pressable>
+                  );
+                })
+              ) : (
+                <View
+                  style={[styles.tab, { borderBottomColor: colors.accent }]}
+                >
+                  <Text
+                    accessibilityRole="header"
+                    style={[type.large, { color: colors.accent }]}
+                  >
+                    {releasesTitle}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         }
         ListFooterComponent={
-          roster.length || tourDates.length || about || links.length ? (
+          tourDates.length || about || links.length ? (
             <View
               style={styles.footer}
               onLayout={(event) => {
                 footerHeight.current = event.nativeEvent.layout.height;
               }}
             >
-              {roster.length
-                ? section(
-                    "roster",
-                    rosterTitle,
-                    <View>
-                      {chunk(roster, 2).map((pair) => (
-                        <View key={pair[0].artist.id} style={styles.rosterRow}>
-                          {pair.map(({ artist }) => (
-                            <ArtistTile
-                              key={artist.id}
-                              artist={artist}
-                              apiRoot={apiRoot}
-                              width={columnWidth}
-                            />
-                          ))}
-                        </View>
-                      ))}
-                    </View>,
-                  )
-                : null}
               {tourDates.length
                 ? section(
                     "dates",
@@ -519,12 +594,18 @@ const styles = StyleSheet.create({
   announcement: {
     padding: spacing.lg,
   },
+  tabs: {
+    flexDirection: "row",
+    // Else a tab pushed past the edge by large text is out of reach
+    flexWrap: "wrap",
+    gap: spacing.lg,
+    paddingLeft: gutter,
+    // Padding keeps the hit slop inside this view, Android clips touches outside it
+    paddingVertical: TAB_SLOP,
+    marginVertical: spacing.lg - TAB_SLOP,
+  },
   // Web tab: 26.4 from the label top to the rule, kept with the 22.4 line
   tab: {
-    alignSelf: "flex-start",
-    marginLeft: gutter,
-    marginTop: spacing.lg,
-    marginBottom: spacing.lg,
     paddingHorizontal: spacing.xs,
     paddingBottom: spacing.xs,
     borderBottomWidth: TAB_RULE,
@@ -538,10 +619,6 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: gutter,
     gap: spacing.sm,
-  },
-  rosterRow: {
-    flexDirection: "row",
-    gap: spacing.md,
   },
   linkRow: {
     minHeight: touchTarget,

@@ -223,6 +223,7 @@ interface Artist {
       posts?: string;
       support?: string;
     };
+    tabOrder?: ("roster" | "releases" | "posts" | "support" | "merch")[];
   };
   // The owner's roster, shown on label profiles only
   user?: { artistLabels?: ArtistLabel[] };
