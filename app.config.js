@@ -15,6 +15,6 @@ module.exports = ({ config }) => ({
   updates: IS_FDROID ? { ...config.updates, enabled: false } : config.updates,
   plugins: [
     ...config.plugins,
-    ...(IS_FDROID ? [] : [["expo-dev-client", { addGeneratedScheme: IS_DEV }]]),
+    ["expo-dev-client", { addGeneratedScheme: IS_DEV }],
   ],
 });
