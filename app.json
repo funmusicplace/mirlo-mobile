@@ -35,7 +35,8 @@
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "space.mirlo.mobile"
+      "package": "space.mirlo.mobile",
+      "versionCode": 10005
     },
     "web": {
       "bundler": "metro",
