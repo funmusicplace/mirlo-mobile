@@ -2,7 +2,7 @@
   "expo": {
     "name": "Mirlo",
     "slug": "mirlo-mobile",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mirlo",
@@ -36,7 +36,7 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "package": "space.mirlo.mobile",
-      "versionCode": 10005
+      "versionCode": 10006
     },
     "web": {
       "bundler": "metro",
