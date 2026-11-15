@@ -68,7 +68,6 @@
     "expo-haptics": "~55.0.18",
     "expo-linking": "~55.0.7",
     "expo-localization": "~55.0.19",
-    "expo-notifications": "~55.0.10",
     "expo-router": "~55.0.3",
     "expo-secure-store": "~55.0.18",
     "expo-splash-screen": "^55.0.19",
@@ -126,6 +125,15 @@
     "ts-jest": "^29.3.3",
     "typescript": "^5.3.3",
     "vite": "^7.3.6"
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-application"
+        ]
+      }
+    }
   },
   "private": true
 }
