@@ -126,5 +126,14 @@
     "typescript": "^5.3.3",
     "vite": "^7.3.6"
   },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-application"
+        ]
+      }
+    }
+  },
   "private": true
 }
