@@ -1,5 +1,6 @@
 import * as Application from "expo-application";
 import { Alert, Linking, Platform } from "react-native";
+import i18n from "@/i18n";
 
 export async function checkForUpdates() {
   try {
@@ -59,7 +60,7 @@ export async function checkForUpdates() {
 async function checkiOSVersion(bundleId: string | null) {
   try {
     const response = await fetch(
-      `https://itunes.apple.com/lookup?bundleId=${bundleId}`
+      `https://itunes.apple.com/lookup?bundleId=${bundleId}`,
     );
 
     if (!response.ok) {
@@ -91,7 +92,7 @@ async function checkiOSVersion(bundleId: string | null) {
 function showForceUpdateAlert(
   currentVersion: string | null,
   newVersion: string,
-  storeUrl: string
+  storeUrl: string,
 ) {
   // Use iTunes URL in simulator, App Store URL on device
   const appStoreUrl =
@@ -102,11 +103,11 @@ function showForceUpdateAlert(
   console.log(appStoreUrl);
 
   Alert.alert(
-    "Update Required",
-    `This version (${currentVersion}) is no longer supported. Please update to version ${newVersion} to continue using the app.`,
+    i18n.t("mobileApp.appUpdate.title"),
+    i18n.t("mobileApp.appUpdate.message", { currentVersion, newVersion }),
     [
       {
-        text: "Update Now",
+        text: i18n.t("mobileApp.appUpdate.updateNow"),
         onPress: () => Linking.openURL(appStoreUrl),
       },
     ],
@@ -116,10 +117,10 @@ function showForceUpdateAlert(
         // Re-show alert if dismissed
         setTimeout(
           () => showForceUpdateAlert(currentVersion, newVersion, storeUrl),
-          1000
+          1000,
         );
       },
-    }
+    },
   );
 }
 
