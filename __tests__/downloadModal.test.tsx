@@ -75,7 +75,7 @@ const FORMATS = [
   "MP3 256kbps",
   "MP3 128kbps",
 ];
-const GENERATING = "We're generating the album! Hold on for a minute...";
+const GENERATING = "We're generating the release! Hold on for a minute...";
 const FAILED = "Couldn't download the release. Please try again in a moment.";
 const URL = "https://storage.example/zip?sig=abc";
 

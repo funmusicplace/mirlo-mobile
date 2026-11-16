@@ -85,7 +85,7 @@ describe("<AddFreeAlbumModal />", () => {
 
     expect(screen.getByText("Add Demo to your collection")).toBeTruthy();
     expect(
-      screen.getByText("You'll add this free album to your collection."),
+      screen.getByText("You'll add this free release to your collection."),
     ).toBeTruthy();
   });
 
