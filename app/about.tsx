@@ -26,7 +26,7 @@ type AboutLinkInfo = {
 
 // Linking.openURL would route mirlo.space links back into the app
 function onLinkPress(url: string) {
-  if (url.startsWith("https://mirlo.space")) {
+  if (url === "https://mirlo.space" || url.startsWith("https://mirlo.space/")) {
     openInBrowser(url);
   } else {
     Linking.openURL(url);
