@@ -32,6 +32,7 @@ describe("checkForUpdates", () => {
   test("asks for an update when the store is ahead", async () => {
     storeVersion("1.0.5");
     expect(await checkForUpdates()).toBe(true);
+    expect(alert.mock.calls[0][0]).toBe("Update Required");
     expect(alert.mock.calls[0][1]).toContain("This version (1.0.4)");
   });
 });
