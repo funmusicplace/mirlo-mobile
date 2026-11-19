@@ -58,6 +58,8 @@ export default function Index() {
           params.append("skip", String(skips[index]));
           params.append("take", String(PAGE_SIZE));
           params.append("distinctArtists", "false");
+          // Pre-orders would sort first, the site's home leaves them out too
+          params.append("isReleased", "released");
           const { results } = await api.getMany<AlbumProps>(
             `/v1/trackGroups?${params}`,
             { apiRoot },
