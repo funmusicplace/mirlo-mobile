@@ -2,8 +2,7 @@ import DismissModalBar from "@/components/DismissModalBar";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as api from "../queries/fetch/fetchWrapper";
-import { useState } from "react";
+import { useEmailPurchaseLinkMutation } from "@/queries/queries";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/state/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -20,21 +19,17 @@ export default function EmailPurchaseInfoModal() {
   const { trackGroupId, artist, trackGroupTitle } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthContext();
-  const [isEmailSent, setIsEmailSent] = useState<boolean>(false);
+  const purchaseEmail = useEmailPurchaseLinkMutation();
+  const isEmailSent = purchaseEmail.isSuccess;
 
   function sendPurchaseEmail() {
-    try {
-      if (user) {
-        api.post(
-          `/v1/trackGroups/${trackGroupId}/emailPurchaseLink?email=${user?.email}`,
-          {},
-        );
-        setIsEmailSent(true);
-      } else {
-        console.log("missing user");
-      }
-    } catch (err) {
-      console.error("issue emailing purchase info", err);
+    if (user) {
+      purchaseEmail.mutate({
+        trackGroupId: Number(trackGroupId),
+        email: user.email,
+      });
+    } else {
+      console.log("missing user");
     }
   }
 
@@ -87,9 +82,18 @@ export default function EmailPurchaseInfoModal() {
               sendPurchaseEmail();
             }}
             disabled={isEmailSent}
+            loading={purchaseEmail.isPending}
             fullWidth
             style={styles.action}
           />
+        )}
+        {purchaseEmail.isError && (
+          <Text
+            accessibilityRole="alert"
+            style={[type.body, styles.error, { color: colors.danger }]}
+          >
+            {t("trackGroupCard.error")}
+          </Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -112,5 +116,8 @@ const styles = StyleSheet.create({
   },
   action: {
     marginTop: spacing.xl,
+  },
+  error: {
+    marginTop: spacing.md,
   },
 });
