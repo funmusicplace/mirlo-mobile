@@ -307,6 +307,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Wishlist actions | Overlay on the cover: wishlist heart, then play | `actions` under the card and outside the link, so each control stays reachable to screen readers: the remove control (`WishlistButton` for a release, `FavoriteTrackButton` for a track), then the filled play circle (`PlayFeaturedButton`), `spacing.lg` apart in a 44 pt row at the bottom of the card, so rows stay level across a grid row. A release plays whole and a track alone, and the circle shows pause while its track plays. Wishlist only |
 | Collection actions | None | `actions` under the card of an owned release: the outlined `onlyIcon` Download circle (`DownloadButton`) in a 44 pt row, which opens the download dialog. Releases only, not tracks or the wishlist |
 | States | Hover shows play, buy and wishlist actions over the cover | Pressed: opacity 0.6 on iOS, foreground `tintX` ripple on Android. `link` role, labeled with title, artist and caption |
+| Deleted release | Empty grayscale square, title and artist as plain text, no link or actions, tooltip "This album was deleted by the artist" | A release with `deletedAt` (a wishlist still lists it): empty `tint` square, title and artist in `secondaryText`, the tooltip's text (`playableCover.deletedByArtist`) as the caption with no line cap. No link, ripple or actions, and screen readers get one element labeled with title, artist and that text |
 
 ### Artist page
 
@@ -406,6 +407,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 - Field errors: one line of `type.small` in `colors.danger` under the input, with `accessibilityRole="alert"`, matching the web's 14 px `--mi-red-700` text.
 - Request and network errors: `ErrorNotification` at the top of the content. There are no toasts.
+- A release or track screen whose request fails keeps its header (`ReleaseError`). A 404 shows the website's `trackGroupDetails.doesNotExist` text in `CollectionEmpty`, any other failure shows `ErrorNotification`.
 - Report failures after a confirmed destructive action with `Alert.alert`.
 
 ### Empty states

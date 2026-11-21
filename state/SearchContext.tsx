@@ -48,7 +48,7 @@ export type Result = {
       1200: string;
       1500: string;
     };
-  };
+  } | null;
 };
 
 export const SearchContext = createContext<SearchContextType | null>(null);

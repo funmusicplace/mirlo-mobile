@@ -29,7 +29,7 @@ import { Fragment, useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import ErrorNotification from "@/components/ErrorNotification";
+import ReleaseError from "@/components/ReleaseError";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
@@ -63,7 +63,6 @@ export default function TrackView() {
   const [album, setAlbum] = useState<RNTrack[]>();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const [showError, setShowError] = useState<boolean>(true);
   const colors = useColors();
 
   useFocusEffect(
@@ -87,7 +86,7 @@ export default function TrackView() {
             apiRoot: data.result.apiRoot,
           };
           filteredTrack.artist = data.result.artist.name;
-          filteredTrack.artwork = data.result.cover.sizes[600];
+          filteredTrack.artwork = data.result.cover?.sizes[600];
           filteredTrack.url = audioUrl(filteredTrack, data.result);
           filteredTrack.queueIndex = 0; //Only displaying 1 track on this screen
           filteredTrack.trackGroupId = data.result.trackGroupId;
@@ -106,15 +105,7 @@ export default function TrackView() {
   );
 
   if (unknown) {
-    return (
-      <View style={styles.screen}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={new Error(t("sources.unknownSource"))}
-        />
-      </View>
-    );
+    return <ReleaseError error={new Error(t("sources.unknownSource"))} />;
   }
 
   if (isPending) {
@@ -131,15 +122,7 @@ export default function TrackView() {
 
   if (isError) {
     console.error(error);
-    return (
-      <View style={styles.screen}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={error}
-        />
-      </View>
-    );
+    return <ReleaseError error={error} />;
   }
 
   const filteredTrack = data.result.tracks?.find(

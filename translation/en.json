@@ -812,7 +812,7 @@
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
     "saveTrackGroupButton": "Save album",
-    "doesNotExist": "This album does not exist or it does not have a public presence.",
+    "doesNotExist": "This release does not exist or it does not have a public presence.",
     "aboutThisTrack": "About this track",
     "credits": "Credits",
     "trackPosition": "Track {{position}} of {{count}}",
@@ -950,6 +950,7 @@
     "close": "Close"
   },
   "playableCover": {
+    "deletedByArtist": "This album was deleted by the artist",
     "play": "Play",
     "pause": "Pause",
     "playAlbum": "Play album",

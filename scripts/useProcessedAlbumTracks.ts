@@ -22,7 +22,7 @@ export function useProcessedAlbumTracks(
       const newTrack: RNTrack = {
         title: track.title,
         artist: data.result.artist.name,
-        artwork: data.result.cover.sizes[600],
+        artwork: data.result.cover?.sizes[600],
         url: audioUrl(track, data.result),
         id: data.result.id,
         trackArtists: track.trackArtists,

@@ -1,4 +1,5 @@
 import React from "react";
+import { StyleSheet } from "react-native";
 import {
   fireEvent,
   render,
@@ -77,7 +78,19 @@ jest.mock("react-i18next", () => {
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 jest.mock("@expo/vector-icons/FontAwesome5", () => "FontAwesome5");
 
-const renderCard = (props: { track?: RNTrack; wishlist?: boolean }) =>
+// The jest mock of Image skips merging a bundled image's size into the style
+jest.mock("react-native/Libraries/Image/Image", () =>
+  jest.requireActual("react-native/Libraries/Image/Image"),
+);
+// Metro hands a bundled image over as a registry ID, the registry holds its size
+jest.mock("@/assets/images/mirlo-logo-logoOnly-light.png", () => 1);
+jest.mock("@/assets/images/mirlo-logo-logoOnly-dark.png", () => 1);
+
+const renderCard = (props: {
+  track?: RNTrack;
+  wishlist?: boolean;
+  trackGroup?: AlbumProps;
+}) =>
   render(
     // No gc timer, it would keep jest open
     <QueryClientProvider
@@ -197,4 +210,37 @@ test("cards of the playing track show pause, the others play", () => {
 
   renderCard({ track: album.tracks![1], wishlist: true });
   expect(screen.getByRole("button", { name: "Play" })).toBeTruthy();
+});
+
+test("the logo of a release without a cover is sized by the card width and the aspect ratio", () => {
+  renderCard({
+    wishlist: true,
+    trackGroup: createMockAlbum({ cover: null }),
+  });
+  const { height } = StyleSheet.flatten(
+    screen.UNSAFE_getByType("RCTImageView" as never).props.style,
+  );
+  // A fixed height beats the aspect ratio, so the logo overflows the card
+  expect(height).not.toEqual(expect.any(Number));
+});
+
+test("a deleted release is plain text with no link and no controls, like the website's card", () => {
+  const deleted = { ...album, cover: null, deletedAt: "2026-11-01T00:00:00Z" };
+  const text = "This album was deleted by the artist";
+  renderCard({ wishlist: true, trackGroup: deleted });
+  // One labeled element for screen readers, with no link or button role
+  expect(
+    screen.getByLabelText(`${album.title}, ${album.artist.name}, ${text}`).props
+      .accessible,
+  ).toBe(true);
+  expect(screen.getByText(text)).toBeTruthy();
+  expect(screen.queryByRole("link")).toBeNull();
+  expect(screen.queryByRole("button")).toBeNull();
+  screen.unmount();
+
+  // A favorited track of that release has the same dead end
+  renderCard({ track, wishlist: true, trackGroup: deleted });
+  expect(screen.getByText(text)).toBeTruthy();
+  expect(screen.queryByRole("link")).toBeNull();
+  expect(screen.queryByRole("button")).toBeNull();
 });

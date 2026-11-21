@@ -31,6 +31,7 @@ export default function TrackGroupItem({
   artistId,
   urlSlug,
   apiRoot,
+  deletedAt,
   width,
   href,
   showArtist = true,
@@ -49,25 +50,17 @@ export default function TrackGroupItem({
   const isDark = useColorScheme() === "dark";
   const { t } = useTranslation("translation");
   const displayTitle = title || t("playableCover.untitled");
-  return (
-    <View style={[styles.card, { width }]}>
-      <Pressable
-        onPress={() =>
-          router.navigate(
-            href ?? {
-              pathname: "/artist/[id]/album/[slug]/album-tracks",
-              params: { id: artistId, slug: urlSlug, apiRoot },
-            },
-          )
-        }
-        accessibilityRole="link"
-        accessibilityLabel={[displayTitle, showArtist && artist.name, caption]
-          .filter(Boolean)
-          .join(", ")}
-        // Foreground so the ripple draws over the cover
-        android_ripple={{ color: colors.tintX, foreground: true }}
-        style={({ pressed }) => pressed && styles.pressed}
-      >
+  // Like the website, a deleted release is plain text with no link or controls
+  const deleted = !!deletedAt;
+  const kind = deleted ? t("playableCover.deletedByArtist") : caption;
+  const label = [displayTitle, showArtist && artist.name, kind]
+    .filter(Boolean)
+    .join(", ");
+  const details = (
+    <>
+      {deleted ? (
+        <View style={[styles.cover, { backgroundColor: colors.tint }]} />
+      ) : (
         <Image
           source={
             cover?.sizes
@@ -78,27 +71,61 @@ export default function TrackGroupItem({
           }
           style={[styles.cover, { backgroundColor: colors.tint }]}
         />
-        <Text style={styles.title} numberOfLines={1}>
-          {displayTitle}
+      )}
+      <Text
+        style={[styles.title, deleted && { color: colors.secondaryText }]}
+        numberOfLines={1}
+      >
+        {displayTitle}
+      </Text>
+      {kind ? (
+        <Text
+          style={[styles.meta, { color: colors.secondaryText }]}
+          // The deleted text is the only reason the card does nothing
+          numberOfLines={deleted ? undefined : 1}
+        >
+          {kind}
         </Text>
-        {caption ? (
-          <Text
-            style={[styles.meta, { color: colors.secondaryText }]}
-            numberOfLines={1}
-          >
-            {caption}
-          </Text>
-        ) : null}
-        {showArtist && (
-          <Text
-            style={[styles.meta, { color: colors.accent }]}
-            numberOfLines={1}
-          >
-            {artist.name}
-          </Text>
-        )}
-      </Pressable>
-      {actions}
+      ) : null}
+      {showArtist && (
+        <Text
+          style={[
+            styles.meta,
+            { color: deleted ? colors.secondaryText : colors.accent },
+          ]}
+          numberOfLines={1}
+        >
+          {artist.name}
+        </Text>
+      )}
+    </>
+  );
+  return (
+    <View style={[styles.card, { width }]}>
+      {deleted ? (
+        <View accessible accessibilityLabel={label}>
+          {details}
+        </View>
+      ) : (
+        <Pressable
+          onPress={() =>
+            router.navigate(
+              href ?? {
+                pathname: "/artist/[id]/album/[slug]/album-tracks",
+                params: { id: artistId, slug: urlSlug, apiRoot },
+              },
+            )
+          }
+          accessibilityRole="link"
+          accessibilityLabel={label}
+          // Foreground so the ripple draws over the cover
+          android_ripple={{ color: colors.tintX, foreground: true }}
+          style={({ pressed }) => pressed && styles.pressed}
+        >
+          {details}
+        </Pressable>
+      )}
+      {deleted ? null : actions}
     </View>
   );
 }
@@ -111,6 +138,8 @@ const styles = StyleSheet.create({
   },
   cover: {
     width: "100%",
+    // A bundled image's pixel height would beat the aspect ratio
+    height: "auto",
     aspectRatio: 1,
   },
   title: {

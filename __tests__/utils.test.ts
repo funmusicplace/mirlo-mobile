@@ -8,6 +8,7 @@ import {
   isTrackOwnedOrPreview,
   pickFeaturedTrack,
   releaseMeta,
+  toRNTrack,
   trackGroupUrl,
   trackMeta,
 } from "@/scripts/utils";
@@ -93,6 +94,18 @@ describe("isTrackOwned", () => {
     const user = createMockUser();
     // @ts-expect-error - validating defensive check
     expect(isTrackOwned(null, undefined, user)).toBe(false);
+  });
+});
+
+describe("toRNTrack", () => {
+  test("a release without a cover gives its tracks no artwork", () => {
+    const track = createMockRNTrack();
+    const album = createMockAlbum();
+    expect(toRNTrack(track, album).artwork).toBe(album.cover?.sizes[600]);
+
+    const bare = toRNTrack(track, { ...album, cover: null });
+    expect(bare.artwork).toBeUndefined();
+    expect(bare.trackGroup.cover).toBeNull();
   });
 });
 

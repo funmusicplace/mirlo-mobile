@@ -75,7 +75,7 @@ interface AlbumProps {
       1200: string;
       1500: string;
     };
-  };
+  } | null;
   title: string;
   artist: Artist;
   artistId: number;
@@ -91,6 +91,8 @@ interface AlbumProps {
   minPrice?: number | null;
   isPreorder?: boolean;
   fundraiser?: { isAllOrNothing: boolean } | null;
+  // Set once the artist deleted the release, a wishlist still lists it
+  deletedAt?: string | null;
   // The instance it came from, unset for the default one
   apiRoot?: string;
 }
@@ -112,7 +114,7 @@ interface TrackProps {
 interface RNTrack {
   title: string;
   artist: string;
-  artwork: string;
+  artwork?: string;
   trackArtists?: {
     role?: string;
     artistId?: number;
@@ -149,7 +151,8 @@ interface RNTrack {
         1200: string;
         1500: string;
       };
-    };
+    } | null;
+    deletedAt?: string | null;
     apiRoot?: string;
   };
   audio: {
