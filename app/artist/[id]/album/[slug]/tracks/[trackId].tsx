@@ -80,7 +80,7 @@ export default function TrackView() {
             cover: data.result.cover,
             title: data.result.title,
             artist: data.result.artist,
-            id: data.result.trackGroupId,
+            id: data.result.id,
             releaseDate: data.result.releaseDate,
             trackGroupId: data.result.trackGroupId,
             apiRoot: data.result.apiRoot,

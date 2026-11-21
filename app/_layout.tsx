@@ -248,6 +248,15 @@ export default function RootLayout() {
                         animationDuration: 200,
                       }}
                     />
+                    <Stack.Screen
+                      name="playNext"
+                      options={{
+                        headerShown: false,
+                        presentation: "modal",
+                        animation: "slide_from_bottom",
+                        animationDuration: 200,
+                      }}
+                    />
                   </Stack>
                   <Footer />
                   <StatusBar style="auto" backgroundColor={colors.background} />

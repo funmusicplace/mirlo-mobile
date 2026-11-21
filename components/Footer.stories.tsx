@@ -34,6 +34,7 @@ export const WithActiveTrack: Story = {
           isPlaying: false,
           looping: "none",
           setLooping: () => {},
+          finished: undefined,
         }}
       >
         <Story />

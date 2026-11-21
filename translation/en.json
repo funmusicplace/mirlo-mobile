@@ -817,7 +817,9 @@
     "credits": "Credits",
     "trackPosition": "Track {{position}} of {{count}}",
     "trackLicense": "License: <licenseLink>{{license}}</licenseLink>",
-    "isrc": "ISRC: {{isrc}}"
+    "isrc": "ISRC: {{isrc}}",
+    "artistRecommends": "{{ artistName }} recommends",
+    "otherReleasesBy": "Other releases by {{artistName}}"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
@@ -1025,6 +1027,13 @@
       "yourCollectionHint": "Navigates to your collection page",
       "yourWishlist": "Your Wishlist",
       "yourWishlistHint": "Navigates to your wishlist page"
+    },
+    "playNext": {
+      "title": "Play next",
+      "label": "Play next suggestions",
+      "hint": "Opens releases to play next",
+      "similarReleases": "Similar releases",
+      "empty": "No suggestions right now"
     },
     "maxPlaysReached": {
       "title": "You are out of free plays for the track \"{{title}}\"",
