@@ -5,6 +5,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useId } from "react";
 import * as api from "./fetch/fetchWrapper";
 import { MirloFetchError } from "./fetch/MirloFetchError";
 
@@ -207,4 +208,33 @@ export function queryWishlist(userId: number | undefined) {
     queryFn: fetchWishlist,
     enabled: !!userId,
   });
+}
+
+export function useEmailPurchaseLinkMutation() {
+  const client = useQueryClient();
+  // Per screen, so a request that hangs can't block the next visit
+  const mutationKey = ["emailPurchaseLink", useId()];
+  const mutation = useMutation({
+    mutationKey,
+    // A bare + in a query string reads as a space
+    mutationFn: ({
+      trackGroupId,
+      email,
+    }: {
+      trackGroupId: number;
+      email: string;
+    }) =>
+      api.post(
+        `/v1/trackGroups/${trackGroupId}/emailPurchaseLink?email=${encodeURIComponent(email)}`,
+        {},
+      ),
+    onError: (err) => console.error("issue emailing purchase info", err),
+  });
+  // isPending lags a tick, the cache already counts the request
+  const mutate: typeof mutation.mutate = (variables, options) => {
+    if (client.isMutating({ mutationKey }) === 0) {
+      mutation.mutate(variables, options);
+    }
+  };
+  return { ...mutation, mutate };
 }

@@ -65,7 +65,7 @@
     {
       "method": "POST",
       "path": "/v1/trackGroups/{param}/emailPurchaseLink",
-      "sources": ["app/emailPurchaseInfoModal.tsx", "app/maxPlaysReached.tsx"]
+      "sources": ["queries/queries.ts"]
     },
     {
       "method": "GET",

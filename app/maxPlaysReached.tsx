@@ -1,11 +1,10 @@
-import * as api from "../queries/fetch/fetchWrapper";
+import { useEmailPurchaseLinkMutation } from "@/queries/queries";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { usePlayer } from "@/state/PlayerContext";
 import { useColors } from "@/constants/colors";
 import { useAuthContext } from "@/state/AuthContext";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
@@ -19,21 +18,17 @@ export default function MaxPlaysReached() {
   const { t } = useTranslation("translation");
   const { activeTrack } = usePlayer();
   const { user } = useAuthContext();
-  const [isEmailSent, setIsEmailSent] = useState<boolean>(false);
+  const purchaseEmail = useEmailPurchaseLinkMutation();
+  const isEmailSent = purchaseEmail.isSuccess;
 
   function sendPurchaseEmail() {
-    try {
-      if (activeTrack && user) {
-        api.post(
-          `/v1/trackGroups/${activeTrack.trackGroup.id}/emailPurchaseLink?email=${user?.email}`,
-          {},
-        );
-        setIsEmailSent(true);
-      } else {
-        console.log("Missing active track or user email");
-      }
-    } catch (err) {
-      console.error("issue emailing purchase info", err);
+    if (activeTrack && user) {
+      purchaseEmail.mutate({
+        trackGroupId: activeTrack.trackGroup.id,
+        email: user.email,
+      });
+    } else {
+      console.log("Missing active track or user email");
     }
   }
 
@@ -87,9 +82,18 @@ export default function MaxPlaysReached() {
               sendPurchaseEmail();
             }}
             disabled={isEmailSent}
+            loading={purchaseEmail.isPending}
             fullWidth
             style={styles.action}
           />
+        )}
+        {purchaseEmail.isError && (
+          <Text
+            accessibilityRole="alert"
+            style={[type.body, styles.error, { color: colors.danger }]}
+          >
+            {t("trackGroupCard.error")}
+          </Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -117,5 +121,8 @@ const styles = StyleSheet.create({
   },
   action: {
     marginTop: spacing.xl,
+  },
+  error: {
+    marginTop: spacing.md,
   },
 });
