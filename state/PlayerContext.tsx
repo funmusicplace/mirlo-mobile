@@ -63,6 +63,8 @@ const updatePlayerOptions = {
 
 let playerSetupPromise: Promise<void> | null = null;
 let trackPlayerMethodsPatched = false;
+// Set by the provider, a new queue replaces one that ran out
+let onNewQueue: (() => void) | undefined;
 
 function isAlreadyInitializedError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
@@ -211,6 +213,7 @@ function patchTrackPlayerMethodsForInitialization() {
     if (typeof originalMethod !== "function") continue;
 
     trackPlayerAny[methodName] = async (...args: unknown[]) => {
+      if (methodName === "setQueue") onNewQueue?.();
       await ensureTrackPlayerInitialized();
       return originalMethod(
         ...(methodsTakingTracks.includes(methodName)
@@ -236,6 +239,8 @@ interface PlayerContextType {
   isPlaying: boolean;
   looping: "none" | "track" | "queue";
   setLooping: (looping: "none" | "track" | "queue") => void;
+  // The release whose track ended the queue, until something plays
+  finished: RNTrack["trackGroup"] | undefined;
 }
 
 export const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -248,6 +253,7 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [playableTracks, setPlayableTracks] = useState<RNTrack[]>([]); // Available Tracks to play when opening an album (sets the stage for a potenial queue change)
   const [activeTrack, setActiveTrack] = useState<RNTrack>();
   const [playerState, setPlayerState] = useState<any>(null);
+  const [finished, setFinished] = useState<RNTrack["trackGroup"]>();
   const playBackState = usePlaybackState();
   const { user } = useAuthContext();
   const router = useRouter();
@@ -278,6 +284,13 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
     activeTrackOwnedRef.current = false;
   }, [user]);
 
+  useEffect(() => {
+    onNewQueue = () => setFinished(undefined);
+    return () => {
+      onNewQueue = undefined;
+    };
+  }, []);
+
   useTrackPlayerEvents(
     [
       Event.RemoteNext,
@@ -300,6 +313,7 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (event.type === Event.PlaybackState) {
         setPlayerState(event.state);
+        if (event.state === State.Playing) setFinished(undefined);
       }
       if (
         [
@@ -316,6 +330,13 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
         incrementedRef.current = false; // Reset for new track
       }
       if (event.type === Event.PlaybackQueueEnded) {
+        // Read before the rewind makes the queue's first track active
+        const ended = (await TrackPlayer.getActiveTrack()) as
+          | RNTrack
+          | undefined;
+        setFinished(ended?.trackGroup);
+        // Android keeps playWhenReady at the end, so the skip would play again
+        await TrackPlayer.pause();
         await TrackPlayer.skip(0);
       }
       if (
@@ -402,8 +423,17 @@ export const PlayerContextProvider: React.FC<{ children: React.ReactNode }> = ({
       isPlaying: isPlaying,
       looping: looping,
       setLooping: setLooping,
+      finished,
     }),
-    [playBackState, playableTracks, activeTrack, shuffled, isPlaying, looping],
+    [
+      playBackState,
+      playableTracks,
+      activeTrack,
+      shuffled,
+      isPlaying,
+      looping,
+      finished,
+    ],
   );
   return (
     <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>

@@ -6,15 +6,24 @@ import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { clearStoredSession, startSession } from "@/queries/fetch/session";
 
-type PlayerEvent = { type: string; position?: number; duration?: number };
+type PlayerEvent = {
+  type: string;
+  position?: number;
+  duration?: number;
+  state?: string;
+};
 
 const mockEvent = {
   PlaybackActiveTrackChanged: "playback-active-track-changed",
   PlaybackProgressUpdated: "playback-progress-updated",
+  PlaybackState: "playback-state",
+  PlaybackQueueEnded: "playback-queue-ended",
 };
 const mockGetActiveTrack = jest.fn();
 const mockSetQueue = jest.fn().mockResolvedValue(undefined);
 const mockLoad = jest.fn().mockResolvedValue(undefined);
+const mockPause = jest.fn().mockResolvedValue(undefined);
+const mockSkip = jest.fn().mockResolvedValue(undefined);
 const mockGet = jest.fn();
 let mockHandler: (event: PlayerEvent) => Promise<void>;
 
@@ -26,6 +35,8 @@ jest.mock("react-native-track-player", () => ({
     getActiveTrack: mockGetActiveTrack,
     setQueue: mockSetQueue,
     load: mockLoad,
+    pause: mockPause,
+    skip: mockSkip,
     getProgress: jest.fn().mockResolvedValue({ position: 0 }),
     getPlayWhenReady: jest.fn().mockResolvedValue(false),
   },
@@ -34,7 +45,7 @@ jest.mock("react-native-track-player", () => ({
   },
   usePlaybackState: () => ({ state: undefined }),
   Event: mockEvent,
-  State: {},
+  State: { Playing: "playing" },
   Capability: {},
   IOSCategory: {},
   IOSCategoryOptions: {},
@@ -105,6 +116,77 @@ describe("PlayerContextProvider", () => {
     );
 
     await waitFor(() => expect(seen).toMatchObject({ id: 7 }));
+  });
+});
+
+describe("queue end", () => {
+  let finished: RNTrack["trackGroup"] | undefined;
+  let track: RNTrack;
+  const renderProvider = () => {
+    const Provider = importProvider();
+    const { usePlayer } = require("@/state/PlayerContext");
+    const Probe = () => {
+      finished = usePlayer().finished;
+      return null;
+    };
+    render(
+      <Provider>
+        <Probe />
+      </Provider>,
+    );
+  };
+  const endQueue = async () => {
+    await fire({ type: mockEvent.PlaybackState, state: "ended" });
+    await fire({ type: mockEvent.PlaybackQueueEnded });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    track = createMockRNTrack({ id: 3 });
+    mockGetActiveTrack.mockResolvedValue(track);
+  });
+
+  test("lasts through the rewind and clears once something plays", async () => {
+    renderProvider();
+    await endQueue();
+    // Paused first, so Android's rewind doesn't start the release over
+    expect(mockPause.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSkip.mock.invocationCallOrder[0],
+    );
+    expect(mockSkip).toHaveBeenCalledWith(0);
+    // What the rewind itself fires
+    await fire({ type: mockEvent.PlaybackActiveTrackChanged });
+    await fire({ type: mockEvent.PlaybackState, state: "buffering" });
+    await fire({ type: mockEvent.PlaybackState, state: "ready" });
+    expect(finished).toEqual(track.trackGroup);
+
+    await fire({ type: mockEvent.PlaybackState, state: "playing" });
+    expect(finished).toBeUndefined();
+  });
+
+  test("keeps the release of the queue's last track", async () => {
+    const first = createMockRNTrack({
+      id: 1,
+      trackGroup: { ...track.trackGroup, id: track.trackGroup.id + 1 },
+    });
+    // The rewind makes the queue's first track, from another release, active
+    mockSkip.mockImplementationOnce(async () => {
+      mockGetActiveTrack.mockResolvedValue(first);
+    });
+    renderProvider();
+    await endQueue();
+    await fire({ type: mockEvent.PlaybackActiveTrackChanged });
+
+    expect(finished).toEqual(track.trackGroup);
+  });
+
+  test("clears when a new queue is set", async () => {
+    renderProvider();
+    await endQueue();
+    expect(finished).toEqual(track.trackGroup);
+
+    await act(() => importTrackPlayer().setQueue([createMockRNTrack()]));
+    expect(finished).toBeUndefined();
   });
 });
 

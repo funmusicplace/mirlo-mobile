@@ -73,6 +73,11 @@
       "sources": ["app/downloadModal.tsx"]
     },
     {
+      "method": "GET",
+      "path": "/v1/trackGroups/{param}/recommendedTrackGroups",
+      "sources": ["queries/queries.ts"]
+    },
+    {
       "method": "POST",
       "path": "/v1/trackGroups/{param}/wishlist",
       "sources": ["components/WishlistButton.tsx"]

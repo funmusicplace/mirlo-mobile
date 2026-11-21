@@ -139,6 +139,31 @@ export function queryArtist(opts: { artistSlug: string; apiRoot?: string }) {
   });
 }
 
+const fetchRecommendedTrackGroups: QueryFunction<
+  { results: AlbumProps[] },
+  [
+    "fetchRecommendedTrackGroups",
+    { trackGroupId: number | undefined; apiRoot?: string },
+  ]
+> = ({ queryKey: [_, { trackGroupId, apiRoot }], signal }) => {
+  return api.get(`/v1/trackGroups/${trackGroupId}/recommendedTrackGroups`, {
+    signal,
+    apiRoot,
+  });
+};
+
+// The releases an artist picked for a release, the web's "{{artistName}} recommends"
+export function queryRecommendedTrackGroups(opts: {
+  trackGroupId: number | undefined;
+  apiRoot?: string;
+}) {
+  return queryOptions({
+    queryKey: ["fetchRecommendedTrackGroups", opts],
+    queryFn: fetchRecommendedTrackGroups,
+    enabled: !!opts.trackGroupId,
+  });
+}
+
 const fetchLabelTrackGroups: QueryFunction<
   { results: AlbumProps[] },
   ["fetchLabelTrackGroups", { labelSlug: string; apiRoot?: string }]

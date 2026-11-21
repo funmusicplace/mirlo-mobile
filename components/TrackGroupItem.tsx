@@ -37,6 +37,7 @@ export default function TrackGroupItem({
   showArtist = true,
   caption,
   actions,
+  inModal,
 }: AlbumProps & {
   width?: number;
   href?: Href;
@@ -45,6 +46,8 @@ export default function TrackGroupItem({
   caption?: string;
   // Controls under the card, outside the link so they stay separate for screen readers
   actions?: ReactNode;
+  // Closes the modal before opening the release, as now playing does
+  inModal?: boolean;
 }) {
   const colors = useColors();
   const isDark = useColorScheme() === "dark";
@@ -108,14 +111,15 @@ export default function TrackGroupItem({
         </View>
       ) : (
         <Pressable
-          onPress={() =>
+          onPress={() => {
+            if (inModal) router.dismiss();
             router.navigate(
               href ?? {
                 pathname: "/artist/[id]/album/[slug]/album-tracks",
                 params: { id: artistId, slug: urlSlug, apiRoot },
               },
-            )
-          }
+            );
+          }}
           accessibilityRole="link"
           accessibilityLabel={label}
           // Foreground so the ripple draws over the cover

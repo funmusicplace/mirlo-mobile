@@ -12,7 +12,7 @@ type PlayProps = Pick<
 >;
 
 // A release plays whole and a track alone
-const playRelease = (trackGroup: AlbumProps): PlayProps => ({
+export const playRelease = (trackGroup: AlbumProps): PlayProps => ({
   pick: playableTracks,
   isCurrent: ({ trackGroup: current }) =>
     current?.urlSlug === trackGroup.urlSlug &&

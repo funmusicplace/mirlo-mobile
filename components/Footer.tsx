@@ -25,11 +25,12 @@ import { useTranslation } from "react-i18next";
 import { usePlayer } from "@/state/PlayerContext";
 import { useAuthContext } from "@/state/AuthContext";
 import MarqueeText from "@/components/MarqueeText";
+import PlayNextPrompt from "@/components/PlayNextPrompt";
 import Text from "@/components/ThemedText";
 import { formatTime } from "@/components/TrackItem";
 import { useColors } from "@/constants/colors";
 import { skipTrack } from "@/scripts/trackPlayUtils";
-import { gutter, radius, spacing } from "@/constants/spacing";
+import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
 import { type } from "@/constants/typography";
 
 const HIT_SIZE = 44;
@@ -149,12 +150,38 @@ export default function Footer({ style }: ViewProps) {
         {
           backgroundColor: colors.playerBackground,
           borderTopColor: colors.playerShadow,
-          paddingTop: showPlayer ? PROGRESS_HEIGHT : 0,
           paddingBottom: insets.bottom,
         },
         style,
       ]}
     >
+      {showPlayer ? (
+        <PlayNextPrompt>
+          {(open) => (
+            <Pressable
+              onPress={open}
+              accessibilityRole="button"
+              accessibilityLabel={t("mobileApp.playNext.label")}
+              accessibilityHint={t("mobileApp.playNext.hint")}
+              android_ripple={{ color: colors.border }}
+              style={({ pressed }) => [
+                styles.playNext,
+                { borderBottomColor: colors.playerShadow },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[type.small, { color: colors.accent }]}>
+                {t("mobileApp.playNext.title")}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={colors.accent}
+              />
+            </Pressable>
+          )}
+        </PlayNextPrompt>
+      ) : null}
       {showPlayer && activeTrack ? (
         <View style={styles.player}>
           <Pressable
@@ -196,10 +223,10 @@ export default function Footer({ style }: ViewProps) {
             <FooterPlayButton />
             <SkipButton direction="next" />
           </View>
+          <ProgressBar />
         </View>
       ) : null}
       {nav}
-      {showPlayer && <ProgressBar />}
     </View>
   );
 }
@@ -418,13 +445,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: gutter,
   },
+  // Above the progress line, so the seek layer can't take its top
+  playNext: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: touchTarget,
+    paddingHorizontal: gutter,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   player: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
     paddingHorizontal: gutter,
     // Buttons start at PROGRESS_HEIGHT + 8 + 2 = 16.4, clear of the seek layer
-    paddingVertical: spacing.sm,
+    paddingTop: PROGRESS_HEIGHT + spacing.sm,
+    paddingBottom: spacing.sm,
   },
   info: {
     flex: 1,

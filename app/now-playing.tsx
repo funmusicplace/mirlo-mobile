@@ -14,8 +14,11 @@ import TrackPlayer, { useProgress } from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Button from "@/components/Button";
 import DismissModalBar from "@/components/DismissModalBar";
 import MarqueeText from "@/components/MarqueeText";
+import PlayNextPrompt from "@/components/PlayNextPrompt";
 import Text from "@/components/ThemedText";
 import { formatTime } from "@/components/TrackItem";
 import { useColors } from "@/constants/colors";
@@ -165,6 +168,20 @@ export default function NowPlaying() {
             </View>
           </View>
           <Player style={styles.controls} />
+          <PlayNextPrompt>
+            {(open) => (
+              <Button
+                variant="outlined"
+                rounded
+                title={t("mobileApp.playNext.title")}
+                accessibilityLabel={t("mobileApp.playNext.label")}
+                accessibilityHint={t("mobileApp.playNext.hint")}
+                endIcon={<Ionicons name="chevron-forward" />}
+                onPress={open}
+                style={styles.playNext}
+              />
+            )}
+          </PlayNextPrompt>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -211,6 +228,10 @@ const styles = StyleSheet.create({
     opacity: Platform.OS === "android" ? 1 : 0.6,
   },
   controls: {
+    marginTop: spacing.lg,
+  },
+  playNext: {
+    alignSelf: "center",
     marginTop: spacing.lg,
   },
 });

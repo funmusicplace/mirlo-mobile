@@ -218,6 +218,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | `common/Spinner.tsx`, `LoadingSpinner.tsx`, `FullPageLoadingSpinner.tsx` | `ActivityIndicator` in `colors.accent` | Matches: the web artist, release and track pages also load behind a centered spinner |
 | `common/Snackbar.tsx` | None | `ErrorNotification` covers request errors |
 | None | `app/now-playing.tsx` with `Player` | Mobile only |
+| `common/ScrollRail.tsx` in `TrackGroup/RecommendedAlbums.tsx` and `TrackGroup/ReleaseArtistBlock.tsx` | `app/playNext.tsx`, `PlayNextPrompt` | Mobile only screen with the web's rail titles, see [Modal](#modal) |
 
 ### Button
 
@@ -270,8 +271,10 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 | Visibility | Shown while a track is loaded | The player row and the divider show while a track is loaded, except on `/now-playing`. The nav row always shows, alone while idle |
 | Pressed | Hover only | Opacity 0.6 on iOS. On Android a ripple in `border`: borderless (radius 22) on the buttons, bounded over the art and title, which are one button |
 | Extras | `PlayerActions`: floating wishlist, support and buy buttons. Loop and shuffle hide at <= 576 px | None |
+| End of queue | Stops on the last track, unless the queue loops | With repeat off, playback stops on iOS and Android: the player pauses and rewinds to the first track, which stays loaded |
+| Play next | None | Once the queue has ended and something can follow it, a 44 pt row at the top of the footer, above the progress line, with a hairline `playerShadow` divider below: "Play next" in `type.small` and `accent`, an Ionicons `chevron-forward` at 16 on the right, `gutter` side padding. A `button` named "Play next suggestions", with the hint "Opens releases to play next", that opens the Play next modal. Hidden on now playing and on Play next, gone once anything plays |
 
-`app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the centered cover at the container width minus 2 x `gutter`, or smaller so the rest of the screen fits without scrolling (`coverSize`, 120 pt at the least, below that the screen scrolls), a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28.
+`app/now-playing.tsx` (mobile only) shows `DismissModalBar`, the centered cover at the container width minus 2 x `gutter`, or smaller so the rest of the screen fits without scrolling (`coverSize`, 120 pt at the least, below that the screen scrolls), a `Slider` (`accent` fill, `tintX` track), times in `type.xsmall` and `secondaryText` with tabular figures, the title in `type.title`, album and artist links in `type.small` and `accent` on 44 pt rows, and `Player`: Feather shuffle and repeat at 22 (`accent` on, `inactive` off), `MaterialIcons` skip at 36, and a 64 pt play circle with a 1 pt `accent` border and an Ionicons glyph at 28. When the footer's Play next row would show, an outlined `rounded` "Play next" `Button`, named "Play next suggestions", with a `chevron-forward` end icon sits centered under `Player`, `spacing.lg` above. It closes now playing, then opens Play next.
 
 ### Screen header
 
@@ -333,12 +336,13 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | | Web `Modal` at <= 576 px | Mobile |
 | --- | --- | --- |
-| Presentation | Bottom sheet, full width, radius 8 on the top corners, slide up over 300 ms, backdrop `rgba(0, 0, 0, 0.6)`. `size="small"` is 90% wide and centered | Native modal routes (`presentation: "modal"`, slide from bottom): now playing, menu, about, delete account, purchase, play limit and verification flows. The album purchase dialog is a React Native `Modal` card on `scrim` (`radius.md`, `spacing.lg` padding and gap) |
+| Presentation | Bottom sheet, full width, radius 8 on the top corners, slide up over 300 ms, backdrop `rgba(0, 0, 0, 0.6)`. `size="small"` is 90% wide and centered | Native modal routes (`presentation: "modal"`, slide from bottom): now playing, Play next, menu, about, delete account, purchase, play limit and verification flows. The album purchase dialog is a React Native `Modal` card on `scrim` (`radius.md`, `spacing.lg` padding and gap) |
 | Header | Title `h2` (20.8 / 28.8), close button (`FaTimes`), 1 px tint-x border under a title | `DismissModalBar`: optional title in `type.heading` (85% wide at most), FontAwesome5 `times` at 20 in `text` in a 30 pt `HeaderButton`, 1 pt `border` under a titled bar. Without a title the X sits on the right |
 | Content | Padding 16 on the sides and bottom | `spacing.lg` padding |
 | Dismiss | Close button, backdrop tap, Escape, focus trap | Close button, swipe down on iOS, back on Android |
 | Confirm | `ConfirmDialog`: right-aligned row, outlined Cancel then solid confirm, 8 apart, 24 above | `deleteAccount.tsx`: the same row with `Button`s, then `Alert.alert` with a destructive action |
 | Download | `DownloadAlbumButton`: "Download" title, "Download FLAC" once a format is picked, the question over seven format buttons, a spinner while the zip builds, then Download and "Choose another format" | `app/downloadModal.tsx`: the same steps and titles, centered text, outlined full-width format buttons `spacing.md` apart, an `accent` spinner, a solid Download and an outlined "Choose another format". iOS saves the zip to the cache and opens the share sheet, Android hands the link to the browser. Failures show `trackGroupCard.downloadFailed` in `danger` under the buttons |
+| Play next | None. The release page shows "{{artistName}} recommends" and "Other releases by {{artistName}}" as snapping `ScrollRail`s | `app/playNext.tsx`, titled "Play next", for the release of the track that ended the queue, kept while a suggestion plays, in this order: the artist's picks ("{{artistName}} recommends"), up to 20 other releases by the artist ("Other releases by {{artistName}}"), then up to 10 "Similar releases" from its first three tags, on the default instance only. A release shows once, in its first section, and only once it's out. Each section is a `header` in `type.body` weight 600 over a horizontal rail of `TrackGroupItem` cards at 42% of the modal's width, `spacing.md` apart and `spacing.lg` in, snapping card by card, each with the filled play circle (`PlayFeaturedButton`) in a 44 pt row under it to play the whole release. A cover tap closes the modal, then opens the release. A large `accent` spinner until every list settles, one `type.body` line in `secondaryText` when nothing is left |
 
 ### Search overlay
 
