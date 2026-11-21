@@ -108,6 +108,14 @@ async function mapSystemPath(path: string, initial: boolean): Promise<string> {
   if (path.startsWith("trackplayer://")) return initial ? "" : "/now-playing";
   if (url.hostname !== "mirlo.space") return path;
 
+  // Built from the parsed URL, since the raw string's host can differ as https
+  const web = `https://mirlo.space${url.pathname}${url.search}${url.hash}`;
+  // The app can't sell, so its album would only email a purchase link again
+  if (url.searchParams.get("buy") === "true") {
+    openOnWeb(web);
+    return "";
+  }
+
   const [artist, section, album, tracks, trackId] = url.pathname
     .split("/")
     .filter(Boolean);
@@ -125,6 +133,6 @@ async function mapSystemPath(path: string, initial: boolean): Promise<string> {
       return `/artist/${artist}/album/${album}/tracks/${trackId}`;
     }
   }
-  openOnWeb(path);
+  openOnWeb(web);
   return "";
 }
