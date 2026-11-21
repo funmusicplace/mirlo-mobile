@@ -49,7 +49,8 @@ export default function NowPlaying() {
       >
         <Image
           source={{
-            uri: trackGroup?.cover.sizes[1200] ?? trackGroup?.cover.sizes[600],
+            uri:
+              trackGroup?.cover?.sizes[1200] ?? trackGroup?.cover?.sizes[600],
           }}
           style={{
             width: side ?? "100%",

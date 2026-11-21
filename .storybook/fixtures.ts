@@ -7,7 +7,7 @@ export const FIXTURE_SEED = 1234;
 const COVER_SIZES = [60, 120, 300, 600, 960, 1200, 1500] as const;
 
 // loremflickr is flaky
-function stableCoverSizes(): AlbumProps["cover"]["sizes"] {
+function stableCoverSizes(): NonNullable<AlbumProps["cover"]>["sizes"] {
   const sizes: Record<number, string> = {};
   for (const size of COVER_SIZES) {
     sizes[size] = faker.image.urlPicsumPhotos({
@@ -17,18 +17,18 @@ function stableCoverSizes(): AlbumProps["cover"]["sizes"] {
       blur: 0,
     });
   }
-  return sizes as AlbumProps["cover"]["sizes"];
+  return sizes as NonNullable<AlbumProps["cover"]>["sizes"];
 }
 
 export function mockAlbum(overrides?: Partial<AlbumProps>): AlbumProps {
   const album = createMockAlbum(overrides);
-  album.cover.sizes = stableCoverSizes();
+  album.cover = { sizes: stableCoverSizes() };
   return album;
 }
 
 export function mockRNTrack(overrides?: Partial<RNTrack>): RNTrack {
   const track = createMockRNTrack(overrides);
-  track.trackGroup.cover.sizes = stableCoverSizes();
+  track.trackGroup.cover = { sizes: stableCoverSizes() };
   track.artwork = track.trackGroup.cover.sizes[600];
   return track;
 }

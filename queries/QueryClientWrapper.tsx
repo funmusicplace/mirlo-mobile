@@ -6,10 +6,10 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 30 * 1000, //30 seconds
       retry: (failureCount, error) => {
-        // don't retyr for auth-related errors
+        // retrying gets the same answer for these
         if (
           error instanceof MirloFetchError &&
-          (error.status === 400 || error.status === 401)
+          [400, 401, 404].includes(error.status)
         ) {
           return false;
         }

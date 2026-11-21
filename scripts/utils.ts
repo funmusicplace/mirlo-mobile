@@ -24,7 +24,7 @@ export function toRNTrack(track: RNTrack, album: AlbumProps): RNTrack {
   return {
     title: track.title,
     artist: album.artist.name,
-    artwork: album.cover.sizes[600],
+    artwork: album.cover?.sizes[600],
     url: audioUrl(track, album),
     allowIndividualSale: track.allowIndividualSale,
     id: track.id,

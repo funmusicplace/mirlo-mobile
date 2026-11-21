@@ -34,7 +34,7 @@ import type { TFunction } from "i18next";
 import Markdown from "@/components/Markdown";
 import { linkifyUrls } from "@/scripts/utils";
 import WishlistButton from "@/components/WishlistButton";
-import ErrorNotification from "@/components/ErrorNotification";
+import ReleaseError from "@/components/ReleaseError";
 import AddAlbumButton from "@/components/AddAlbumButton";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
@@ -197,7 +197,6 @@ export default function AlbumTracks() {
   const [album, setAlbum] = useState<RNTrack[]>();
   const { t } = useTranslation("translation");
   const { width } = useWindowDimensions();
-  const [showError, setShowError] = useState<boolean>(true);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const colors = useColors();
 
@@ -226,15 +225,7 @@ export default function AlbumTracks() {
   );
 
   if (unknown) {
-    return (
-      <View style={styles.screen}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={new Error(t("sources.unknownSource"))}
-        />
-      </View>
-    );
+    return <ReleaseError error={new Error(t("sources.unknownSource"))} />;
   }
 
   if (isPending) {
@@ -251,15 +242,7 @@ export default function AlbumTracks() {
 
   if (isError) {
     console.error(error);
-    return (
-      <View style={styles.screen}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={error}
-        />
-      </View>
-    );
+    return <ReleaseError error={error} />;
   }
 
   const selectedAlbum = data.result;
