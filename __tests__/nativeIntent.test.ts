@@ -65,6 +65,32 @@ describe("redirectSystemPath", () => {
     expect(openBrowserAsync).not.toHaveBeenCalled();
   });
 
+  test("hands purchase links to Safari and keeps other release links in the app", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    const release = "https://mirlo.space/arod/release/penaflor-single";
+    for (const p of [`${release}?buy=true`, `${release}/tracks/12?buy=true`]) {
+      expect(await redirect(p)).toBe("");
+      await flush();
+      expect(openURL).toHaveBeenLastCalledWith(p);
+    }
+    for (const p of [release, `${release}?buy=false`]) {
+      expect(await redirect(p)).toBe(
+        "/artist/arod/album/penaflor-single/album-tracks",
+      );
+    }
+  });
+
+  test("opens the https form of a mirlo:// link on the checked host", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    expect(await redirect("mirlo://mirlo.space/login?a=1#b")).toBe("");
+    await flush();
+    expect(openURL).toHaveBeenLastCalledWith("https://mirlo.space/login?a=1#b");
+    // A backslash ends the host in https and is userinfo in a custom scheme
+    expect(await redirect("mirlo://evil.com\\@mirlo.space/login")).toBe("");
+    await flush();
+    expect(openURL).toHaveBeenLastCalledWith("https://mirlo.space/login");
+  });
+
   test("still opens the artist page when the API check fails for another reason", async () => {
     (queryClient.fetchQuery as jest.Mock).mockRejectedValueOnce(
       new TypeError("Network request failed"),
@@ -138,6 +164,20 @@ describe("a link that remounts the app on Android", () => {
   test("maps the first launch as usual", async () => {
     const { open, mount, launch } = load("android");
     expect(await launch("a")).toBe(route("a"));
+    mount();
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  test("opens a purchase link in the browser when it starts the app", async () => {
+    const { open, mount, launch } = load("android");
+    // load() reset the registry, so the top-level mock is stale
+    const browser = jest.requireMock("expo-web-browser");
+    expect(await launch("a?buy=true")).toBe("");
+    await flush();
+    expect(browser.openBrowserAsync).toHaveBeenCalledWith(
+      "https://mirlo.space/arod/release/a?buy=true",
+      { browserPackage: "com.android.chrome" },
+    );
     mount();
     expect(open).not.toHaveBeenCalled();
   });
