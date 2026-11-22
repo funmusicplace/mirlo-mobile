@@ -51,6 +51,11 @@ jest.mock("@/components/Markdown", () => ({
   __esModule: true,
   default: () => null,
 }));
+// Only an error state renders it, and its module imports the player
+jest.mock("@/components/ScreenError", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock("react-native-safe-area-context", () => ({
   SafeAreaView: jest.requireActual("react-native").View,
 }));

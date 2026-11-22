@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTranslation } from "react-i18next";
 import { CollectionEmpty } from "@/components/CollectionPurchase";
 import ErrorNotification from "@/components/ErrorNotification";
 import MenuButton from "@/components/MenuButton";
@@ -12,9 +11,14 @@ import { screenEdges } from "@/constants/safe-area";
 import { gutter } from "@/constants/spacing";
 import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 
-// A failed request of a release screen, kept under the header of the loaded one
-export default function ReleaseError({ error }: { error: Error }) {
-  const { t } = useTranslation("translation");
+// A failed request of a screen, kept under the header of the loaded one
+export default function ScreenError({
+  error,
+  notFound,
+}: {
+  error: Error;
+  notFound?: string;
+}) {
   const colors = useColors();
   const [visible, setVisible] = useState(true);
   return (
@@ -31,11 +35,9 @@ export default function ReleaseError({ error }: { error: Error }) {
           </>
         }
       />
-      {error instanceof MirloFetchError && error.status === 404 ? (
+      {notFound && error instanceof MirloFetchError && error.status === 404 ? (
         <View style={styles.message}>
-          <CollectionEmpty>
-            {t("trackGroupDetails.doesNotExist")}
-          </CollectionEmpty>
+          <CollectionEmpty>{notFound}</CollectionEmpty>
         </View>
       ) : (
         <ErrorNotification
