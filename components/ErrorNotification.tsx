@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { AccessibilityInfo, View, Pressable, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Text from "@/components/ThemedText";
@@ -21,13 +21,25 @@ const ErrorNotification = ({
 }: ErrorNotificationProps) => {
   const colors = useColors();
   const { t } = useTranslation("translation");
-  if (!visible) return null;
-
   const offline = error.message === "Network request failed";
+  const title = offline
+    ? t("mobileApp.errorNotification.connectionIssue")
+    : t("trackGroupCard.error");
+  const message = offline
+    ? t("mobileApp.errorNotification.unableToConnect")
+    : error.message;
+
+  // The role alone announces nothing when the box appears
+  useEffect(() => {
+    if (visible) {
+      AccessibilityInfo.announceForAccessibility(`${title}, ${message}`);
+    }
+  }, [visible, title, message]);
+
+  if (!visible) return null;
 
   return (
     <View
-      accessibilityRole="alert"
       style={[
         styles.box,
         {
@@ -36,17 +48,10 @@ const ErrorNotification = ({
         },
       ]}
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>
-          {offline
-            ? t("mobileApp.errorNotification.connectionIssue")
-            : error.name}
-        </Text>
-        <Text style={styles.message}>
-          {offline
-            ? t("mobileApp.errorNotification.unableToConnect")
-            : error.message}
-        </Text>
+      {/* The alert is the text only, or iOS would swallow Dismiss */}
+      <View accessible accessibilityRole="alert" style={styles.content}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.message}>{message}</Text>
       </View>
       <Pressable
         onPress={onDismiss}

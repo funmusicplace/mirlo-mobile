@@ -328,7 +328,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 
 | | Web | Mobile |
 | --- | --- | --- |
-| Notice | `Box` success, info and warning: color at 30% over the background, 4 px left rule, radius 3, text color, padding 8 by 11.2 at <= 768 px | `ErrorNotification`: `alert` fill, 4 pt `alertBorder` rule, `radius.sm`, padding 8 by 12, title in `type.body` weight 600, message in `type.small`, `alert` role, dismiss X (FontAwesome5 `times` at 16) with `hitSlop` up to 44. `deleteAccount.tsx` uses the same box for its warning |
+| Notice | `Box` success, info and warning: color at 30% over the background, 4 px left rule, radius 3, text color, padding 8 by 11.2 at <= 768 px | `ErrorNotification`: `alert` fill, 4 pt `alertBorder` rule, `radius.sm`, padding 8 by 12, title in `type.body` weight 600 ("Something went wrong" from `trackGroupCard.error`, "Connection Issue" for a connection failure), message in `type.small`, `alert` role on the title and message together, announced with `announceForAccessibility` when the box appears, dismiss X (FontAwesome5 `times` at 16) with `hitSlop` up to 44. `deleteAccount.tsx` uses the same box for its warning |
 | Field error | 14 px `--mi-red-700` text with `role="alert"`. `FormError`: warning fill, white text, padding 8 by 16 | `type.small` in `danger` under the input |
 | Toast | `Snackbar`: warning (`#f2897a`, black text), error (pink, white), success (`--mi-green-500`, white bold), radius 4 | None |
 
