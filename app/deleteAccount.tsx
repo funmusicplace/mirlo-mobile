@@ -77,7 +77,7 @@ export default function DeleteAccountScreen() {
   ]);
 
   const openAccountPage = useCallback(async () => {
-    await openInBrowser(ACCOUNT_URL);
+    if (!(await openInBrowser(ACCOUNT_URL))) return;
     setOpenedAccountPage(true);
     refreshLoggedInUser();
   }, [refreshLoggedInUser]);

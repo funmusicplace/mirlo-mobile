@@ -60,7 +60,7 @@ describe("<DeleteAccountScreen />", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCurrentUser = createMockUser();
-    mockOpenInBrowser.mockResolvedValue(undefined);
+    mockOpenInBrowser.mockResolvedValue(true);
   });
 
   test("renders the title and warning bullets", () => {
@@ -161,6 +161,24 @@ describe("<DeleteAccountScreen />", () => {
 
     expect(mockDismiss).toHaveBeenCalledWith("/");
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  test("a failed open arms neither the refresh nor the redirect", async () => {
+    mockOpenInBrowser.mockResolvedValueOnce(false);
+    const Screen = importScreen();
+    const { getAllByText, rerender } = render(<Screen />);
+
+    const matches = getAllByText("Delete account");
+    fireEvent.press(matches[matches.length - 1]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(mockOpenInBrowser).toHaveBeenCalled();
+    expect(mockRefreshLoggedInUser).not.toHaveBeenCalled();
+
+    mockCurrentUser = null;
+    rerender(<Screen />);
+
+    expect(mockDismiss).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith("/login");
   });
 
   test("signed out visitors go to login and never see the button", () => {

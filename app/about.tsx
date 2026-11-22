@@ -1,5 +1,4 @@
 import {
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -11,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
-import { openInBrowser } from "@/scripts/openInBrowser";
+import { openInBrowser, openInSystemBrowser } from "@/scripts/openInBrowser";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { screenEdges } from "@/constants/safe-area";
@@ -29,7 +28,7 @@ function onLinkPress(url: string) {
   if (url === "https://mirlo.space" || url.startsWith("https://mirlo.space/")) {
     openInBrowser(url);
   } else {
-    Linking.openURL(url);
+    openInSystemBrowser(url);
   }
 }
 
