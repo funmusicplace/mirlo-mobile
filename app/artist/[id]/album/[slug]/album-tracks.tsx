@@ -34,7 +34,7 @@ import type { TFunction } from "i18next";
 import Markdown from "@/components/Markdown";
 import { linkifyUrls } from "@/scripts/utils";
 import WishlistButton from "@/components/WishlistButton";
-import ReleaseError from "@/components/ReleaseError";
+import ScreenError from "@/components/ScreenError";
 import AddAlbumButton from "@/components/AddAlbumButton";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
@@ -225,7 +225,7 @@ export default function AlbumTracks() {
   );
 
   if (unknown) {
-    return <ReleaseError error={new Error(t("sources.unknownSource"))} />;
+    return <ScreenError error={new Error(t("sources.unknownSource"))} />;
   }
 
   if (isPending) {
@@ -242,7 +242,12 @@ export default function AlbumTracks() {
 
   if (isError) {
     console.error(error);
-    return <ReleaseError error={error} />;
+    return (
+      <ScreenError
+        error={error}
+        notFound={t("trackGroupDetails.doesNotExist")}
+      />
+    );
   }
 
   const selectedAlbum = data.result;

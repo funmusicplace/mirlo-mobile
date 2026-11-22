@@ -30,6 +30,7 @@ import Text from "@/components/ThemedText";
 import Button from "@/components/Button";
 import ArtistTile from "@/components/ArtistTile";
 import ShareButton from "@/components/ShareButton";
+import ScreenError from "@/components/ScreenError";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
 import SearchButton from "@/components/SearchButton";
 import MenuButton from "@/components/MenuButton";
@@ -174,11 +175,7 @@ export default function ArtistPage() {
   const aimTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   if (unknown) {
-    return (
-      <View>
-        <Text>{t("sources.unknownSource")}</Text>
-      </View>
-    );
+    return <ScreenError error={new Error(t("sources.unknownSource"))} />;
   }
 
   if (isPending) {
@@ -194,13 +191,7 @@ export default function ArtistPage() {
   }
 
   if (isError) {
-    return (
-      <View>
-        <Text>
-          {t("mobileApp.artistPage.error", { message: error.message })}
-        </Text>
-      </View>
-    );
+    return <ScreenError error={error} notFound={t("artist.doesNotExist")} />;
   }
 
   const artistInfo = data;

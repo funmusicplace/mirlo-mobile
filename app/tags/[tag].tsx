@@ -19,8 +19,7 @@ import ScreenHeader, {
   BackButton,
   SectionHeader,
 } from "@/components/ScreenHeader";
-import ErrorNotification from "@/components/ErrorNotification";
-import { useState } from "react";
+import ScreenError from "@/components/ScreenError";
 import { useColors } from "@/constants/colors";
 import { type } from "@/constants/typography";
 import { gutter, spacing } from "@/constants/spacing";
@@ -30,8 +29,6 @@ const PAGE_SIZE = 20;
 export default function TagsView() {
   const { tag } = useLocalSearchParams();
   const { t } = useTranslation("translation");
-
-  const [showError, setShowError] = useState<boolean>(true);
   const colors = useColors();
   const columnWidth = useGridColumnWidth();
 
@@ -76,15 +73,7 @@ export default function TagsView() {
 
   if (isError) {
     console.error(error);
-    return (
-      <View style={{ flex: 1 }}>
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={error}
-        />
-      </View>
-    );
+    return <ScreenError error={error} />;
   }
 
   const renderLoadingFooter = () => {

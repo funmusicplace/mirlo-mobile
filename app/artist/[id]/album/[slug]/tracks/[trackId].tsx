@@ -29,7 +29,7 @@ import { Fragment, useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import ReleaseError from "@/components/ReleaseError";
+import ScreenError from "@/components/ScreenError";
 import ShareButton from "@/components/ShareButton";
 import Button from "@/components/Button";
 import ScreenHeader, { BackButton } from "@/components/ScreenHeader";
@@ -105,7 +105,7 @@ export default function TrackView() {
   );
 
   if (unknown) {
-    return <ReleaseError error={new Error(t("sources.unknownSource"))} />;
+    return <ScreenError error={new Error(t("sources.unknownSource"))} />;
   }
 
   if (isPending) {
@@ -122,7 +122,12 @@ export default function TrackView() {
 
   if (isError) {
     console.error(error);
-    return <ReleaseError error={error} />;
+    return (
+      <ScreenError
+        error={error}
+        notFound={t("trackGroupDetails.doesNotExist")}
+      />
+    );
   }
 
   const filteredTrack = data.result.tracks?.find(

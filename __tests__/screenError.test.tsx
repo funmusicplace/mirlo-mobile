@@ -4,6 +4,8 @@ import { render, screen } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AlbumTracks from "@/app/artist/[id]/album/[slug]/album-tracks";
 import TrackView from "@/app/artist/[id]/album/[slug]/tracks/[trackId]";
+import ArtistPage from "@/app/artist/[id]/artist-page";
+import TagsView from "@/app/tags/[tag]";
 import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient as appQueryClient } from "@/queries/QueryClientWrapper";
 
@@ -105,19 +107,21 @@ const fails = (status: number, message: string) =>
     new MirloFetchError({ status } as Response, message),
   );
 
+const releaseNotFound =
+  "This release does not exist or it does not have a public presence.";
+const artistNotFound =
+  "This artist page does not exist or does not have any public presence yet.";
+
 test.each([
-  ["album", AlbumTracks],
-  ["track", TrackView],
+  ["album", AlbumTracks, releaseNotFound],
+  ["track", TrackView, releaseNotFound],
+  ["artist", ArtistPage, artistNotFound],
 ])(
-  "the %s screen keeps its header when the release fails to load, a 404 gets the website's message",
-  async (_, Screen) => {
+  "the %s screen keeps its header when its request fails, a 404 gets the website's message",
+  async (_, Screen, notFound) => {
     fails(404, "TrackGroup with id 12 not found");
     renderScreen(Screen);
-    expect(
-      await screen.findByText(
-        "This release does not exist or it does not have a public presence.",
-      ),
-    ).toBeTruthy();
+    expect(await screen.findByText(notFound)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
     expect(screen.queryByText("TrackGroup with id 12 not found")).toBeNull();
     screen.unmount();
@@ -128,3 +132,10 @@ test.each([
     expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
   },
 );
+
+test("the tag screen keeps its header and shows the error message even for a 404", async () => {
+  fails(404, "No such tag");
+  renderScreen(TagsView);
+  expect(await screen.findByText("No such tag")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
+});

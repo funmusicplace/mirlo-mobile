@@ -331,7 +331,7 @@
     "areSupporting": "You're supporting this artist!",
     "updatedBio": "Updated bio",
     "support": "Support",
-    "doesNotExist": "This artist does not exist or it does not have a public presence.",
+    "doesNotExist": "This artist page does not exist or does not have any public presence yet.",
     "edit": "Edit page",
     "updates": "Posts",
     "noUpdates": "There are no posts yet for this artist.",
@@ -983,7 +983,6 @@
       "title": "Add {{ title }} to your collection"
     },
     "artistPage": {
-      "error": "Error: {{message}}",
       "noAlbums": "No Albums Present!",
       "readMore": "Read more",
       "showLess": "Show less"
