@@ -58,8 +58,14 @@ jest.mock("@/state/PlayerContext", () => ({
     setShuffled: jest.fn(),
   }),
 }));
+// The real hook is never ready for an unknown source
+let mockUnknownSource = false;
 jest.mock("@/state/InstancesContext", () => ({
-  useKnownApiRoot: () => ({ apiRoot: undefined, ready: true, unknown: false }),
+  useKnownApiRoot: () => ({
+    apiRoot: undefined,
+    ready: !mockUnknownSource,
+    unknown: mockUnknownSource,
+  }),
 }));
 
 // Local strings, so a Transifex token in the env can't change them
@@ -79,6 +85,8 @@ jest.mock("@/components/Markdown", () => "Markdown");
 jest.mock("@/components/PlayPauseWrapper", () => "PlayPauseWrapper");
 
 beforeEach(() => {
+  mockUnknownSource = false;
+  mockGet.mockClear();
   jest.spyOn(console, "error").mockImplementation(() => undefined);
 });
 afterEach(() => jest.restoreAllMocks());
@@ -138,4 +146,14 @@ test("the tag screen keeps its header and shows the error message even for a 404
   renderScreen(TagsView);
   expect(await screen.findByText("No such tag")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
+});
+
+test("the artist screen keeps its header and explains an unknown source without sending a request", () => {
+  mockUnknownSource = true;
+  renderScreen(ArtistPage);
+  expect(
+    screen.getByText("This page comes from a source that isn't in your list."),
+  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
+  expect(mockGet).not.toHaveBeenCalled();
 });
