@@ -147,7 +147,10 @@ export const trackGroupUrl = (trackGroup: AlbumProps) =>
   `${siteUrlFor(trackGroup.apiRoot)}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`;
 
 export const handleExternalPurchase = (trackGroup: AlbumProps) => {
-  openInBrowser(trackGroupUrl(trackGroup));
+  // The website opens its purchase dialog for this query. A fundraiser release
+  // has two purchase buttons there, and each would open one
+  const query = trackGroup.fundraiser ? "" : "?buy=true";
+  openInBrowser(`${trackGroupUrl(trackGroup)}${query}`);
 };
 
 // The web puts the release date and the track count on one line
