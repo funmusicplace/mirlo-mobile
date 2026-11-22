@@ -29,7 +29,9 @@ export default function Wishlist() {
   const { user } = useAuthContext();
   const userId = user?.id;
   const { top } = useSafeAreaInsets();
-  const { isPending, isError, data, error } = useQuery(queryWishlist(userId));
+  const { isPending, isLoadingError, data, error } = useQuery(
+    queryWishlist(userId),
+  );
   const { t } = useTranslation();
   const [showError, setShowError] = useState<boolean>(true);
   const [filter, setFilter] = useState<Filter>("all");
@@ -88,7 +90,7 @@ export default function Wishlist() {
         style={styles.loadSpinner}
       />
     );
-  } else if (isError) {
+  } else if (isLoadingError) {
     console.error(error);
     content = (
       <ErrorNotification

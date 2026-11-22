@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAppIsReadyContext } from "@/state/AppReadyContext";
 import { useInstances } from "@/state/InstancesContext";
 import { dedupeReleases, mergeReleases } from "@/scripts/instances";
+import { useNextPage } from "@/scripts/useNextPage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as api from "../queries/fetch/fetchWrapper";
 import { API_ROOT } from "@/constants/api-root";
@@ -40,12 +41,13 @@ export default function Index() {
   const { instances, loaded } = useInstances();
   const {
     isPending,
-    isError,
+    isLoadingError,
     data,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
     isRefetching,
     refetch,
   } = useInfiniteQuery({
@@ -84,13 +86,20 @@ export default function Index() {
 
   // An error ends the splash too, or it would hide the error box
   useEffect(() => {
-    if (data || isError || API_ROOT === "http://localhost:3000") {
+    if (data || isLoadingError || API_ROOT === "http://localhost:3000") {
       const timer = setTimeout(() => {
         setIsDataLoaded(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [data, isError]);
+  }, [data, isLoadingError]);
+
+  const nextPage = useNextPage({
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  });
 
   if (isPending) {
     return (
@@ -132,7 +141,7 @@ export default function Index() {
     />
   );
 
-  if (isError) {
+  if (isLoadingError) {
     console.error(error);
     return (
       <View style={screenStyle}>
@@ -182,12 +191,7 @@ export default function Index() {
         renderItem={({ item }) => (
           <TrackGroupItem {...item} width={columnWidth} />
         )}
-        onEndReached={() => {
-          if (!hasNextPage || isFetchingNextPage) {
-            return;
-          }
-          fetchNextPage();
-        }}
+        {...nextPage}
         onEndReachedThreshold={0.0}
         ListHeaderComponent={
           <>

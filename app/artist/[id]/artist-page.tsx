@@ -153,7 +153,7 @@ export default function ArtistPage() {
   const { id } = params;
   const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
   const artistQuery = queryArtist({ artistSlug: String(id) ?? "", apiRoot });
-  const { data, isError, isPending, error } = useQuery({
+  const { data, isLoadingError, isPending, error } = useQuery({
     ...artistQuery,
     enabled: ready && artistQuery.enabled,
   });
@@ -190,7 +190,7 @@ export default function ArtistPage() {
     );
   }
 
-  if (isError) {
+  if (isLoadingError) {
     return <ScreenError error={error} notFound={t("artist.doesNotExist")} />;
   }
 
@@ -210,7 +210,7 @@ export default function ArtistPage() {
   const releasesTitle =
     artistInfo.properties?.titles?.releases || t("artist.releases");
   // A label lists its artists' releases too, an older instance may lack the route
-  const labelList = isLabel && !labelTrackGroups.isError;
+  const labelList = isLabel && !labelTrackGroups.isLoadingError;
   const releasesPending = labelList && labelTrackGroups.isPending;
   const releases = labelList
     ? (labelTrackGroups.data?.results ?? [])

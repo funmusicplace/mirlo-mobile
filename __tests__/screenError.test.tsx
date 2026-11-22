@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from "react";
-import { render, screen } from "@testing-library/react-native";
+import { act, render, screen } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AlbumTracks from "@/app/artist/[id]/album/[slug]/album-tracks";
 import TrackView from "@/app/artist/[id]/album/[slug]/tracks/[trackId]";
@@ -91,21 +91,20 @@ beforeEach(() => {
 });
 afterEach(() => jest.restoreAllMocks());
 
-const renderScreen = (Screen: React.ComponentType) =>
+// The app's own retry rule, and no gc timer that would keep jest open
+const newClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        ...appQueryClient.getDefaultOptions().queries,
+        gcTime: Infinity,
+      },
+    },
+  });
+
+const renderScreen = (Screen: React.ComponentType, client = newClient()) =>
   render(
-    // The app's own retry rule, and no gc timer that would keep jest open
-    <QueryClientProvider
-      client={
-        new QueryClient({
-          defaultOptions: {
-            queries: {
-              ...appQueryClient.getDefaultOptions().queries,
-              gcTime: Infinity,
-            },
-          },
-        })
-      }
-    >
+    <QueryClientProvider client={client}>
       <Screen />
     </QueryClientProvider>,
   );
@@ -156,4 +155,54 @@ test("the artist screen keeps its header and explains an unknown source without 
   ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
   expect(mockGet).not.toHaveBeenCalled();
+});
+
+const release = {
+  id: 3,
+  title: "Dronefields",
+  urlSlug: "dronefields",
+  artistId: 7,
+  artist: { name: "Joni Void" },
+  cover: null,
+} as AlbumProps;
+const artist = {
+  id: 7,
+  name: "Joni Void",
+  urlSlug: "joni-void",
+  trackGroups: [release],
+} as Artist;
+
+// The next request fails and the screens already on display refetch
+const failRefresh = async (client: QueryClient) => {
+  fails(400, "Bad request");
+  await act(async () => {
+    await client.refetchQueries();
+    // React hears of the failure on a timer
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  expect(mockGet).toHaveBeenCalledTimes(2);
+};
+
+test("the artist screen keeps its loaded page when a refresh fails", async () => {
+  const client = newClient();
+  mockGet.mockResolvedValue({ result: artist });
+  renderScreen(ArtistPage, client);
+  expect(await screen.findByText("Joni Void")).toBeTruthy();
+
+  await failRefresh(client);
+
+  expect(screen.getByText("Joni Void")).toBeTruthy();
+  expect(screen.queryByText("Bad request")).toBeNull();
+});
+
+test("the tag screen keeps its loaded list when a refresh fails", async () => {
+  const client = newClient();
+  mockGet.mockResolvedValue({ results: [release] });
+  renderScreen(TagsView, client);
+  expect(await screen.findByText("Dronefields")).toBeTruthy();
+
+  await failRefresh(client);
+
+  expect(screen.getByText("Dronefields")).toBeTruthy();
+  expect(screen.queryByText("Bad request")).toBeNull();
 });

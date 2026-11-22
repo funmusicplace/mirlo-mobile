@@ -27,7 +27,7 @@ export default function Collections() {
   const userId = user?.id;
   const { top } = useSafeAreaInsets();
   const colors = useColors();
-  const { isPending, isError, data, error } = useQuery(
+  const { isPending, isLoadingError, data, error } = useQuery(
     queryUserCollection(userId),
   );
   const [showError, setShowError] = useState<boolean>(true);
@@ -69,7 +69,7 @@ export default function Collections() {
         style={styles.loadSpinner}
       />
     );
-  } else if (isError) {
+  } else if (isLoadingError) {
     console.error(error);
     content = (
       <ErrorNotification

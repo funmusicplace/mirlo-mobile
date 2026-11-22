@@ -20,6 +20,7 @@ import ScreenHeader, {
   SectionHeader,
 } from "@/components/ScreenHeader";
 import ScreenError from "@/components/ScreenError";
+import { useNextPage } from "@/scripts/useNextPage";
 import { useColors } from "@/constants/colors";
 import { type } from "@/constants/typography";
 import { gutter, spacing } from "@/constants/spacing";
@@ -34,12 +35,13 @@ export default function TagsView() {
 
   const {
     isPending,
-    isError,
+    isLoadingError,
     data,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
   } = useInfiniteQuery<{ results: AlbumProps[] }>({
     queryKey: ["infiniteTrackGroups", tag],
     queryFn: ({ pageParam = 0 }) => {
@@ -57,6 +59,12 @@ export default function TagsView() {
         : null;
     },
   });
+  const nextPage = useNextPage({
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  });
   const { top } = useSafeAreaInsets();
   const trackGroups = data?.pages.flatMap((page) => page.results) || [];
   if (isPending) {
@@ -71,7 +79,7 @@ export default function TagsView() {
     );
   }
 
-  if (isError) {
+  if (isLoadingError) {
     console.error(error);
     return <ScreenError error={error} />;
   }
@@ -112,7 +120,7 @@ export default function TagsView() {
         renderItem={({ item }) => (
           <TrackGroupItem {...item} width={columnWidth} />
         )}
-        onEndReached={() => !isFetchingNextPage && fetchNextPage()}
+        {...nextPage}
         onEndReachedThreshold={0.0}
         ListHeaderComponent={
           <>
