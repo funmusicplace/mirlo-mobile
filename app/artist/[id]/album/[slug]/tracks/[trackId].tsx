@@ -54,7 +54,7 @@ export default function TrackView() {
   const { slug, id, trackId } = params;
   const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
   const albumQuery = queryAlbum({ slug: slug, id: id, apiRoot });
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isLoadingError, error } = useQuery({
     ...albumQuery,
     enabled: ready && albumQuery.enabled,
   });
@@ -120,7 +120,7 @@ export default function TrackView() {
     );
   }
 
-  if (isError) {
+  if (isLoadingError) {
     console.error(error);
     return (
       <ScreenError

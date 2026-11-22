@@ -25,6 +25,7 @@ let mockLabel: {
   data?: { results: AlbumProps[] };
   isPending: boolean;
   isError: boolean;
+  isLoadingError?: boolean;
 };
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (options: { queryKey: string[] }) =>
@@ -323,12 +324,21 @@ describe("artist page tabs", () => {
   });
 
   test("a label list that fails falls back to the label's own releases", () => {
-    mockLabel = { isPending: false, isError: true };
+    mockLabel = { isPending: false, isError: true, isLoadingError: true };
     page({ properties: { colors: {}, tabOrder: ["releases", "roster"] } });
     expect(
       screen.getByRole("link", { name: "Corona Borealis, Constellation" }),
     ).toBeTruthy();
     expect(screen.queryByRole("link", { name: /Hyper Natural/ })).toBeNull();
+  });
+
+  test("a label list that fails to refresh keeps showing the releases it has", () => {
+    mockLabel = { ...mockLabel, isError: true };
+    page({ properties: { colors: {}, tabOrder: ["releases", "roster"] } });
+    expect(
+      screen.getByRole("link", { name: "Hyper Natural, Joni Void" }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("link", { name: /Corona Borealis/ })).toBeNull();
   });
 
   test("a strip button aims again while the list grows, until it settles or the user drags", () => {

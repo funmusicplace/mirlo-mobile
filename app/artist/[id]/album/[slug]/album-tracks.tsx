@@ -188,7 +188,7 @@ export default function AlbumTracks() {
   const { id, slug } = params;
   const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
   const albumQuery = queryAlbum({ slug: slug, id: id, apiRoot });
-  const { isPending, isError, data, error } = useQuery({
+  const { isPending, isLoadingError, data, error } = useQuery({
     ...albumQuery,
     enabled: ready && albumQuery.enabled,
   });
@@ -240,7 +240,7 @@ export default function AlbumTracks() {
     );
   }
 
-  if (isError) {
+  if (isLoadingError) {
     console.error(error);
     return (
       <ScreenError
