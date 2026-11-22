@@ -21,7 +21,7 @@ export const NetworkError: Story = {
 export const GenericError: Story = {
   args: {
     visible: true,
-    error: new Error("Something went wrong loading this release."),
+    error: new Error("Internal server error"),
     onDismiss: () => {},
   },
 };
