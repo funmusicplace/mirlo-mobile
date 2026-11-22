@@ -413,6 +413,7 @@ Web paths are relative to `client/src/components/`. Status describes the mobile 
 - Request and network errors: `ErrorNotification` at the top of the content. There are no toasts.
 - A release or track screen whose request fails keeps its header (`ReleaseError`). A 404 shows the website's `trackGroupDetails.doesNotExist` text in `CollectionEmpty`, any other failure shows `ErrorNotification`.
 - Report failures after a confirmed destructive action with `Alert.alert`.
+- Report a web link that can't open with `Alert.alert`, as `openInBrowser` and `openInSystemBrowser` do on Android.
 
 ### Empty states
 

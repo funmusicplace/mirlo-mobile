@@ -988,6 +988,10 @@
       "readMore": "Read more",
       "showLess": "Show less"
     },
+    "browser": {
+      "title": "Can't open the page",
+      "message": "No browser on this device can open it. Install or enable a browser, then try again."
+    },
     "deleteAccount": {
       "intro": "Review the impact below. You'll finish on mirlo.space, which asks you to confirm before it deletes the account.",
       "whatHappensNext": "What happens next",

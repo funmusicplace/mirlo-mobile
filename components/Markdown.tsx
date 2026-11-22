@@ -6,6 +6,7 @@ import MarkdownDisplay, {
   type RenderRules,
 } from "@ronradtke/react-native-markdown-display";
 import { useColorSchemeName } from "@/constants/colors";
+import { openInSystemBrowser } from "@/scripts/openInBrowser";
 
 // The library's Pressable links sit off the text baseline, nested Text keeps them inline
 const rules: RenderRules = {
@@ -21,11 +22,16 @@ const rules: RenderRules = {
   ),
 };
 
-export default function Markdown(props: MarkdownProps) {
+export default function Markdown({ onLinkPress, ...props }: MarkdownProps) {
   return (
     <MarkdownDisplay
       rules={rules}
       colorScheme={useColorSchemeName()}
+      // Opens the link here, as the library's Linking.openURL fails silently without a browser
+      onLinkPress={(url) => {
+        if (!onLinkPress || onLinkPress(url)) openInSystemBrowser(url);
+        return false;
+      }}
       {...props}
     />
   );
