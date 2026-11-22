@@ -82,14 +82,15 @@ export default function Index() {
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const columnWidth = useGridColumnWidth();
 
+  // An error ends the splash too, or it would hide the error box
   useEffect(() => {
-    if (data || API_ROOT === "http://localhost:3000") {
+    if (data || isError || API_ROOT === "http://localhost:3000") {
       const timer = setTimeout(() => {
         setIsDataLoaded(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [data]);
+  }, [data, isError]);
 
   if (isPending) {
     return (
@@ -103,10 +104,39 @@ export default function Index() {
     );
   }
 
+  const screenStyle = {
+    flex: 1,
+    paddingTop: top,
+    backgroundColor: colors.background,
+  };
+  const header = (
+    <ScreenHeader
+      left={
+        <HeaderButton
+          size={LOGO_SIZE}
+          accessibilityLabel={LOGO_LABEL}
+          accessibilityHint={t("mobileApp.accessibility.scrollsToTop")}
+          onPress={() =>
+            listRef.current?.scrollToOffset({ offset: 0, animated: true })
+          }
+        >
+          <MirloLogo />
+        </HeaderButton>
+      }
+      right={
+        <>
+          <SearchButton />
+          <MenuButton />
+        </>
+      }
+    />
+  );
+
   if (isError) {
     console.error(error);
     return (
-      <View style={{ flex: 1 }}>
+      <View style={screenStyle}>
+        {header}
         <ErrorNotification
           visible={showError}
           onDismiss={() => setShowError(false)}
@@ -130,29 +160,8 @@ export default function Index() {
     );
   };
   return (
-    <View
-      style={{ flex: 1, paddingTop: top, backgroundColor: colors.background }}
-    >
-      <ScreenHeader
-        left={
-          <HeaderButton
-            size={LOGO_SIZE}
-            accessibilityLabel={LOGO_LABEL}
-            accessibilityHint={t("mobileApp.accessibility.scrollsToTop")}
-            onPress={() =>
-              listRef.current?.scrollToOffset({ offset: 0, animated: true })
-            }
-          >
-            <MirloLogo />
-          </HeaderButton>
-        }
-        right={
-          <>
-            <SearchButton />
-            <MenuButton />
-          </>
-        }
-      />
+    <View style={screenStyle}>
+      {header}
       <FlatList
         ref={listRef}
         // Native counterpart of the web's Refresh button on this list

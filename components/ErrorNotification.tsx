@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
@@ -27,40 +26,38 @@ const ErrorNotification = ({
   const offline = error.message === "Network request failed";
 
   return (
-    <SafeAreaView>
-      <View
-        accessibilityRole="alert"
-        style={[
-          styles.box,
-          {
-            backgroundColor: colors.alert,
-            borderLeftColor: colors.alertBorder,
-          },
-        ]}
-      >
-        <View style={styles.content}>
-          <Text style={styles.title}>
-            {offline
-              ? t("mobileApp.errorNotification.connectionIssue")
-              : error.name}
-          </Text>
-          <Text style={styles.message}>
-            {offline
-              ? t("mobileApp.errorNotification.unableToConnect")
-              : error.message}
-          </Text>
-        </View>
-        <Pressable
-          onPress={onDismiss}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.dismiss")}
-          hitSlop={(touchTarget - 20) / 2}
-          style={({ pressed }) => [styles.dismiss, pressed && styles.pressed]}
-        >
-          <FontAwesome5 name="times" size={16} color={colors.text} />
-        </Pressable>
+    <View
+      accessibilityRole="alert"
+      style={[
+        styles.box,
+        {
+          backgroundColor: colors.alert,
+          borderLeftColor: colors.alertBorder,
+        },
+      ]}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>
+          {offline
+            ? t("mobileApp.errorNotification.connectionIssue")
+            : error.name}
+        </Text>
+        <Text style={styles.message}>
+          {offline
+            ? t("mobileApp.errorNotification.unableToConnect")
+            : error.message}
+        </Text>
       </View>
-    </SafeAreaView>
+      <Pressable
+        onPress={onDismiss}
+        accessibilityRole="button"
+        accessibilityLabel={t("common.dismiss")}
+        hitSlop={(touchTarget - 20) / 2}
+        style={({ pressed }) => [styles.dismiss, pressed && styles.pressed]}
+      >
+        <FontAwesome5 name="times" size={16} color={colors.text} />
+      </Pressable>
+    </View>
   );
 };
 
