@@ -3,6 +3,7 @@ import {
   coverSize,
   creditedArtists,
   downloadFileName,
+  handleExternalPurchase,
   textAroundTag,
   isTrackOwned,
   isTrackOwnedOrPreview,
@@ -12,11 +13,14 @@ import {
   trackGroupUrl,
   trackMeta,
 } from "@/scripts/utils";
+import { openInBrowser } from "@/scripts/openInBrowser";
 import { createMockUser } from "@/__mocks__/mockUser";
 import { createMockRNTrack } from "@/__mocks__/mockRNTrack";
 import { createMockAlbum } from "@/__mocks__/mockAlbum";
 import { createMockArtist } from "@/__mocks__/mockArtist";
 import i18n from "../i18n";
+
+jest.mock("@/scripts/openInBrowser", () => ({ openInBrowser: jest.fn() }));
 
 describe("audioTrackType", () => {
   test("returns 'hls' for .m3u8 URLs", () => {
@@ -116,6 +120,31 @@ describe("trackGroupUrl", () => {
       artist: createMockArtist({ urlSlug: "my-artist" }),
     });
     expect(trackGroupUrl(trackGroup)).toBe(
+      "https://mirlo.space/my-artist/release/my-album",
+    );
+  });
+});
+
+describe("handleExternalPurchase", () => {
+  test("adds ?buy=true so the website opens its purchase dialog", () => {
+    const trackGroup = createMockAlbum({
+      urlSlug: "my-album",
+      artist: createMockArtist({ urlSlug: "my-artist" }),
+    });
+    handleExternalPurchase(trackGroup);
+    expect(openInBrowser).toHaveBeenLastCalledWith(
+      "https://mirlo.space/my-artist/release/my-album?buy=true",
+    );
+  });
+
+  test("opens the plain release page for a release with a fundraiser", () => {
+    const trackGroup = createMockAlbum({
+      urlSlug: "my-album",
+      artist: createMockArtist({ urlSlug: "my-artist" }),
+      fundraiser: { isAllOrNothing: false },
+    });
+    handleExternalPurchase(trackGroup);
+    expect(openInBrowser).toHaveBeenLastCalledWith(
       "https://mirlo.space/my-artist/release/my-album",
     );
   });
