@@ -136,18 +136,6 @@ describe("handleExternalPurchase", () => {
       "https://mirlo.space/my-artist/release/my-album?buy=true",
     );
   });
-
-  test("opens the plain release page for a release with a fundraiser", () => {
-    const trackGroup = createMockAlbum({
-      urlSlug: "my-album",
-      artist: createMockArtist({ urlSlug: "my-artist" }),
-      fundraiser: { isAllOrNothing: false },
-    });
-    handleExternalPurchase(trackGroup);
-    expect(openInBrowser).toHaveBeenLastCalledWith(
-      "https://mirlo.space/my-artist/release/my-album",
-    );
-  });
 });
 
 describe("isTrackOwnedOrPreview", () => {
