@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { usePlayer } from "@/state/PlayerContext";
 import Player from "@/components/Player";
-import { useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,6 +35,44 @@ export default function NowPlaying() {
   const colors = useColors();
   const trackGroup = activeTrack?.trackGroup;
   const linkStyle = [type.small, { color: colors.accent }];
+  // A link needs every id its route names, else its text stays plain
+  const albumHref: Href | undefined =
+    trackGroup?.artistId && trackGroup.urlSlug
+      ? {
+          pathname: "/artist/[id]/album/[slug]/album-tracks",
+          params: {
+            id: trackGroup.artistId,
+            slug: trackGroup.urlSlug,
+            apiRoot: trackGroup.apiRoot,
+          },
+        }
+      : undefined;
+  const artistHref: Href | undefined = trackGroup?.artistId
+    ? {
+        pathname: "/artist/[id]/artist-page",
+        params: { id: trackGroup.artistId, apiRoot: trackGroup.apiRoot },
+      }
+    : undefined;
+  const metaLink = (text: string | undefined, href: Href | undefined) =>
+    href ? (
+      <Pressable
+        accessibilityRole="link"
+        // Else iOS joins MarqueeText's hidden copies into the label
+        accessibilityLabel={text}
+        android_ripple={{ color: colors.tintX }}
+        style={({ pressed }) => [styles.link, pressed && styles.pressed]}
+        onPress={() => {
+          router.dismiss(1);
+          router.navigate(href);
+        }}
+      >
+        <MarqueeText style={linkStyle}>{text}</MarqueeText>
+      </Pressable>
+    ) : (
+      <View style={styles.link}>
+        <MarqueeText style={type.small}>{text}</MarqueeText>
+      </View>
+    );
   // Measured so the cover leaves room for everything under it
   const [area, setArea] = useState<{ width: number; height: number }>();
   const [rest, setRest] = useState(0);
@@ -112,59 +150,16 @@ export default function NowPlaying() {
               <Text style={[type.small, { color: colors.secondaryText }]}>
                 {textAroundTag(t("trackGroupDetails.fromAlbum")) + " "}
               </Text>
-              <Pressable
-                accessibilityRole="link"
-                // Else iOS joins MarqueeText's hidden copies into the label
-                accessibilityLabel={trackGroup?.title}
-                android_ripple={{ color: colors.tintX }}
-                style={({ pressed }) => [
-                  styles.link,
-                  pressed && styles.pressed,
-                ]}
-                onPress={() => {
-                  router.dismiss(1);
-                  router.navigate({
-                    pathname: "/artist/[id]/album/[slug]/album-tracks",
-                    params: {
-                      id: String(trackGroup?.artistId),
-                      slug: String(trackGroup?.urlSlug),
-                      apiRoot: trackGroup?.apiRoot,
-                    },
-                  });
-                }}
-              >
-                <MarqueeText style={linkStyle}>
-                  {trackGroup?.title || t("playableCover.untitled")}
-                </MarqueeText>
-              </Pressable>
+              {metaLink(
+                trackGroup?.title || t("playableCover.untitled"),
+                albumHref,
+              )}
             </View>
             <View style={styles.meta}>
               <Text style={[type.small, { color: colors.secondaryText }]}>
                 {textAroundTag(t("trackGroupDetails.byArtist")) + " "}
               </Text>
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel={activeTrack?.artist}
-                android_ripple={{ color: colors.tintX }}
-                style={({ pressed }) => [
-                  styles.link,
-                  pressed && styles.pressed,
-                ]}
-                onPress={() => {
-                  router.dismiss(1);
-                  router.navigate({
-                    pathname: "/artist/[id]/artist-page",
-                    params: {
-                      id: String(trackGroup?.artistId),
-                      apiRoot: trackGroup?.apiRoot,
-                    },
-                  });
-                }}
-              >
-                <MarqueeText style={linkStyle}>
-                  {activeTrack?.artist}
-                </MarqueeText>
-              </Pressable>
+              {metaLink(activeTrack?.artist, artistHref)}
             </View>
           </View>
           <Player style={styles.controls} />

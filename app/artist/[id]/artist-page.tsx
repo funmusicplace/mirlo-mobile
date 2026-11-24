@@ -149,15 +149,15 @@ function TourDateRow({ tourDate }: { tourDate: TourDate }) {
 }
 
 export default function ArtistPage() {
-  const params = useLocalSearchParams<{ id: string; apiRoot?: string }>();
-  const { id } = params;
+  const params = useLocalSearchParams<{ id?: string; apiRoot?: string }>();
+  const { id = "" } = params;
   const { apiRoot, ready, unknown } = useKnownApiRoot(params.apiRoot);
-  const artistQuery = queryArtist({ artistSlug: String(id) ?? "", apiRoot });
+  const artistQuery = queryArtist({ artistSlug: id, apiRoot });
   const { data, isLoadingError, isPending, error } = useQuery({
     ...artistQuery,
     enabled: ready && artistQuery.enabled,
   });
-  const labelQuery = queryLabelTrackGroups({ labelSlug: String(id), apiRoot });
+  const labelQuery = queryLabelTrackGroups({ labelSlug: id, apiRoot });
   const labelTrackGroups = useQuery({
     ...labelQuery,
     enabled: ready && !!data?.isLabelProfile && labelQuery.enabled,
@@ -176,6 +176,11 @@ export default function ArtistPage() {
 
   if (unknown) {
     return <ScreenError error={new Error(t("sources.unknownSource"))} />;
+  }
+
+  // A disabled query stays pending, so this has to come before the spinner
+  if (!id) {
+    return <ScreenError notFound={t("artist.doesNotExist")} />;
   }
 
   if (isPending) {
