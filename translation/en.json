@@ -65,6 +65,9 @@
     "confirmNewPassword": "Set password",
     "accountIncomplete": "Set a password to finish claiming this account"
   },
+  "emailConfirmation": {
+    "tryAgain": "Try again"
+  },
   "headerMenu": {
     "logOutSuccess": "Logged out!",
     "collection": "Collection",
