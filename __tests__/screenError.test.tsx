@@ -10,6 +10,8 @@ import { MirloFetchError } from "@/queries/fetch/MirloFetchError";
 import { queryClient as appQueryClient } from "@/queries/QueryClientWrapper";
 
 const mockGet = jest.fn();
+const routeParams = { id: "77", slug: "gone", trackId: "5" };
+let mockParams: Record<string, string> = routeParams;
 jest.mock("@/queries/fetch/fetchWrapper", () => ({
   get: (...args: unknown[]) => mockGet(...args),
   post: jest.fn(),
@@ -28,7 +30,7 @@ jest.mock("expo-router", () => {
     router,
     useRouter: () => router,
     usePathname: () => "/",
-    useLocalSearchParams: () => ({ id: "77", slug: "gone", trackId: "5" }),
+    useLocalSearchParams: () => mockParams,
     useFocusEffect: (effect: () => void) =>
       require("react").useEffect(effect, [effect]),
     Link: ({ children }: { children?: React.ReactNode }) => (
@@ -85,6 +87,7 @@ jest.mock("@/components/Markdown", () => "Markdown");
 jest.mock("@/components/PlayPauseWrapper", () => "PlayPauseWrapper");
 
 beforeEach(() => {
+  mockParams = routeParams;
   mockUnknownSource = false;
   mockGet.mockClear();
   jest.spyOn(console, "error").mockImplementation(() => undefined);
@@ -153,6 +156,14 @@ test("the artist screen keeps its header and explains an unknown source without 
   expect(
     screen.getByText("This page comes from a source that isn't in your list."),
   ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
+  expect(mockGet).not.toHaveBeenCalled();
+});
+
+test("the artist screen keeps its header and says the artist doesn't exist when the route has no id, without sending a request", () => {
+  mockParams = {};
+  renderScreen(ArtistPage);
+  expect(screen.getByText(artistNotFound)).toBeTruthy();
   expect(screen.getByRole("button", { name: "Back" })).toBeTruthy();
   expect(mockGet).not.toHaveBeenCalled();
 });

@@ -19,7 +19,7 @@ type Release = RNTrack["trackGroup"];
 // Suggestions after a release, the prompt and the Play next screen share the cache
 export function usePlayNext(release?: Release) {
   const apiRoot = release?.apiRoot;
-  const artistId = release ? String(release.artistId) : "";
+  const artistId = release?.artistId ? String(release.artistId) : "";
   const recommended = useQuery(
     queryRecommendedTrackGroups({ trackGroupId: release?.id, apiRoot }),
   );
