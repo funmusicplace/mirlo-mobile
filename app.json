@@ -30,7 +30,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#BE3455"
       },
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS"
