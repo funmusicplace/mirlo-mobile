@@ -40,7 +40,7 @@ export default function PlayNext() {
   const cardWidth = Math.round((sheetWidth ?? windowWidth) * CARD_SHARE);
   const artistName = release?.artist.name;
   const titles = {
-    recommended: t("trackGroupDetails.artistRecommends", { artistName }),
+    recommended: t("mobileApp.playNext.recommendedBy", { artistName }),
     artist: t("trackGroupDetails.otherReleasesBy", { artistName }),
     similar: t("mobileApp.playNext.similarReleases"),
   };
