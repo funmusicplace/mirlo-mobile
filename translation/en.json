@@ -1038,6 +1038,7 @@
       "title": "Play next",
       "label": "Play next suggestions",
       "hint": "Opens releases to play next",
+      "recommendedBy": "Recommended by {{artistName}}",
       "similarReleases": "Similar releases",
       "empty": "No suggestions right now"
     },
