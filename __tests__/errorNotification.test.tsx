@@ -1,5 +1,5 @@
 import React from "react";
-import { AccessibilityInfo } from "react-native";
+import { AccessibilityInfo, ActivityIndicator } from "react-native";
 import {
   fireEvent,
   render,
@@ -28,21 +28,25 @@ const alertLines = () =>
     .getAllByText(/./)
     .map((text) => text.props.children);
 
-test("an ordinary error is one alert of the title and the message, with Dismiss as its own button", () => {
+test("an ordinary error is one alert of the title and the message, with Dismiss and Try again as their own buttons", () => {
   const onDismiss = jest.fn();
+  const onRetry = jest.fn();
   render(
     <ErrorNotification
       visible
       error={new Error("Bad request")}
       onDismiss={onDismiss}
+      onRetry={onRetry}
     />,
   );
 
   expect(alertLines()).toEqual(["Something went wrong", "Bad request"]);
-  // An accessible parent would swallow Dismiss on iOS
+  // An accessible parent would swallow Dismiss and Try again on iOS
   expect(within(screen.getByRole("alert")).queryByRole("button")).toBeNull();
   fireEvent.press(screen.getByRole("button", { name: "Dismiss" }));
   expect(onDismiss).toHaveBeenCalledTimes(1);
+  fireEvent.press(screen.getByRole("button", { name: "Try again" }));
+  expect(onRetry).toHaveBeenCalledWith();
 });
 
 test("a connection failure reads the connection title and text", () => {
@@ -58,14 +62,17 @@ test("a connection failure reads the connection title and text", () => {
     "Connection Issue",
     "Unable to connect. Check your internet and try again.",
   ]);
+  expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
 });
 
-test("the box announces its title and message once when it appears, and nothing while hidden", () => {
-  const box = (visible: boolean) => (
+test("the box announces its title and message once when it appears, nothing while hidden or retrying, and again when a retry fails", () => {
+  const box = (visible: boolean, retrying = false) => (
     <ErrorNotification
       visible={visible}
       error={new Error("Bad request")}
       onDismiss={jest.fn()}
+      onRetry={jest.fn()}
+      retrying={retrying}
     />
   );
   const { rerender } = render(box(false));
@@ -78,4 +85,12 @@ test("the box announces its title and message once when it appears, and nothing 
   // Rendering the same words again is the same appearance
   rerender(box(true));
   expect(announce).toHaveBeenCalledTimes(1);
+
+  // Retrying shows the spinner in the label's color, the accent is under 4.5:1
+  rerender(box(true, true));
+  const { color } = screen.UNSAFE_getByType(ActivityIndicator).props;
+  expect(color).toBe("#000000");
+  expect(announce).toHaveBeenCalledTimes(1);
+  rerender(box(true));
+  expect(announce).toHaveBeenCalledTimes(2);
 });

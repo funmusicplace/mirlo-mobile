@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { AccessibilityInfo, View, Pressable, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Button from "@/components/Button";
 import Text from "@/components/ThemedText";
 import { useColors } from "@/constants/colors";
 import { gutter, radius, spacing, touchTarget } from "@/constants/spacing";
@@ -11,6 +12,8 @@ type ErrorNotificationProps = {
   onDismiss: () => void;
   visible: boolean;
   error: Error;
+  onRetry?: () => void;
+  retrying?: boolean;
 };
 
 // Matches the web warning Box: 30% tinted surface with a 4 pt left rule
@@ -18,6 +21,8 @@ const ErrorNotification = ({
   onDismiss,
   visible = true,
   error,
+  onRetry,
+  retrying,
 }: ErrorNotificationProps) => {
   const colors = useColors();
   const { t } = useTranslation("translation");
@@ -29,12 +34,12 @@ const ErrorNotification = ({
     ? t("mobileApp.errorNotification.unableToConnect")
     : error.message;
 
-  // The role alone announces nothing when the box appears
+  // The role alone announces nothing when the box appears or a retry fails again
   useEffect(() => {
-    if (visible) {
+    if (visible && !retrying) {
       AccessibilityInfo.announceForAccessibility(`${title}, ${message}`);
     }
-  }, [visible, title, message]);
+  }, [visible, title, message, retrying]);
 
   if (!visible) return null;
 
@@ -48,10 +53,24 @@ const ErrorNotification = ({
         },
       ]}
     >
-      {/* The alert is the text only, or iOS would swallow Dismiss */}
-      <View accessible accessibilityRole="alert" style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.message}>{message}</Text>
+      <View style={styles.content}>
+        {/* The alert is the text only, or iOS would swallow the buttons */}
+        <View accessible accessibilityRole="alert">
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.message}>{message}</Text>
+        </View>
+        {onRetry && (
+          <Button
+            title={t("emailConfirmation.tryAgain")}
+            onPress={() => onRetry()}
+            variant="outlined"
+            size="compact"
+            loading={retrying}
+            // The accent is under 4.5:1 on the alert fill
+            style={[styles.retry, { borderColor: colors.text }]}
+            textStyle={{ color: colors.text }}
+          />
+        )}
       </View>
       <Pressable
         onPress={onDismiss}
@@ -80,6 +99,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    gap: spacing.sm,
+  },
+  retry: {
+    alignSelf: "flex-start",
   },
   title: {
     ...type.body,

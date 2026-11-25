@@ -164,7 +164,10 @@ export default function Button({
         {endIcon ? icon(endIcon) : null}
       </View>
       {loading ? (
-        <ActivityIndicator color={color} style={StyleSheet.absoluteFill} />
+        <ActivityIndicator
+          color={StyleSheet.flatten(textStyle)?.color ?? color}
+          style={StyleSheet.absoluteFill}
+        />
       ) : null}
     </Pressable>
   );

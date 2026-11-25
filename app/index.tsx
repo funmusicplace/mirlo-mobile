@@ -1,8 +1,10 @@
 import {
   ActivityIndicator,
+  AppState,
   View,
   FlatList,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import MenuButton from "@/components/MenuButton";
 import SearchButton from "@/components/SearchButton";
@@ -42,13 +44,14 @@ export default function Index() {
   const {
     isPending,
     isLoadingError,
+    isFetched,
+    isFetching,
     data,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
-    isRefetching,
     refetch,
   } = useInfiniteQuery({
     // A new source starts the feed over
@@ -80,7 +83,25 @@ export default function Index() {
   });
   const { top } = useSafeAreaInsets();
   const trackGroups = data ? dedupeReleases(data.pages) : [];
-  const [showError, setShowError] = useState<boolean>(true);
+  const [dismissed, setDismissed] = useState<Error | null>(null);
+  // A retry sends the failed query back to pending and clears its error, so the
+  // box keeps the last one until the sources change
+  const sources = JSON.stringify(instances);
+  const [lastError, setLastError] = useState<{
+    error: Error;
+    sources: string;
+  }>();
+  if (lastError && lastError.sources !== sources) setLastError(undefined);
+  if (isLoadingError && lastError?.error !== error) {
+    setLastError({ error, sources });
+  }
+  const shownError = isLoadingError
+    ? error
+    : isPending && isFetched
+      ? lastError?.error
+      : undefined;
+  // Each failure is a new error, so a failed retry shows a dismissed box again
+  const boxVisible = shownError !== undefined && shownError !== dismissed;
   const listRef = useRef<FlatList<AlbumProps>>(null);
   const columnWidth = useGridColumnWidth();
 
@@ -94,6 +115,18 @@ export default function Index() {
     }
   }, [data, isLoadingError]);
 
+  // Only a failed first load retries on return, a loaded feed stays put
+  useEffect(() => {
+    if (!isLoadingError) return;
+    let previous = AppState.currentState;
+    const subscription = AppState.addEventListener("change", (state) => {
+      // iOS overlays like Control Center go inactive -> active
+      if (previous === "background" && state === "active") refetch();
+      previous = state;
+    });
+    return () => subscription.remove();
+  }, [isLoadingError, refetch]);
+
   const nextPage = useNextPage({
     hasNextPage,
     isFetchingNextPage,
@@ -101,7 +134,7 @@ export default function Index() {
     fetchNextPage,
   });
 
-  if (isPending) {
+  if (isPending && !shownError) {
     return (
       <View style={{ flex: 1 }}>
         <ActivityIndicator
@@ -141,16 +174,36 @@ export default function Index() {
     />
   );
 
-  if (isLoadingError) {
-    console.error(error);
+  // Native counterpart of the web's Refresh button on this list
+  // A retry from the error screen is pending, and the box shows it itself
+  const refreshControl = (
+    <RefreshControl
+      refreshing={isFetching && !isFetchingNextPage && !boxVisible}
+      onRefresh={refetch}
+      tintColor={colors.accent}
+      colors={[colors.accent]}
+      progressBackgroundColor={colors.background}
+    />
+  );
+
+  if (shownError) {
+    if (error) console.error(error);
     return (
       <View style={screenStyle}>
         {header}
-        <ErrorNotification
-          visible={showError}
-          onDismiss={() => setShowError(false)}
-          error={error}
-        />
+        <ScrollView
+          refreshControl={refreshControl}
+          // iOS only pulls from content, and the box can be dismissed
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <ErrorNotification
+            visible={boxVisible}
+            onDismiss={() => setDismissed(shownError)}
+            error={shownError}
+            onRetry={refetch}
+            retrying={isFetching}
+          />
+        </ScrollView>
       </View>
     );
   }
@@ -173,16 +226,7 @@ export default function Index() {
       {header}
       <FlatList
         ref={listRef}
-        // Native counterpart of the web's Refresh button on this list
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching && !isFetchingNextPage}
-            onRefresh={refetch}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-            progressBackgroundColor={colors.background}
-          />
-        }
+        refreshControl={refreshControl}
         numColumns={2}
         columnWrapperStyle={{ gap: spacing.md }}
         contentContainerStyle={{ paddingHorizontal: gutter }}
